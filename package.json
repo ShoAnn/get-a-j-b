@@ -1,0 +1,25 @@
+{
+  "name": "get-a-j-b",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ShoAnn/get-a-j-b.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ShoAnn/get-a-j-b/issues"
+  },
+  "homepage": "https://github.com/ShoAnn/get-a-j-b#readme"
+}

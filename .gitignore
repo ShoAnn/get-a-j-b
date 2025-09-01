@@ -1,0 +1,22 @@
+# .gitignore
+
+# Node
+node_modules
+.next
+npm-debug.log*
+package-lock.json
+
+# Go
+/apps/api/server
+
+# Docker
+docker-compose.override.yml
+
+# IDE & OS
+.vscode
+.idea
+.DS_Store
+
+# Env files
+.env
+.env.local
