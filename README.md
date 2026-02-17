@@ -13,4 +13,4 @@ git clone https://github.com/ShoAnn/get-a-j-b.git
 docker-compose up --build
 ```
 
-afterwards you can just do `docker-compose up`
+afterwards you can just `docker-compose up`
