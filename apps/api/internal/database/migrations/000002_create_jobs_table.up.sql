@@ -1,0 +1,14 @@
+CREATE TABLE jobs (
+	id SERIAL PRIMARY KEY,
+	title VARCHAR(255) UNIQUE NOT NULL,
+	source_url VARCHAR(2048) NOT NULL,
+	salary DECIMAL(15, 2) NOT NULL,
+	description VARCHAR(2048) NULL,
+	requirements VARCHAR(2048) NOT NULL,
+	current_status CHAR(50) NOT NULL,
+	notes VARCHAR(2048) NULL,
+	application_date TIMESTAMP NULL,
+	created_at TIMESTAMP NOT NULL DEFAULT NOW(), 
+	updated_at TIMESTAMP NULL, 
+	user_id INT REFERENCES users(id)
+)
