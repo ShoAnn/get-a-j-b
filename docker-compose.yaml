@@ -1,38 +1,48 @@
 services:
-  postgres:
-    image: postgres:17-alpine
-    container_name: postgres_db
+  db:
+    image: postgres:18.1-alpine3.22
+    container_name: postgres_jobtracker
     environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: jobtracker
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+
     ports:
-      - "5432:5432"
+      - "${DB_EXTERNAL_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
 
+  adminer:
+    image: adminer
+    container_name: adminer_jobtracker
+    restart: always
+    ports:
+      - "${ADMINER_EXTERNAL_PORT}:8080"
+    depends_on:
+      - db
+
   api:
-    container_name: go_api
+    container_name: go_api_jobtracker
     build:
       context: ./apps/api
       dockerfile: Dockerfile
     volumes:
       - ./apps/api:/app
     ports:
-      - "8080:8080"
+      - "${API_EXTERNAL_PORT}:8080"
     depends_on:
-      - postgres
+      - db
     command: ["air"]
     restart: unless-stopped
 
   web:
-    container_name: nextjs_web
+    container_name: nextjs_jobtracker
     build:
       context: .
       dockerfile: apps/web/Dockerfile
     ports:
-      - "3000:3000"
+      - "${WEB_EXTERNAL_PORT}:3000"
     depends_on:
       - api
     restart: unless-stopped
