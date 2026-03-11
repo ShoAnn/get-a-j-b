@@ -10,8 +10,10 @@ import (
 
 type Job struct {
 	ID              int32
+	UserID          pgtype.Int4
 	Title           string
 	Company         string
+	Location        string
 	Salary          pgtype.Numeric
 	Description     pgtype.Text
 	Requirements    string
@@ -21,16 +23,24 @@ type Job struct {
 	ApplicationDate pgtype.Timestamp
 	CreatedAt       pgtype.Timestamp
 	UpdatedAt       pgtype.Timestamp
-	UserID          pgtype.Int4
+}
+
+type RefreshToken struct {
+	ID        pgtype.UUID
+	UserID    pgtype.Int4
+	Token     string
+	CreatedAt pgtype.Timestamp
+	ExpiresAt pgtype.Timestamp
+	RevokedAt pgtype.Timestamp
 }
 
 type Resume struct {
 	ID        int32
+	UserID    pgtype.Int4
 	Label     string
 	FileUrl   string
 	CreatedAt pgtype.Timestamp
 	UpdatedAt pgtype.Timestamp
-	UserID    pgtype.Int4
 }
 
 type User struct {

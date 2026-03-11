@@ -1,5 +1,6 @@
 CREATE TABLE jobs (
 	id SERIAL PRIMARY KEY,
+	user_id INT REFERENCES users(id) ON DELETE CASCADE,
 	title VARCHAR(255) UNIQUE NOT NULL,
 	company VARCHAR(255) NOT NULL,
 	location VARCHAR(255) NOT NULL,
@@ -11,6 +12,5 @@ CREATE TABLE jobs (
 	source_url VARCHAR(2048) NOT NULL,
 	application_date TIMESTAMP NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(), 
-	updated_at TIMESTAMP NULL, 
-	user_id INT REFERENCES users(id)
-)
+	updated_at TIMESTAMP NULL
+);

@@ -6,7 +6,7 @@ type Resume struct {
 	ID      int    `json:"id"`
 	Label   string `json:"label"`
 	UserID  int    `json:"user_id"`
-	FileUrl string `json:"content"`
+	FileUrl string `json:"file_url"`
 }
 
 type CreateResumeRequest struct {
@@ -16,7 +16,7 @@ type CreateResumeRequest struct {
 
 type UpdateResumeRequest struct {
 	Label   *string `json:"label"`
-	FileUrl *string `json:"content"`
+	FileUrl *string `json:"file_url"`
 }
 
 type ResumeRepository interface {

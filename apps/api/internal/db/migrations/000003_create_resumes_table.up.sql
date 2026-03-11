@@ -1,8 +1,8 @@
 CREATE TABLE resumes (
 	id SERIAL PRIMARY KEY,
+	user_id INT REFERENCES users(id) ON DELETE CASCADE,
 	label VARCHAR(255) UNIQUE NOT NULL,
 	file_url VARCHAR(2048) NOT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(), 
-	updated_at TIMESTAMP NULL, 
-	user_id INT REFERENCES users(id)
-)
+	updated_at TIMESTAMP NULL
+);
