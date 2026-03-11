@@ -15,7 +15,7 @@ import (
 const createResume = `-- name: CreateResume :one
 INSERT INTO resumes (label, file_url, created_at, user_id)
 VALUES ($1, $2, NOW(), $3)
-RETURNING id, label, file_url, created_at, updated_at, user_id
+RETURNING id, user_id, label, file_url, created_at, updated_at
 `
 
 type CreateResumeParams struct {
@@ -29,11 +29,11 @@ func (q *Queries) CreateResume(ctx context.Context, arg CreateResumeParams) (Res
 	var i Resume
 	err := row.Scan(
 		&i.ID,
+		&i.UserID,
 		&i.Label,
 		&i.FileUrl,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.UserID,
 	)
 	return i, err
 }
@@ -47,7 +47,7 @@ func (q *Queries) DeleteResume(ctx context.Context, id int32) (pgconn.CommandTag
 }
 
 const getAllResumes = `-- name: GetAllResumes :many
-SELECT id, label, file_url, created_at, updated_at, user_id FROM resumes WHERE user_id = $1 ORDER BY id
+SELECT id, user_id, label, file_url, created_at, updated_at FROM resumes WHERE user_id = $1 ORDER BY id
 `
 
 func (q *Queries) GetAllResumes(ctx context.Context, userID pgtype.Int4) ([]Resume, error) {
@@ -61,11 +61,11 @@ func (q *Queries) GetAllResumes(ctx context.Context, userID pgtype.Int4) ([]Resu
 		var i Resume
 		if err := rows.Scan(
 			&i.ID,
+			&i.UserID,
 			&i.Label,
 			&i.FileUrl,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.UserID,
 		); err != nil {
 			return nil, err
 		}
@@ -78,7 +78,7 @@ func (q *Queries) GetAllResumes(ctx context.Context, userID pgtype.Int4) ([]Resu
 }
 
 const getResumeById = `-- name: GetResumeById :one
-SELECT id, label, file_url, created_at, updated_at, user_id FROM resumes WHERE id = $1
+SELECT id, user_id, label, file_url, created_at, updated_at FROM resumes WHERE id = $1
 `
 
 func (q *Queries) GetResumeById(ctx context.Context, id int32) (Resume, error) {
@@ -86,11 +86,11 @@ func (q *Queries) GetResumeById(ctx context.Context, id int32) (Resume, error) {
 	var i Resume
 	err := row.Scan(
 		&i.ID,
+		&i.UserID,
 		&i.Label,
 		&i.FileUrl,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.UserID,
 	)
 	return i, err
 }
@@ -102,7 +102,7 @@ SET
 	file_url = $2,
 	updated_at = NOW()
 WHERE id = $3
-RETURNING id, label, file_url, created_at, updated_at, user_id
+RETURNING id, user_id, label, file_url, created_at, updated_at
 `
 
 type UpdateResumeParams struct {
@@ -116,11 +116,11 @@ func (q *Queries) UpdateResume(ctx context.Context, arg UpdateResumeParams) (Res
 	var i Resume
 	err := row.Scan(
 		&i.ID,
+		&i.UserID,
 		&i.Label,
 		&i.FileUrl,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.UserID,
 	)
 	return i, err
 }

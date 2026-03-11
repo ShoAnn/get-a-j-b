@@ -30,8 +30,8 @@ type UserRepository interface {
 }
 
 type UserService interface {
-	Register(ctx context.Context, req *CreateUserRequest) (*User, error)
+	Register(ctx context.Context, user *User) (*User, error)
 	GetByID(ctx context.Context, id int) (*User, error)
-	UpdateUser(ctx context.Context, id int, req *UpdateUserRequest) (*User, error)
+	UpdateUser(ctx context.Context, id int, user *User) (*User, error)
 	DeleteUser(ctx context.Context, id int) error
 }
