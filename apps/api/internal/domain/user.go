@@ -19,19 +19,33 @@ type CreateUserRequest struct {
 type UpdateUserRequest struct {
 	Username *string `json:"username" validate:"omitempty,min=5"`
 	Email    *string `json:"email" validate:"omitempty,email"`
-	Password *string `json:"password" validate:"omitempty,min=6"`
 }
 
 type UserRepository interface {
-	Create(ctx context.Context, user *User) (*User, error)
+	Create(ctx context.Context, user *CreateUserRequest) (*User, error)
 	GetByID(ctx context.Context, id int) (*User, error)
-	Update(ctx context.Context, user *User) (*User, error)
+	ExistByEmail(ctx context.Context, email string) (bool, error)
+	Update(ctx context.Context, id int, user *UpdateUserRequest) (*User, error)
 	Delete(ctx context.Context, id int) error
 }
 
 type UserService interface {
 	Register(ctx context.Context, user *User) (*User, error)
-	GetByID(ctx context.Context, id int) (*User, error)
 	UpdateUser(ctx context.Context, id int, user *User) (*User, error)
 	DeleteUser(ctx context.Context, id int) error
 }
+
+type ErrorResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+func (e *ErrorResponse) Error() string {
+	return e.Message
+}
+
+var (
+	ErrEmailAlreadyExists = &ErrorResponse{Code: 400, Message: "Email already exists"}
+	ErrUserNotFound       = &ErrorResponse{Code: 404, Message: "User not found"}
+	ErrInvalidInput       = &ErrorResponse{Code: 400, Message: "Invalid input"}
+)
