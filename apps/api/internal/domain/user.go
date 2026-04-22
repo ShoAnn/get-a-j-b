@@ -23,6 +23,7 @@ type UpdateUserRequest struct {
 
 type UserRepository interface {
 	Create(ctx context.Context, user *CreateUserRequest) (*User, error)
+	GetAll(ctx context.Context) ([]*User, error)
 	GetByID(ctx context.Context, id int) (*User, error)
 	ExistByEmail(ctx context.Context, email string) (bool, error)
 	Update(ctx context.Context, id int, user *UpdateUserRequest) (*User, error)
@@ -31,6 +32,8 @@ type UserRepository interface {
 
 type UserService interface {
 	Register(ctx context.Context, user *User) (*User, error)
+	GetAllUsers(ctx context.Context) ([]*User, error)
+	GetUserByID(ctx context.Context, id int) (*User, error)
 	UpdateUser(ctx context.Context, id int, user *User) (*User, error)
 	DeleteUser(ctx context.Context, id int) error
 }
