@@ -14,7 +14,7 @@ import (
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (username, email, created_at)
 VALUES ($1, $2, NOW())
-RETURNING id, username, email, password, created_at, updated_at, deleted
+RETURNING id, username, email, password, role, created_at, updated_at, deleted
 `
 
 type CreateUserParams struct {
@@ -30,6 +30,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Username,
 		&i.Email,
 		&i.Password,
+		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Deleted,
@@ -38,7 +39,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const getUserById = `-- name: GetUserById :one
-SELECT id, username, email, password, created_at, updated_at, deleted FROM users WHERE id = $1 AND deleted = FALSE LIMIT 1
+SELECT id, username, email, password, role, created_at, updated_at, deleted FROM users WHERE id = $1 AND deleted = FALSE LIMIT 1
 `
 
 func (q *Queries) GetUserById(ctx context.Context, id int32) (User, error) {
@@ -49,6 +50,7 @@ func (q *Queries) GetUserById(ctx context.Context, id int32) (User, error) {
 		&i.Username,
 		&i.Email,
 		&i.Password,
+		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Deleted,
@@ -73,7 +75,7 @@ SET
 	email = $3,
 	updated_at = NOW()
 WHERE id = $1 AND deleted = FALSE
-RETURNING id, username, email, password, created_at, updated_at, deleted
+RETURNING id, username, email, password, role, created_at, updated_at, deleted
 `
 
 type UpdateUserParams struct {
@@ -90,6 +92,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.Username,
 		&i.Email,
 		&i.Password,
+		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Deleted,
