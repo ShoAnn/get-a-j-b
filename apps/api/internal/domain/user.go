@@ -13,6 +13,7 @@ type User struct {
 	Password  string `json:"-"`
 	Role      string `json:"role"`
 	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 type CreateUserRequest struct {
@@ -39,7 +40,7 @@ type UserRepository interface {
 	GetAll(ctx context.Context) ([]*User, error)
 	GetByID(ctx context.Context, id int) (*User, error)
 	GetByEmail(ctx context.Context, email string) (*User, error)
-	ExistByEmail(ctx context.Context, email string) (bool, error)
+	ExistUserByEmail(ctx context.Context, email string) (bool, error)
 	Update(ctx context.Context, id int, user *UpdateUserRequest) (*User, error)
 	Delete(ctx context.Context, id int) error
 }
