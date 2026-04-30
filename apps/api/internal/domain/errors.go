@@ -16,3 +16,5 @@ var (
 	ErrUnauthorized       = &ErrorResponse{Code: 401, Message: "Unauthorized"}
 	ErrInvalidInput       = &ErrorResponse{Code: 400, Message: "Invalid input"}
 )
+
+var AppName = "get-a-j-b"

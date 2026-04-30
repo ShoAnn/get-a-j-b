@@ -27,14 +27,6 @@ type UpdateUserRequest struct {
 	Email    *string `json:"email" validate:"omitempty,email"`
 }
 
-type Claims struct {
-	UserID   int    `json:"user_id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Role     string `json:"role"`
-	jwt.RegisteredClaims
-}
-
 type UserRepository interface {
 	Create(ctx context.Context, user *CreateUserRequest) (*User, error)
 	GetAll(ctx context.Context) ([]*User, error)
