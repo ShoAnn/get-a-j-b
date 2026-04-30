@@ -45,6 +45,70 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const existsUserByEmail = `-- name: ExistsUserByEmail :one
+SELECT EXISTS(SELECT 1 FROM users WHERE email = $1 AND deleted = FALSE)
+`
+
+func (q *Queries) ExistsUserByEmail(ctx context.Context, email string) (bool, error) {
+	row := q.db.QueryRow(ctx, existsUserByEmail, email)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const getAllUsers = `-- name: GetAllUsers :many
+SELECT id, username, email, password, role, created_at, updated_at, deleted FROM users WHERE deleted = FALSE
+`
+
+func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.Query(ctx, getAllUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.Email,
+			&i.Password,
+			&i.Role,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Deleted,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, username, email, password, role, created_at, updated_at, deleted FROM users WHERE email = $1 AND deleted = FALSE LIMIT 1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.Password,
+		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Deleted,
+	)
+	return i, err
+}
+
 const getUserById = `-- name: GetUserById :one
 SELECT id, username, email, password, role, created_at, updated_at, deleted FROM users WHERE id = $1 AND deleted = FALSE LIMIT 1
 `
