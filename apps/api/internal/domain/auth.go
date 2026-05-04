@@ -7,7 +7,8 @@ import (
 )
 
 type AuthResponse struct {
-	Token string `json:"token"`
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh_token,omitempty"`
 }
 
 type Claims struct {
@@ -23,4 +24,11 @@ type AuthService interface {
 	Login(ctx context.Context, email, password string) (*AuthResponse, error)
 	ValidateToken(tokenStr string) (*Claims, error)
 	GenerateToken(user *User) (string, error)
+	RefreshToken(ctx context.Context, refreshTokenStr string) (*AuthResponse, error)
 }
+
+type contextKey string
+
+const (
+	ContextKeyClaims contextKey = "claims"
+)

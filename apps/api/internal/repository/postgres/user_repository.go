@@ -5,22 +5,14 @@ import (
 
 	db "github.com/ShoAnn/get-a-j-b/api/internal/db/sqlc"
 	"github.com/ShoAnn/get-a-j-b/api/internal/domain"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
 )
 
-type DBTX interface {
-	Exec(ctx context.Context, query string, args ...any) (pgconn.CommandTag, error)
-	Query(ctx context.Context, query string, args ...any) (pgx.Rows, error)
-	QueryRow(ctx context.Context, query string, args ...any) pgx.Row
-}
-
 type postgresUserRepository struct {
-	db DBTX
+	db db.DBTX
 	q  *db.Queries
 }
 
-func NewUserRepository(conn DBTX) domain.UserRepository {
+func NewUserRepository(conn db.DBTX) domain.UserRepository {
 	return &postgresUserRepository{
 		db: conn,
 		q:  db.New(conn),
