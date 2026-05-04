@@ -88,7 +88,6 @@ func (s *AuthService) ValidateToken(tokenStr string) (*domain.Claims, error) {
 	return claims, nil
 }
 
-// Helper functions
 func (s *AuthService) GenerateToken(user *domain.User) (string, error) {
 	claims := domain.Claims{
 		UserID:   user.ID,
