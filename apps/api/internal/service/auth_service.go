@@ -11,6 +11,7 @@ import (
 
 type AuthService struct {
 	userRepo     domain.UserRepository
+	tokenRepo    domain.RefreshTokenRepository
 	jwtSecretKey []byte
 }
 
@@ -39,7 +40,7 @@ func (s *AuthService) Register(ctx context.Context, req *domain.CreateUserReques
 		return nil, err
 	}
 
-	token, err := s.GenerateToken(user)
+	token, err := s.GenerateJWT(user)
 	if err != nil {
 		return nil, err
 	}
@@ -59,15 +60,76 @@ func (s *AuthService) Login(ctx context.Context, email, password string) (*domai
 		return nil, domain.ErrInvalidCredentials
 	}
 
-	token, err := s.GenerateToken(user)
+	accessToken, err := s.GenerateJWT(user)
+	if err != nil {
+		return nil, err
+	}
+
+	refreshToken, err := GenerateRefreshToken(32)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.tokenRepo.Create(ctx, &domain.RefreshToken{
+		UserID:    user.ID,
+		Token:     refreshToken,
+		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
+	})
+
+	return &domain.AuthResponse{
+		Token:        accessToken,
+		RefreshToken: refreshToken,
+	}, nil
+}
+
+func (s *AuthService) RefreshToken(ctx context.Context, refreshTokenStr string) (*domain.AuthResponse, error) {
+	refreshToken, err := s.tokenRepo.GetByToken(ctx, refreshTokenStr)
+	if err != nil {
+		return nil, domain.ErrRefreshTokenNotFound
+	}
+	if refreshToken.RevokedAt != nil {
+		return nil, domain.ErrRefreshTokenRevoked
+	}
+	if time.Now().After(refreshToken.ExpiresAt) {
+		return nil, domain.ErrRefreshTokenExpired
+	}
+
+	user, err := s.userRepo.GetByID(ctx, refreshToken.UserID)
+	if err != nil {
+		return nil, domain.ErrRefreshTokenInvalid
+	}
+
+	accessToken, err := s.GenerateJWT(user)
+	if err != nil {
+		return nil, err
+	}
+
+	newRefreshToken, err := GenerateRefreshToken(32)
+	if err != nil {
+		return nil, err
+	}
+
+	// Token Rotation
+	err = s.tokenRepo.Revoke(ctx, refreshTokenStr)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.tokenRepo.Create(ctx, &domain.RefreshToken{
+		UserID:    user.ID,
+		Token:     newRefreshToken,
+		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	return &domain.AuthResponse{
-		Token: token,
+		Token:        accessToken,
+		RefreshToken: newRefreshToken,
 	}, nil
 }
+
 func (s *AuthService) ValidateToken(tokenStr string) (*domain.Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &domain.Claims{}, func(token *jwt.Token) (interface{}, error) {
 		tokenMethod, ok := token.Method.(*jwt.SigningMethodHMAC)
@@ -88,14 +150,14 @@ func (s *AuthService) ValidateToken(tokenStr string) (*domain.Claims, error) {
 	return claims, nil
 }
 
-func (s *AuthService) GenerateToken(user *domain.User) (string, error) {
+func (s *AuthService) GenerateJWT(user *domain.User) (string, error) {
 	claims := domain.Claims{
 		UserID:   user.ID,
 		Username: user.Username,
 		Email:    user.Email,
 		Role:     user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			Issuer:    domain.AppName,
 		},

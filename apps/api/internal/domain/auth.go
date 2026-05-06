@@ -23,7 +23,7 @@ type AuthService interface {
 	Register(ctx context.Context, req *CreateUserRequest) (*AuthResponse, error)
 	Login(ctx context.Context, email, password string) (*AuthResponse, error)
 	ValidateToken(tokenStr string) (*Claims, error)
-	GenerateToken(user *User) (string, error)
+	GenerateJWT(user *User) (string, error)
 	RefreshToken(ctx context.Context, refreshTokenStr string) (*AuthResponse, error)
 }
 

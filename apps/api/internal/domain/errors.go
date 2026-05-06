@@ -16,6 +16,7 @@ var (
 	ErrUnauthorized         = &ErrorResponse{Code: 401, Message: "Unauthorized"}
 	ErrInvalidInput         = &ErrorResponse{Code: 400, Message: "Invalid input"}
 	ErrRefreshTokenNotFound = &ErrorResponse{Code: 404, Message: "Refresh token not found"}
+	ErrRefreshTokenInvalid  = &ErrorResponse{Code: 401, Message: "Invalid refresh token"}
 	ErrRefreshTokenExpired  = &ErrorResponse{Code: 401, Message: "Refresh token expired"}
 	ErrRefreshTokenRevoked  = &ErrorResponse{Code: 401, Message: "Refresh token revoked"}
 )

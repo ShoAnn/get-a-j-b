@@ -33,6 +33,7 @@ func (r *postgresRefreshTokenRepository) Create(ctx context.Context, token *doma
 	}
 
 	return &domain.RefreshToken{
+		UserID:    int(dbToken.UserID.Int32),
 		Token:     dbToken.Token,
 		CreatedAt: dbToken.CreatedAt.Time,
 		ExpiresAt: dbToken.ExpiresAt.Time,
