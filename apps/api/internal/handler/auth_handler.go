@@ -94,8 +94,48 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(authResponse)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("Failed to encode response: %v", err)
+	}
+}
+
+func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		RefreshToken string `json:"refresh_token" validate:"required"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, "Invalid input", http.StatusBadRequest)
 		return
+	}
+
+	if err := h.validate.Struct(input); err != nil {
+		h.writeValidationError(w, err)
+		return
+	}
+
+	authResponse, err := h.svc.RefreshToken(r.Context(), input.RefreshToken)
+	switch {
+	case errors.Is(err, domain.ErrRefreshTokenNotFound):
+		http.Error(w, "Refresh token not found", http.StatusNotFound)
+		return
+	case errors.Is(err, domain.ErrRefreshTokenInvalid):
+		http.Error(w, "Invalid refresh token", http.StatusUnauthorized)
+		return
+	case errors.Is(err, domain.ErrRefreshTokenExpired):
+		http.Error(w, "Refresh token expired", http.StatusUnauthorized)
+		return
+	case errors.Is(err, domain.ErrRefreshTokenRevoked):
+		http.Error(w, "Refresh token revoked", http.StatusUnauthorized)
+		return
+	case err != nil:
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(authResponse)
+	if err != nil {
+		log.Printf("Failed to encode response: %v", err)
 	}
 }
 
