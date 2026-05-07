@@ -2,8 +2,6 @@ package domain
 
 import (
 	"context"
-
-	"github.com/golang-jwt/jwt/v5"
 )
 
 type User struct {
