@@ -19,6 +19,7 @@ var (
 	ErrRefreshTokenInvalid  = &ErrorResponse{Code: 401, Message: "Invalid refresh token"}
 	ErrRefreshTokenExpired  = &ErrorResponse{Code: 401, Message: "Refresh token expired"}
 	ErrRefreshTokenRevoked  = &ErrorResponse{Code: 401, Message: "Refresh token revoked"}
+	ErrJobNotFound          = &ErrorResponse{Code: 404, Message: "Job not found"}
 )
 
 var AppName = "get-a-j-b"

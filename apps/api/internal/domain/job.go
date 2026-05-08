@@ -3,18 +3,18 @@ package domain
 import "context"
 
 type Job struct {
-	ID            int    `json:"id"`
-	UserID        int    `json:"user_id"`
-	Title         string `json:"title"`
-	Company       string `json:"company"`
-	Location      string `json:"location"`
-	Salary        int    `json:"salary"`
-	Description   string `json:"description"`
-	Requirements  string `json:"requirements"`
-	CurrentStatus string `json:"current_status"`
-	Notes         string `json:"notes"`
-	SourceURL     string `json:"source_url"`
-	AppliedAt     string `json:"applied_at"`
+	ID                int    `json:"id"`
+	UserID            int    `json:"user_id"`
+	Title             string `json:"title"`
+	Company           string `json:"company"`
+	Location          string `json:"location"`
+	Salary            int    `json:"salary"`
+	Description       string `json:"description"`
+	Requirements      string `json:"requirements"`
+	ApplicationStatus string `json:"current_status"`
+	Notes             string `json:"notes"`
+	SourceURL         string `json:"source_url"`
+	AppliedAt         string `json:"applied_at"`
 }
 
 type CreateJobRequest struct {
@@ -28,15 +28,15 @@ type CreateJobRequest struct {
 }
 
 type UpdateJobRequest struct {
-	Title         *string `json:"title"`
-	Company       *string `json:"company"`
-	Location      *string `json:"location"`
-	Salary        *int    `json:"salary"`
-	Description   *string `json:"description"`
-	Requirements  *string `json:"requirements"`
-	SourceURL     *string `json:"source_url"`
-	CurrentStatus *string `json:"current_status"`
-	Notes         *string `json:"notes"`
+	Title             *string `json:"title"`
+	Company           *string `json:"company"`
+	Location          *string `json:"location"`
+	Salary            *int    `json:"salary"`
+	Description       *string `json:"description"`
+	Requirements      *string `json:"requirements"`
+	SourceURL         *string `json:"source_url"`
+	ApplicationStatus *string `json:"current_status"`
+	Notes             *string `json:"notes"`
 }
 
 type JobRepository interface {
