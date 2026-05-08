@@ -5,24 +5,78 @@
 package db
 
 import (
+	"database/sql/driver"
+	"fmt"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type ApplicationStatus string
+
+const (
+	ApplicationStatusDraft              ApplicationStatus = "draft"
+	ApplicationStatusSubmitted          ApplicationStatus = "submitted"
+	ApplicationStatusUnderReview        ApplicationStatus = "under_review"
+	ApplicationStatusInterviewScheduled ApplicationStatus = "interview_scheduled"
+	ApplicationStatusOfferExtended      ApplicationStatus = "offer_extended"
+	ApplicationStatusAccepted           ApplicationStatus = "accepted"
+	ApplicationStatusRejected           ApplicationStatus = "rejected"
+	ApplicationStatusWithdrawn          ApplicationStatus = "withdrawn"
+	ApplicationStatusArchived           ApplicationStatus = "archived"
+)
+
+func (e *ApplicationStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = ApplicationStatus(s)
+	case string:
+		*e = ApplicationStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for ApplicationStatus: %T", src)
+	}
+	return nil
+}
+
+type NullApplicationStatus struct {
+	ApplicationStatus ApplicationStatus
+	Valid             bool // Valid is true if ApplicationStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullApplicationStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.ApplicationStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.ApplicationStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullApplicationStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.ApplicationStatus), nil
+}
+
 type Job struct {
-	ID              int32
-	UserID          pgtype.Int4
-	Title           string
-	Company         string
-	Location        string
-	Salary          pgtype.Numeric
-	Description     pgtype.Text
-	Requirements    string
-	CurrentStatus   string
-	Notes           pgtype.Text
-	SourceUrl       string
-	ApplicationDate pgtype.Timestamp
-	CreatedAt       pgtype.Timestamp
-	UpdatedAt       pgtype.Timestamp
+	ID                int32
+	UserID            pgtype.Int4
+	Title             string
+	Company           string
+	Location          string
+	Salary            pgtype.Numeric
+	Description       pgtype.Text
+	Requirements      string
+	ApplicationStatus string
+	StatusChangedAt   pgtype.Timestamp
+	Notes             pgtype.Text
+	SourceUrl         string
+	ContactInfo       pgtype.Text
+	ApplicationDate   pgtype.Timestamp
+	CreatedAt         pgtype.Timestamp
+	UpdatedAt         pgtype.Timestamp
 }
 
 type RefreshToken struct {

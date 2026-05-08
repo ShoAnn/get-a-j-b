@@ -13,34 +13,51 @@ import (
 )
 
 const createJob = `-- name: CreateJob :one
-INSERT INTO jobs (title, source_url, salary, description, requirements, current_status, notes, application_date, created_at, user_id)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), $9)
-RETURNING id, user_id, title, company, location, salary, description, requirements, current_status, notes, source_url, application_date, created_at, updated_at
+INSERT INTO jobs (
+    user_id,
+    title, 
+    company, 
+    location, 
+    salary, 
+    description, 
+    requirements, 
+    application_status, 
+    notes, 
+    source_url, 
+    application_date, 
+    created_at
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
+RETURNING id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, application_date, created_at, updated_at
 `
 
 type CreateJobParams struct {
-	Title           string
-	SourceUrl       string
-	Salary          pgtype.Numeric
-	Description     pgtype.Text
-	Requirements    string
-	CurrentStatus   string
-	Notes           pgtype.Text
-	ApplicationDate pgtype.Timestamp
-	UserID          pgtype.Int4
+	UserID            pgtype.Int4
+	Title             string
+	Company           string
+	Location          string
+	Salary            pgtype.Numeric
+	Description       pgtype.Text
+	Requirements      string
+	ApplicationStatus string
+	Notes             pgtype.Text
+	SourceUrl         string
+	ApplicationDate   pgtype.Timestamp
 }
 
 func (q *Queries) CreateJob(ctx context.Context, arg CreateJobParams) (Job, error) {
 	row := q.db.QueryRow(ctx, createJob,
+		arg.UserID,
 		arg.Title,
-		arg.SourceUrl,
+		arg.Company,
+		arg.Location,
 		arg.Salary,
 		arg.Description,
 		arg.Requirements,
-		arg.CurrentStatus,
+		arg.ApplicationStatus,
 		arg.Notes,
+		arg.SourceUrl,
 		arg.ApplicationDate,
-		arg.UserID,
 	)
 	var i Job
 	err := row.Scan(
@@ -52,9 +69,11 @@ func (q *Queries) CreateJob(ctx context.Context, arg CreateJobParams) (Job, erro
 		&i.Salary,
 		&i.Description,
 		&i.Requirements,
-		&i.CurrentStatus,
+		&i.ApplicationStatus,
+		&i.StatusChangedAt,
 		&i.Notes,
 		&i.SourceUrl,
+		&i.ContactInfo,
 		&i.ApplicationDate,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -71,7 +90,7 @@ func (q *Queries) DeleteJob(ctx context.Context, id int32) (pgconn.CommandTag, e
 }
 
 const getAllJobs = `-- name: GetAllJobs :many
-SELECT id, user_id, title, company, location, salary, description, requirements, current_status, notes, source_url, application_date, created_at, updated_at FROM jobs WHERE user_id = $1 ORDER BY id
+SELECT id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, application_date, created_at, updated_at FROM jobs WHERE user_id = $1 ORDER BY id
 `
 
 func (q *Queries) GetAllJobs(ctx context.Context, userID pgtype.Int4) ([]Job, error) {
@@ -92,9 +111,11 @@ func (q *Queries) GetAllJobs(ctx context.Context, userID pgtype.Int4) ([]Job, er
 			&i.Salary,
 			&i.Description,
 			&i.Requirements,
-			&i.CurrentStatus,
+			&i.ApplicationStatus,
+			&i.StatusChangedAt,
 			&i.Notes,
 			&i.SourceUrl,
+			&i.ContactInfo,
 			&i.ApplicationDate,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -110,7 +131,7 @@ func (q *Queries) GetAllJobs(ctx context.Context, userID pgtype.Int4) ([]Job, er
 }
 
 const getJobById = `-- name: GetJobById :one
-SELECT id, user_id, title, company, location, salary, description, requirements, current_status, notes, source_url, application_date, created_at, updated_at FROM jobs WHERE id = $1
+SELECT id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, application_date, created_at, updated_at FROM jobs WHERE id = $1
 `
 
 func (q *Queries) GetJobById(ctx context.Context, id int32) (Job, error) {
@@ -125,9 +146,11 @@ func (q *Queries) GetJobById(ctx context.Context, id int32) (Job, error) {
 		&i.Salary,
 		&i.Description,
 		&i.Requirements,
-		&i.CurrentStatus,
+		&i.ApplicationStatus,
+		&i.StatusChangedAt,
 		&i.Notes,
 		&i.SourceUrl,
+		&i.ContactInfo,
 		&i.ApplicationDate,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -138,40 +161,46 @@ func (q *Queries) GetJobById(ctx context.Context, id int32) (Job, error) {
 const updateJob = `-- name: UpdateJob :one
 UPDATE jobs
 SET 
-	title = $1,
-	source_url = $2,
-	salary = $3,
-	description = $4,
-	requirements = $5,
-	current_status = $6,
-	notes = $7,
-	application_date = $8,
-	updated_at = NOW()
-WHERE id = $9
-RETURNING id, user_id, title, company, location, salary, description, requirements, current_status, notes, source_url, application_date, created_at, updated_at
+    title = $1,
+    company = $2,
+    location = $3,
+    salary = $4,
+    description = $5,
+    requirements = $6,
+    application_status = $7,
+    notes = $8,
+    source_url = $9,
+    application_date = $10,
+    updated_at = NOW()
+WHERE id = $11
+RETURNING id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, application_date, created_at, updated_at
 `
 
 type UpdateJobParams struct {
-	Title           string
-	SourceUrl       string
-	Salary          pgtype.Numeric
-	Description     pgtype.Text
-	Requirements    string
-	CurrentStatus   string
-	Notes           pgtype.Text
-	ApplicationDate pgtype.Timestamp
-	ID              int32
+	Title             string
+	Company           string
+	Location          string
+	Salary            pgtype.Numeric
+	Description       pgtype.Text
+	Requirements      string
+	ApplicationStatus string
+	Notes             pgtype.Text
+	SourceUrl         string
+	ApplicationDate   pgtype.Timestamp
+	ID                int32
 }
 
 func (q *Queries) UpdateJob(ctx context.Context, arg UpdateJobParams) (Job, error) {
 	row := q.db.QueryRow(ctx, updateJob,
 		arg.Title,
-		arg.SourceUrl,
+		arg.Company,
+		arg.Location,
 		arg.Salary,
 		arg.Description,
 		arg.Requirements,
-		arg.CurrentStatus,
+		arg.ApplicationStatus,
 		arg.Notes,
+		arg.SourceUrl,
 		arg.ApplicationDate,
 		arg.ID,
 	)
@@ -185,9 +214,11 @@ func (q *Queries) UpdateJob(ctx context.Context, arg UpdateJobParams) (Job, erro
 		&i.Salary,
 		&i.Description,
 		&i.Requirements,
-		&i.CurrentStatus,
+		&i.ApplicationStatus,
+		&i.StatusChangedAt,
 		&i.Notes,
 		&i.SourceUrl,
+		&i.ContactInfo,
 		&i.ApplicationDate,
 		&i.CreatedAt,
 		&i.UpdatedAt,
