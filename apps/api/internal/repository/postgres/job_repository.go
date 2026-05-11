@@ -48,13 +48,8 @@ func (r *postgresJobRepository) Create(ctx context.Context, job *domain.Job) (*d
 	return toDomainJob(dbJob), nil
 }
 
-func (r *postgresJobRepository) ListAll(ctx context.Context) ([]*domain.Job, error) {
-	userID, ok := ctx.Value("user_id").(int)
-	if !ok {
-		return nil, fmt.Errorf("user_id not found in context")
-	}
-
-	dbJobs, err := r.q.GetAllJobs(ctx, pgtype.Int4{Int32: int32(userID), Valid: true})
+func (r *postgresJobRepository) ListAll(ctx context.Context, userId int) ([]*domain.Job, error) {
+	dbJobs, err := r.q.GetAllJobs(ctx, pgtype.Int4{Int32: int32(userId), Valid: true})
 	if err != nil {
 		return nil, err
 	}
