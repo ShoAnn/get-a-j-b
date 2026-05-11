@@ -36,9 +36,8 @@ type UserRepository interface {
 }
 
 type UserService interface {
-	Register(ctx context.Context, user *User) (*User, error)
 	GetAllUsers(ctx context.Context) ([]*User, error)
 	GetUserByID(ctx context.Context, id int) (*User, error)
-	UpdateUser(ctx context.Context, id int, user *User) (*User, error)
+	UpdateUser(ctx context.Context, id int, user *UpdateUserRequest) (*User, error)
 	DeleteUser(ctx context.Context, id int) error
 }
