@@ -41,7 +41,7 @@ type UpdateJobRequest struct {
 
 type JobRepository interface {
 	Create(ctx context.Context, job *Job) (*Job, error)
-	ListAll(ctx context.Context) ([]*Job, error)
+	ListAll(ctx context.Context, userId int) ([]*Job, error)
 	GetByID(ctx context.Context, id int) (*Job, error)
 	Update(ctx context.Context, job *Job) (*Job, error)
 	Delete(ctx context.Context, id int) error
@@ -49,8 +49,8 @@ type JobRepository interface {
 
 type JobService interface {
 	CreateJob(ctx context.Context, req *CreateJobRequest) (*Job, error)
-	ListAllJobs(ctx context.Context) ([]*Job, error)
-	GetJobByID(ctx context.Context, id int) (*Job, error)
-	UpdateJob(ctx context.Context, id int, req *UpdateJobRequest) (*Job, error)
-	DeleteJob(ctx context.Context, id int) error
+	ListAllJobs(ctx context.Context, userID int) ([]*Job, error)
+	GetJobByID(ctx context.Context, jobID int, userID int) (*Job, error)
+	UpdateJob(ctx context.Context, jobID int, userID int, req *UpdateJobRequest) (*Job, error)
+	DeleteJob(ctx context.Context, jobID int, userID int) error
 }
