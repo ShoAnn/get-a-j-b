@@ -1,7 +1,11 @@
 package handler
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
+	"net/http"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -19,4 +23,25 @@ func validationMessage(fe validator.FieldError) string {
 	default:
 		return "invalid value"
 	}
+}
+
+func writeValidationError(w http.ResponseWriter, err error) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
+		"errors": formatValidationErrors(err),
+	}); err != nil {
+		log.Printf("Failed to encode validation error response: %v", err)
+	}
+}
+
+func formatValidationErrors(err error) map[string]string {
+	messages := make(map[string]string)
+	var ve validator.ValidationErrors
+	if errors.As(err, &ve) {
+		for _, fe := range ve {
+			messages[fe.Field()] = validationMessage(fe)
+		}
+	}
+	return messages
 }
