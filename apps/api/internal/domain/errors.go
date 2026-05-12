@@ -14,6 +14,7 @@ var (
 	ErrEmailAlreadyExists   = &ErrorResponse{Code: 409, Message: "Email already exists"}
 	ErrUserNotFound         = &ErrorResponse{Code: 404, Message: "User not found"}
 	ErrUnauthorized         = &ErrorResponse{Code: 401, Message: "Unauthorized"}
+	ErrForbidden            = &ErrorResponse{Code: 403, Message: "Forbidden"}
 	ErrInvalidInput         = &ErrorResponse{Code: 400, Message: "Invalid input"}
 	ErrRefreshTokenNotFound = &ErrorResponse{Code: 404, Message: "Refresh token not found"}
 	ErrRefreshTokenInvalid  = &ErrorResponse{Code: 401, Message: "Invalid refresh token"}

@@ -7,13 +7,12 @@ INSERT INTO jobs (
     salary, 
     description, 
     requirements, 
-    application_status, 
+    application_status,
     notes, 
     source_url, 
-    application_date, 
     created_at
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
 RETURNING *;
 
 -- name: GetAllJobs :many

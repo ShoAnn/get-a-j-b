@@ -29,11 +29,15 @@ func (s *jobService) CreateJob(ctx context.Context, req *domain.CreateJobRequest
 		Description:       "",
 		Requirements:      req.Requirements,
 		ApplicationStatus: "draft",
+		Notes:             "",
 		SourceURL:         "",
 	}
 
 	if req.Description != nil {
 		job.Description = *req.Description
+	}
+	if req.ApplicationStatus != nil {
+		job.ApplicationStatus = *req.ApplicationStatus
 	}
 	if req.SourceURL != nil {
 		job.SourceURL = *req.SourceURL
@@ -42,34 +46,30 @@ func (s *jobService) CreateJob(ctx context.Context, req *domain.CreateJobRequest
 	return s.repo.Create(ctx, job)
 }
 
-func (s *jobService) ListAllJobs(ctx context.Context) ([]*domain.Job, error) {
-	return s.repo.ListAll(ctx)
+func (s *jobService) ListAllJobs(ctx context.Context, userID int) ([]*domain.Job, error) {
+	return s.repo.ListAll(ctx, userID)
 }
 
-func (s *jobService) GetJobByID(ctx context.Context, id int) (*domain.Job, error) {
-	job, err := s.repo.GetByID(ctx, id)
+func (s *jobService) GetJobByID(ctx context.Context, jobID int, userID int) (*domain.Job, error) {
+	job, err := s.repo.GetByID(ctx, jobID)
 	if err != nil {
 		return nil, domain.ErrJobNotFound
 	}
-	
-	// Check ownership
-	userID, ok := ctx.Value("user_id").(int)
-	if !ok || job.UserID != userID {
-		return nil, domain.ErrUnauthorized
+	if userID != job.UserID {
+		return nil, domain.ErrForbidden
 	}
 
 	return job, nil
 }
 
-func (s *jobService) UpdateJob(ctx context.Context, id int, req *domain.UpdateJobRequest) (*domain.Job, error) {
-	job, err := s.repo.GetByID(ctx, id)
+func (s *jobService) UpdateJob(ctx context.Context, jobID int, userID int, req *domain.UpdateJobRequest) (*domain.Job, error) {
+	job, err := s.repo.GetByID(ctx, jobID)
 	if err != nil {
 		return nil, domain.ErrJobNotFound
 	}
 
 	// Check ownership
-	userID, ok := ctx.Value("user_id").(int)
-	if !ok || job.UserID != userID {
+	if job.UserID != userID {
 		return nil, domain.ErrUnauthorized
 	}
 
@@ -104,17 +104,15 @@ func (s *jobService) UpdateJob(ctx context.Context, id int, req *domain.UpdateJo
 	return s.repo.Update(ctx, job)
 }
 
-func (s *jobService) DeleteJob(ctx context.Context, id int) error {
-	job, err := s.repo.GetByID(ctx, id)
+func (s *jobService) DeleteJob(ctx context.Context, jobID int, userID int) error {
+	job, err := s.repo.GetByID(ctx, jobID)
 	if err != nil {
 		return domain.ErrJobNotFound
 	}
 
-	// Check ownership
-	userID, ok := ctx.Value("user_id").(int)
-	if !ok || job.UserID != userID {
+	if job.UserID != userID {
 		return domain.ErrUnauthorized
 	}
 
-	return s.repo.Delete(ctx, id)
+	return s.repo.Delete(ctx, jobID)
 }
