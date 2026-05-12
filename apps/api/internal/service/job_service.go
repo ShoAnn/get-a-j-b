@@ -29,11 +29,15 @@ func (s *jobService) CreateJob(ctx context.Context, req *domain.CreateJobRequest
 		Description:       "",
 		Requirements:      req.Requirements,
 		ApplicationStatus: "draft",
+		Notes:             "",
 		SourceURL:         "",
 	}
 
 	if req.Description != nil {
 		job.Description = *req.Description
+	}
+	if req.ApplicationStatus != nil {
+		job.ApplicationStatus = *req.ApplicationStatus
 	}
 	if req.SourceURL != nil {
 		job.SourceURL = *req.SourceURL
@@ -46,8 +50,8 @@ func (s *jobService) ListAllJobs(ctx context.Context, userID int) ([]*domain.Job
 	return s.repo.ListAll(ctx, userID)
 }
 
-func (s *jobService) GetJobByID(ctx context.Context, jobId int, userID int) (*domain.Job, error) {
-	job, err := s.repo.GetByID(ctx, jobId)
+func (s *jobService) GetJobByID(ctx context.Context, jobID int, userID int) (*domain.Job, error) {
+	job, err := s.repo.GetByID(ctx, jobID)
 	if err != nil {
 		return nil, domain.ErrJobNotFound
 	}

@@ -14,17 +14,19 @@ type Job struct {
 	ApplicationStatus string `json:"current_status"`
 	Notes             string `json:"notes"`
 	SourceURL         string `json:"source_url"`
-	AppliedAt         string `json:"applied_at"`
+	CreatedAt         string `json:"applied_at"`
 }
 
 type CreateJobRequest struct {
-	Title        string  `json:"title" validate:"required"`
-	Company      string  `json:"company" validate:"required"`
-	Location     string  `json:"location" validate:"required"`
-	Salary       int     `json:"salary" validate:"required"`
-	Description  *string `json:"description"`
-	Requirements string  `json:"requirements" validate:"required"`
-	SourceURL    *string `json:"source_url"`
+	Title             string  `json:"title" validate:"required"`
+	Company           string  `json:"company" validate:"required"`
+	Location          string  `json:"location" validate:"required"`
+	Salary            int     `json:"salary" validate:"required"`
+	Description       *string `json:"description"`
+	Requirements      string  `json:"requirements" validate:"required"`
+	ApplicationStatus *string `json:"current_status"`
+	Notes             *string `json:"notes"`
+	SourceURL         *string `json:"source_url"`
 }
 
 type UpdateJobRequest struct {
