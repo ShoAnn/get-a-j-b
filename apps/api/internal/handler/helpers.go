@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"reflect"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -44,4 +46,14 @@ func formatValidationErrors(err error) map[string]string {
 		}
 	}
 	return messages
+}
+
+func registerJSONTagNameFunc(v *validator.Validate) {
+	v.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := fld.Tag.Get("json")
+		if name == "" || name == "-" {
+			return fld.Name
+		}
+		return strings.Split(name, ",")[0]
+	})
 }

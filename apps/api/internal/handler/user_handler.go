@@ -20,13 +20,7 @@ type UserHandler struct {
 
 func NewUserHandler(svc domain.UserService) *UserHandler {
 	v := validator.New()
-	v.RegisterTagNameFunc(func(fld reflect.StructField) string {
-		name := fld.Tag.Get("json")
-		if name == "" || name == "-" {
-			return fld.Name
-		}
-		return strings.Split(name, ",")[0]
-	})
+	registerJSONTagNameFunc(v)
 	return &UserHandler{svc: svc, validate: v}
 }
 

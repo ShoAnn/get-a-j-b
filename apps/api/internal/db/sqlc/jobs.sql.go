@@ -21,13 +21,12 @@ INSERT INTO jobs (
     salary, 
     description, 
     requirements, 
-    application_status, 
+    application_status,
     notes, 
     source_url, 
-    application_date, 
     created_at
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
 RETURNING id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, application_date, created_at, updated_at
 `
 
@@ -42,7 +41,6 @@ type CreateJobParams struct {
 	ApplicationStatus string
 	Notes             pgtype.Text
 	SourceUrl         string
-	ApplicationDate   pgtype.Timestamp
 }
 
 func (q *Queries) CreateJob(ctx context.Context, arg CreateJobParams) (Job, error) {
@@ -57,7 +55,6 @@ func (q *Queries) CreateJob(ctx context.Context, arg CreateJobParams) (Job, erro
 		arg.ApplicationStatus,
 		arg.Notes,
 		arg.SourceUrl,
-		arg.ApplicationDate,
 	)
 	var i Job
 	err := row.Scan(

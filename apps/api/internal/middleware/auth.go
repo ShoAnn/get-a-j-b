@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/ShoAnn/get-a-j-b/api/internal/domain"
@@ -37,16 +38,16 @@ func (m *AuthMiddleware) Auth(next http.Handler) http.Handler {
 	})
 }
 
+func GetClaimsFromContext(ctx context.Context) (*domain.Claims, error) {
+	claims, ok := ctx.Value(domain.ContextKeyClaims).(*domain.Claims)
+	if !ok {
+		return nil, errors.New("claims not found in context")
+	}
+
+	return claims, nil
+}
+
 func setClaimsInContext(ctx context.Context, claims *domain.Claims) context.Context {
 	ctx = context.WithValue(ctx, domain.ContextKeyClaims, claims)
 	return ctx
-}
-
-func getClaimsFromContext(ctx context.Context) (*domain.Claims, bool) {
-	claims, ok := ctx.Value(domain.ContextKeyClaims).(*domain.Claims)
-	if !ok {
-		return nil, false
-	}
-
-	return claims, ok
 }

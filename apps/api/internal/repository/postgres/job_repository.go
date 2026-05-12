@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"math/big"
 
 	db "github.com/ShoAnn/get-a-j-b/api/internal/db/sqlc"
@@ -39,7 +38,6 @@ func (r *postgresJobRepository) Create(ctx context.Context, job *domain.Job) (*d
 		ApplicationStatus: job.ApplicationStatus,
 		Notes:             pgtype.Text{String: job.Notes, Valid: job.Notes != ""},
 		SourceUrl:         job.SourceURL,
-		ApplicationDate:   pgtype.Timestamp{Valid: false}, // Defaulting for now
 	})
 	if err != nil {
 		return nil, err
@@ -48,13 +46,8 @@ func (r *postgresJobRepository) Create(ctx context.Context, job *domain.Job) (*d
 	return toDomainJob(dbJob), nil
 }
 
-func (r *postgresJobRepository) ListAll(ctx context.Context) ([]*domain.Job, error) {
-	userID, ok := ctx.Value("user_id").(int)
-	if !ok {
-		return nil, fmt.Errorf("user_id not found in context")
-	}
-
-	dbJobs, err := r.q.GetAllJobs(ctx, pgtype.Int4{Int32: int32(userID), Valid: true})
+func (r *postgresJobRepository) ListAll(ctx context.Context, userId int) ([]*domain.Job, error) {
+	dbJobs, err := r.q.GetAllJobs(ctx, pgtype.Int4{Int32: int32(userId), Valid: true})
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +101,7 @@ func (r *postgresJobRepository) Delete(ctx context.Context, id int) error {
 }
 
 func toDomainJob(dbJob db.Job) *domain.Job {
-	salary, _ := dbJob.Salary.Int.Int64()
+	salary := dbJob.Salary.Int.Int64()
 
 	var appliedAt string
 	if dbJob.ApplicationDate.Valid {
@@ -127,6 +120,5 @@ func toDomainJob(dbJob db.Job) *domain.Job {
 		ApplicationStatus: dbJob.ApplicationStatus,
 		Notes:             dbJob.Notes.String,
 		SourceURL:         dbJob.SourceUrl,
-		AppliedAt:         appliedAt,
 	}
 }
