@@ -50,7 +50,7 @@ type JobRepository interface {
 }
 
 type JobService interface {
-	CreateJob(ctx context.Context, req *CreateJobRequest) (*Job, error)
+	CreateJob(ctx context.Context, userID int, req *CreateJobRequest) (*Job, error)
 	ListAllJobs(ctx context.Context, userID int) ([]*Job, error)
 	GetJobByID(ctx context.Context, jobID int, userID int) (*Job, error)
 	UpdateJob(ctx context.Context, jobID int, userID int, req *UpdateJobRequest) (*Job, error)

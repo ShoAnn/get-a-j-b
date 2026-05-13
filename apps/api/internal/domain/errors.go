@@ -13,6 +13,8 @@ var (
 	ErrInvalidCredentials   = &ErrorResponse{Code: 401, Message: "Invalid email or password"}
 	ErrEmailAlreadyExists   = &ErrorResponse{Code: 409, Message: "Email already exists"}
 	ErrUserNotFound         = &ErrorResponse{Code: 404, Message: "User not found"}
+	ErrJobNotFound          = &ErrorResponse{Code: 404, Message: "Job not found"}
+	ErrResumeNotFound       = &ErrorResponse{Code: 404, Message: "Resume not found"}
 	ErrUnauthorized         = &ErrorResponse{Code: 401, Message: "Unauthorized"}
 	ErrForbidden            = &ErrorResponse{Code: 403, Message: "Forbidden"}
 	ErrInvalidInput         = &ErrorResponse{Code: 400, Message: "Invalid input"}
@@ -20,7 +22,6 @@ var (
 	ErrRefreshTokenInvalid  = &ErrorResponse{Code: 401, Message: "Invalid refresh token"}
 	ErrRefreshTokenExpired  = &ErrorResponse{Code: 401, Message: "Refresh token expired"}
 	ErrRefreshTokenRevoked  = &ErrorResponse{Code: 401, Message: "Refresh token revoked"}
-	ErrJobNotFound          = &ErrorResponse{Code: 404, Message: "Job not found"}
 )
 
 var AppName = "get-a-j-b"
