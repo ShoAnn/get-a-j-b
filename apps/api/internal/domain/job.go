@@ -12,9 +12,10 @@ type Job struct {
 	Description       string `json:"description"`
 	Requirements      string `json:"requirements"`
 	ApplicationStatus string `json:"current_status"`
+	StatusChangedAt   string `json:"status_changed_at"`
 	Notes             string `json:"notes"`
 	SourceURL         string `json:"source_url"`
-	CreatedAt         string `json:"applied_at"`
+	CreatedAt         string `json:"created_at"`
 }
 
 type CreateJobRequest struct {

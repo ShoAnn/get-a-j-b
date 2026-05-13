@@ -20,7 +20,7 @@ type ResumeHandler struct {
 func NewResumeHandler(svc domain.ResumeService) *ResumeHandler {
 	v := validator.New()
 	registerJSONTagNameFunc(v)
-	return &ResumeHandler{svc: svc}
+	return &ResumeHandler{svc: svc, validate: v}
 }
 
 func (h *ResumeHandler) CreateResume(w http.ResponseWriter, r *http.Request) {

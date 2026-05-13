@@ -5,9 +5,9 @@ This list outlines the remaining tasks to complete the project and potential enh
 ## 🚀 Core Features (Required to Finish)
 
 ### 1. Resume Management
-- [ ] **Implement Repository:** Complete `internal/repository/postgres/resume_repository.go` using the generated `sqlc` queries.
-- [ ] **Implement Service:** Complete `internal/service/resume_service.go` to handle business logic for resumes.
-- [ ] **Implement Handler:** Complete `internal/handler/resume_handler.go` with CRUD endpoints:
+- [x] **Implement Repository:** Complete `internal/repository/postgres/resume_repository.go` using the generated `sqlc` queries.
+- [x] **Implement Service:** Complete `internal/service/resume_service.go` to handle business logic for resumes.
+- [x] **Implement Handler:** Complete `internal/handler/resume_handler.go` with CRUD endpoints:
     - `POST /resumes`: Create a new resume.
     - `GET /resumes`: List all resumes for the authenticated user.
     - `GET /resumes/{id}`: Get a specific resume.

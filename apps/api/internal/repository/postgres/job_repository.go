@@ -86,7 +86,6 @@ func (r *postgresJobRepository) Update(ctx context.Context, job *domain.Job) (*d
 		ApplicationStatus: job.ApplicationStatus,
 		Notes:             pgtype.Text{String: job.Notes, Valid: job.Notes != ""},
 		SourceUrl:         job.SourceURL,
-		ApplicationDate:   pgtype.Timestamp{Valid: false}, // Needs proper mapping if available
 	})
 	if err != nil {
 		return nil, err
@@ -103,9 +102,9 @@ func (r *postgresJobRepository) Delete(ctx context.Context, id int) error {
 func toDomainJob(dbJob db.Job) *domain.Job {
 	salary := dbJob.Salary.Int.Int64()
 
-	var appliedAt string
-	if dbJob.ApplicationDate.Valid {
-		appliedAt = dbJob.ApplicationDate.Time.Format("2006-01-02 15:04:05")
+	var statusChangedAt string
+	if dbJob.StatusChangedAt.Valid {
+		statusChangedAt = dbJob.StatusChangedAt.Time.Format("2006-01-02 15:04:05")
 	}
 
 	return &domain.Job{
@@ -118,7 +117,9 @@ func toDomainJob(dbJob db.Job) *domain.Job {
 		Description:       dbJob.Description.String,
 		Requirements:      dbJob.Requirements,
 		ApplicationStatus: dbJob.ApplicationStatus,
+		StatusChangedAt:   statusChangedAt,
 		Notes:             dbJob.Notes.String,
 		SourceURL:         dbJob.SourceUrl,
+		CreatedAt:         dbJob.CreatedAt.Time.Format("2006-01-02 15:04:05"),
 	}
 }

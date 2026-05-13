@@ -31,11 +31,14 @@ SET
     description = $5,
     requirements = $6,
     application_status = $7,
+	status_changed_at = CASE 
+		WHEN application_status != $7 THEN NOW() 
+		ELSE status_changed_at 
+	END,
     notes = $8,
     source_url = $9,
-    application_date = $10,
     updated_at = NOW()
-WHERE id = $11
+WHERE id = $10
 RETURNING *;
 
 -- name: DeleteJob :execresult
