@@ -15,12 +15,13 @@ type AuthService struct {
 	jwtSecretKey []byte
 }
 
-func NewAuthService(userRepo domain.UserRepository, secret string) (*AuthService, error) {
+func NewAuthService(userRepo domain.UserRepository, tokenRepo domain.RefreshTokenRepository, secret string) (*AuthService, error) {
 	if secret == "" {
 		return nil, errors.New("jwt secret key is required")
 	}
 	return &AuthService{
 		userRepo:     userRepo,
+		tokenRepo:    tokenRepo,
 		jwtSecretKey: []byte(secret),
 	}, nil
 }
