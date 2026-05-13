@@ -8,12 +8,14 @@ import (
 
 	"github.com/ShoAnn/get-a-j-b/api/internal/handler"
 	"github.com/ShoAnn/get-a-j-b/api/internal/middleware"
+	repository "github.com/ShoAnn/get-a-j-b/api/internal/repository/postgres"
 	"github.com/ShoAnn/get-a-j-b/api/internal/service"
 )
 
 var jwtSecretKey = os.Getenv("JWT_SECRET_KEY")
 
 func main() {
+	userRepo := repository.NewUserRepository()
 
 	authService, _ := service.NewAuthService(userRepo, jwtSecretKey)
 	authMiddleware := middleware.NewAuthMiddleware(authService)
