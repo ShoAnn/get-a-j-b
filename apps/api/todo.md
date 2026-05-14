@@ -15,15 +15,15 @@ This list outlines the remaining tasks to complete the project and potential enh
     - `DELETE /resumes/{id}`: Delete a resume.
 
 ### 2. Main Application Bootstrap
-- [ ] **Database Connection:** Implement robust database connection logic in `cmd/api/main.go` using `pgx`.
-- [ ] **Dependency Injection:** Wire up all repositories, services, and handlers in `main.go`.
-- [ ] **Routing:** Register all endpoints in the router.
-- [ ] **Middleware Integration:** Apply `AuthMiddleware` to all protected routes (Jobs, Resumes, User management).
-- [ ] **Configuration:** Use environment variables for sensitive data (DB URL, JWT Secret, Port).
+- [x] **Database Connection:** Implement robust database connection logic in `cmd/api/main.go` using `pgx`.
+- [x] **Dependency Injection:** Wire up all repositories, services, and handlers in `main.go`.
+- [x] **Routing:** Register all endpoints in the router.
+- [x] **Middleware Integration:** Apply `AuthMiddleware` to all protected routes (Jobs, Resumes, User management).
+- [x] **Configuration:** Use environment variables for sensitive data (DB URL, JWT Secret, Port).
 
 ### 3. Verification & Validation
-- [ ] **API Testing:** Ensure all handlers have corresponding tests (similar to `user_repository_test.go`).
-- [ ] **Error Handling:** Ensure consistent error responses across all handlers using the `domain.ErrorResponse` struct.
+- [x] **API Testing:** Ensure all handlers have corresponding tests (similar to `user_repository_test.go`).
+- [x] **Error Handling:** Ensure consistent error responses across all handlers using the `domain.ErrorResponse` struct.
 
 ---
 
