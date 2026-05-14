@@ -83,6 +83,10 @@ func (s *AuthService) Login(ctx context.Context, email, password string) (*domai
 	}, nil
 }
 
+func (s *AuthService) Logout(ctx context.Context, refreshTokenStr string) error {
+	return s.tokenRepo.Revoke(ctx, refreshTokenStr)
+}
+
 func (s *AuthService) RefreshToken(ctx context.Context, refreshTokenStr string) (*domain.AuthResponse, error) {
 	refreshToken, err := s.tokenRepo.GetByToken(ctx, refreshTokenStr)
 	if err != nil {
