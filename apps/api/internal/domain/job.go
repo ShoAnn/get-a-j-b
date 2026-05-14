@@ -12,9 +12,10 @@ type Job struct {
 	Description       string `json:"description"`
 	Requirements      string `json:"requirements"`
 	ApplicationStatus string `json:"current_status"`
+	StatusChangedAt   string `json:"status_changed_at"`
 	Notes             string `json:"notes"`
 	SourceURL         string `json:"source_url"`
-	CreatedAt         string `json:"applied_at"`
+	CreatedAt         string `json:"created_at"`
 }
 
 type CreateJobRequest struct {
@@ -50,7 +51,7 @@ type JobRepository interface {
 }
 
 type JobService interface {
-	CreateJob(ctx context.Context, req *CreateJobRequest) (*Job, error)
+	CreateJob(ctx context.Context, userID int, req *CreateJobRequest) (*Job, error)
 	ListAllJobs(ctx context.Context, userID int) ([]*Job, error)
 	GetJobByID(ctx context.Context, jobID int, userID int) (*Job, error)
 	UpdateJob(ctx context.Context, jobID int, userID int, req *UpdateJobRequest) (*Job, error)

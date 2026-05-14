@@ -24,7 +24,6 @@ CREATE TABLE jobs (
 	notes VARCHAR(2048) NULL,
 	source_url VARCHAR(2048) NOT NULL,
 	contact_info VARCHAR(255) NULL,
-	application_date TIMESTAMP NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT NOW(), 
 	updated_at TIMESTAMP NULL
 );

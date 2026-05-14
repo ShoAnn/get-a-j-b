@@ -27,7 +27,7 @@ INSERT INTO jobs (
     created_at
 )
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
-RETURNING id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, application_date, created_at, updated_at
+RETURNING id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, created_at, updated_at
 `
 
 type CreateJobParams struct {
@@ -71,7 +71,6 @@ func (q *Queries) CreateJob(ctx context.Context, arg CreateJobParams) (Job, erro
 		&i.Notes,
 		&i.SourceUrl,
 		&i.ContactInfo,
-		&i.ApplicationDate,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -87,7 +86,7 @@ func (q *Queries) DeleteJob(ctx context.Context, id int32) (pgconn.CommandTag, e
 }
 
 const getAllJobs = `-- name: GetAllJobs :many
-SELECT id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, application_date, created_at, updated_at FROM jobs WHERE user_id = $1 ORDER BY id
+SELECT id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, created_at, updated_at FROM jobs WHERE user_id = $1 ORDER BY id
 `
 
 func (q *Queries) GetAllJobs(ctx context.Context, userID pgtype.Int4) ([]Job, error) {
@@ -113,7 +112,6 @@ func (q *Queries) GetAllJobs(ctx context.Context, userID pgtype.Int4) ([]Job, er
 			&i.Notes,
 			&i.SourceUrl,
 			&i.ContactInfo,
-			&i.ApplicationDate,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -128,7 +126,7 @@ func (q *Queries) GetAllJobs(ctx context.Context, userID pgtype.Int4) ([]Job, er
 }
 
 const getJobById = `-- name: GetJobById :one
-SELECT id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, application_date, created_at, updated_at FROM jobs WHERE id = $1
+SELECT id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, created_at, updated_at FROM jobs WHERE id = $1
 `
 
 func (q *Queries) GetJobById(ctx context.Context, id int32) (Job, error) {
@@ -148,7 +146,6 @@ func (q *Queries) GetJobById(ctx context.Context, id int32) (Job, error) {
 		&i.Notes,
 		&i.SourceUrl,
 		&i.ContactInfo,
-		&i.ApplicationDate,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -165,12 +162,15 @@ SET
     description = $5,
     requirements = $6,
     application_status = $7,
+	status_changed_at = CASE 
+		WHEN application_status != $7 THEN NOW() 
+		ELSE status_changed_at 
+	END,
     notes = $8,
     source_url = $9,
-    application_date = $10,
     updated_at = NOW()
-WHERE id = $11
-RETURNING id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, application_date, created_at, updated_at
+WHERE id = $10
+RETURNING id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, created_at, updated_at
 `
 
 type UpdateJobParams struct {
@@ -183,7 +183,6 @@ type UpdateJobParams struct {
 	ApplicationStatus string
 	Notes             pgtype.Text
 	SourceUrl         string
-	ApplicationDate   pgtype.Timestamp
 	ID                int32
 }
 
@@ -198,7 +197,6 @@ func (q *Queries) UpdateJob(ctx context.Context, arg UpdateJobParams) (Job, erro
 		arg.ApplicationStatus,
 		arg.Notes,
 		arg.SourceUrl,
-		arg.ApplicationDate,
 		arg.ID,
 	)
 	var i Job
@@ -216,7 +214,6 @@ func (q *Queries) UpdateJob(ctx context.Context, arg UpdateJobParams) (Job, erro
 		&i.Notes,
 		&i.SourceUrl,
 		&i.ContactInfo,
-		&i.ApplicationDate,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
