@@ -98,6 +98,33 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		RefreshToken string `json:"refresh_token" validate:"required"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, "Invalid input", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.validate.Struct(input); err != nil {
+		h.writeValidationError(w, err)
+		return
+	}
+
+	err := h.svc.Logout(r.Context(), input.RefreshToken)
+	if errors.Is(err, domain.ErrRefreshTokenNotFound) {
+		http.Error(w, "Refresh token not found", http.StatusNotFound)
+		return
+	} else if err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		RefreshToken string `json:"refresh_token" validate:"required"`

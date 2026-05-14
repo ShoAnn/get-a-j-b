@@ -24,6 +24,11 @@ func NewJobHandler(svc domain.JobService) *JobHandler {
 }
 
 func (h *JobHandler) CreateJob(w http.ResponseWriter, r *http.Request) {
+	claims, err := middleware.GetClaimsFromContext(r.Context())
+	if err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 	var req domain.CreateJobRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
@@ -35,7 +40,7 @@ func (h *JobHandler) CreateJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	job, err := h.svc.CreateJob(r.Context(), &req)
+	job, err := h.svc.CreateJob(r.Context(), claims.UserID, &req)
 	if errors.Is(err, domain.ErrUnauthorized) {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -54,7 +59,7 @@ func (h *JobHandler) CreateJob(w http.ResponseWriter, r *http.Request) {
 func (h *JobHandler) GetAllJobs(w http.ResponseWriter, r *http.Request) {
 	claims, err := middleware.GetClaimsFromContext(r.Context())
 	if err != nil {
-		http.Error(w, "claims not found in context", http.StatusNotFound)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 	jobs, err := h.svc.ListAllJobs(r.Context(), claims.UserID)
@@ -79,7 +84,7 @@ func (h *JobHandler) GetJobByID(w http.ResponseWriter, r *http.Request) {
 
 	claims, err := middleware.GetClaimsFromContext(r.Context())
 	if err != nil {
-		http.Error(w, "Claims not found in context", http.StatusNotFound)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 	job, err := h.svc.GetJobByID(r.Context(), id, claims.UserID)
@@ -106,7 +111,7 @@ func (h *JobHandler) UpdateJob(w http.ResponseWriter, r *http.Request) {
 	}
 	claims, err := middleware.GetClaimsFromContext(r.Context())
 	if err != nil {
-		http.Error(w, "Claims not found in context", http.StatusNotFound)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -147,7 +152,7 @@ func (h *JobHandler) DeleteJob(w http.ResponseWriter, r *http.Request) {
 	}
 	claims, err := middleware.GetClaimsFromContext(r.Context())
 	if err != nil {
-		http.Error(w, "Claims not found in context", http.StatusNotFound)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 

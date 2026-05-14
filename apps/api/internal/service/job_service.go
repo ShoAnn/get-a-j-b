@@ -14,12 +14,7 @@ func NewJobService(repo domain.JobRepository) domain.JobService {
 	return &jobService{repo: repo}
 }
 
-func (s *jobService) CreateJob(ctx context.Context, req *domain.CreateJobRequest) (*domain.Job, error) {
-	userID, ok := ctx.Value("user_id").(int)
-	if !ok {
-		return nil, domain.ErrUnauthorized
-	}
-
+func (s *jobService) CreateJob(ctx context.Context, userID int, req *domain.CreateJobRequest) (*domain.Job, error) {
 	job := &domain.Job{
 		UserID:            userID,
 		Title:             req.Title,

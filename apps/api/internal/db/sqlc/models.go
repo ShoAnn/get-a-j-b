@@ -74,7 +74,6 @@ type Job struct {
 	Notes             pgtype.Text
 	SourceUrl         string
 	ContactInfo       pgtype.Text
-	ApplicationDate   pgtype.Timestamp
 	CreatedAt         pgtype.Timestamp
 	UpdatedAt         pgtype.Timestamp
 }

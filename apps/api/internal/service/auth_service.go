@@ -15,12 +15,13 @@ type AuthService struct {
 	jwtSecretKey []byte
 }
 
-func NewAuthService(userRepo domain.UserRepository, secret string) (*AuthService, error) {
+func NewAuthService(userRepo domain.UserRepository, tokenRepo domain.RefreshTokenRepository, secret string) (*AuthService, error) {
 	if secret == "" {
 		return nil, errors.New("jwt secret key is required")
 	}
 	return &AuthService{
 		userRepo:     userRepo,
+		tokenRepo:    tokenRepo,
 		jwtSecretKey: []byte(secret),
 	}, nil
 }
@@ -80,6 +81,10 @@ func (s *AuthService) Login(ctx context.Context, email, password string) (*domai
 		Token:        accessToken,
 		RefreshToken: refreshToken,
 	}, nil
+}
+
+func (s *AuthService) Logout(ctx context.Context, refreshTokenStr string) error {
+	return s.tokenRepo.Revoke(ctx, refreshTokenStr)
 }
 
 func (s *AuthService) RefreshToken(ctx context.Context, refreshTokenStr string) (*domain.AuthResponse, error) {

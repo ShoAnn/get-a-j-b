@@ -5,9 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"reflect"
 	"strconv"
-	"strings"
 
 	"github.com/ShoAnn/get-a-j-b/api/internal/domain"
 	"github.com/go-playground/validator/v10"
