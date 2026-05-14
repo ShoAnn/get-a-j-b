@@ -11,7 +11,8 @@ import (
 
 func TestAuthService_Register(t *testing.T) {
 	userRepo := &mockUserRepository{users: make(map[int]*domain.User)}
-	s, _ := NewAuthService(userRepo, "secret")
+	tokenRepo := &mockRefreshTokenRepository{tokens: make(map[string]*domain.RefreshToken)}
+	s, _ := NewAuthService(userRepo, tokenRepo, "secret")
 
 	req := &domain.CreateUserRequest{
 		Username: "testuser",
@@ -36,8 +37,7 @@ func TestAuthService_Login(t *testing.T) {
 		},
 	}
 	tokenRepo := &mockRefreshTokenRepository{tokens: make(map[string]*domain.RefreshToken)}
-	s, _ := NewAuthService(userRepo, "secret")
-	s.tokenRepo = tokenRepo
+	s, _ := NewAuthService(userRepo, tokenRepo, "secret")
 
 	t.Run("Success", func(t *testing.T) {
 		resp, err := s.Login(context.Background(), "test@example.com", "password123")
@@ -72,8 +72,7 @@ func TestAuthService_RefreshToken(t *testing.T) {
 			"expired_token": {UserID: 1, Token: "expired_token", ExpiresAt: time.Now().Add(-time.Hour)},
 		},
 	}
-	s, _ := NewAuthService(userRepo, "secret")
-	s.tokenRepo = tokenRepo
+	s, _ := NewAuthService(userRepo, tokenRepo, "secret")
 
 	t.Run("Success", func(t *testing.T) {
 		resp, err := s.RefreshToken(context.Background(), "valid_token")
@@ -111,7 +110,8 @@ func TestAuthService_RefreshToken(t *testing.T) {
 
 func TestAuthService_ValidateToken(t *testing.T) {
 	userRepo := &mockUserRepository{}
-	s, _ := NewAuthService(userRepo, "secret")
+	tokenRepo := &mockRefreshTokenRepository{tokens: make(map[string]*domain.RefreshToken)}
+	s, _ := NewAuthService(userRepo, tokenRepo, "secret")
 
 	user := &domain.User{ID: 1, Username: "testuser", Email: "test@example.com", Role: "user"}
 	token, _ := s.GenerateJWT(user)

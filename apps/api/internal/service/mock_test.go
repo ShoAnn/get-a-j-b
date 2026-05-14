@@ -155,3 +155,127 @@ func (m *mockRefreshTokenRepository) RevokeAllForUser(ctx context.Context, userI
 func (m *mockRefreshTokenRepository) DeleteExpired(ctx context.Context) error {
 	return nil
 }
+
+type mockResumeRepository struct {
+	resumes  map[int]*domain.Resume
+	createFn func(ctx context.Context, resume *domain.Resume) (*domain.Resume, error)
+	getAllFn func(ctx context.Context, userID int) ([]*domain.Resume, error)
+	getByIDFn func(ctx context.Context, id int) (*domain.Resume, error)
+	updateFn func(ctx context.Context, resume *domain.Resume) (*domain.Resume, error)
+	deleteFn func(ctx context.Context, id int) error
+}
+
+func (m *mockResumeRepository) Create(ctx context.Context, resume *domain.Resume) (*domain.Resume, error) {
+	if m.createFn != nil {
+		return m.createFn(ctx, resume)
+	}
+	if m.resumes == nil {
+		m.resumes = make(map[int]*domain.Resume)
+	}
+	id := len(m.resumes) + 1
+	resume.ID = id
+	m.resumes[id] = resume
+	return resume, nil
+}
+
+func (m *mockResumeRepository) GetAll(ctx context.Context, userID int) ([]*domain.Resume, error) {
+	if m.getAllFn != nil {
+		return m.getAllFn(ctx, userID)
+	}
+	var res []*domain.Resume
+	for _, r := range m.resumes {
+		if r.UserID == userID {
+			res = append(res, r)
+		}
+	}
+	return res, nil
+}
+
+func (m *mockResumeRepository) GetByID(ctx context.Context, id int) (*domain.Resume, error) {
+	if m.getByIDFn != nil {
+		return m.getByIDFn(ctx, id)
+	}
+	r, ok := m.resumes[id]
+	if !ok {
+		return nil, domain.ErrResumeNotFound
+	}
+	return r, nil
+}
+
+func (m *mockResumeRepository) Update(ctx context.Context, resume *domain.Resume) (*domain.Resume, error) {
+	if m.updateFn != nil {
+		return m.updateFn(ctx, resume)
+	}
+	m.resumes[resume.ID] = resume
+	return resume, nil
+}
+
+func (m *mockResumeRepository) Delete(ctx context.Context, id int) error {
+	if m.deleteFn != nil {
+		return m.deleteFn(ctx, id)
+	}
+	delete(m.resumes, id)
+	return nil
+}
+
+type mockJobRepository struct {
+	jobs     map[int]*domain.Job
+	createFn func(ctx context.Context, job *domain.Job) (*domain.Job, error)
+	listAllFn func(ctx context.Context, userID int) ([]*domain.Job, error)
+	getByIDFn func(ctx context.Context, id int) (*domain.Job, error)
+	updateFn func(ctx context.Context, job *domain.Job) (*domain.Job, error)
+	deleteFn func(ctx context.Context, id int) error
+}
+
+func (m *mockJobRepository) Create(ctx context.Context, job *domain.Job) (*domain.Job, error) {
+	if m.createFn != nil {
+		return m.createFn(ctx, job)
+	}
+	if m.jobs == nil {
+		m.jobs = make(map[int]*domain.Job)
+	}
+	id := len(m.jobs) + 1
+	job.ID = id
+	m.jobs[id] = job
+	return job, nil
+}
+
+func (m *mockJobRepository) ListAll(ctx context.Context, userID int) ([]*domain.Job, error) {
+	if m.listAllFn != nil {
+		return m.listAllFn(ctx, userID)
+	}
+	var res []*domain.Job
+	for _, j := range m.jobs {
+		if j.UserID == userID {
+			res = append(res, j)
+		}
+	}
+	return res, nil
+}
+
+func (m *mockJobRepository) GetByID(ctx context.Context, id int) (*domain.Job, error) {
+	if m.getByIDFn != nil {
+		return m.getByIDFn(ctx, id)
+	}
+	j, ok := m.jobs[id]
+	if !ok {
+		return nil, domain.ErrJobNotFound
+	}
+	return j, nil
+}
+
+func (m *mockJobRepository) Update(ctx context.Context, job *domain.Job) (*domain.Job, error) {
+	if m.updateFn != nil {
+		return m.updateFn(ctx, job)
+	}
+	m.jobs[job.ID] = job
+	return job, nil
+}
+
+func (m *mockJobRepository) Delete(ctx context.Context, id int) error {
+	if m.deleteFn != nil {
+		return m.deleteFn(ctx, id)
+	}
+	delete(m.jobs, id)
+	return nil
+}
