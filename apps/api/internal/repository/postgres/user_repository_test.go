@@ -2,28 +2,16 @@ package repository
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/ShoAnn/get-a-j-b/api/internal/domain"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func TestPostgresUserRepository(t *testing.T) {
-	dbURL := os.Getenv("DATABASE_URL")
-	if dbURL == "" {
-		t.Skip("Skipping integration test: DATABASE_URL not set")
-	}
-
 	ctx := context.Background()
-	pool, err := pgxpool.New(ctx, dbURL)
-	if err != nil {
-		t.Fatalf("failed to connect to database: %v", err)
-	}
-	defer pool.Close()
 
 	t.Run("CreateAndGet", func(t *testing.T) {
-		tx, err := pool.Begin(ctx)
+		tx, err := testPool.Begin(ctx)
 		if err != nil {
 			t.Fatalf("failed to begin transaction: %v", err)
 		}
@@ -55,7 +43,7 @@ func TestPostgresUserRepository(t *testing.T) {
 	})
 
 	t.Run("GetByEmail", func(t *testing.T) {
-		tx, err := pool.Begin(ctx)
+		tx, err := testPool.Begin(ctx)
 		if err != nil {
 			t.Fatalf("failed to begin transaction: %v", err)
 		}
@@ -82,7 +70,7 @@ func TestPostgresUserRepository(t *testing.T) {
 	})
 
 	t.Run("ExistUserByEmail", func(t *testing.T) {
-		tx, err := pool.Begin(ctx)
+		tx, err := testPool.Begin(ctx)
 		if err != nil {
 			t.Fatalf("failed to begin transaction: %v", err)
 		}
@@ -90,7 +78,7 @@ func TestPostgresUserRepository(t *testing.T) {
 
 		repo := NewUserRepository(tx)
 		email := "exist@example.com"
-		
+
 		exists, _ := repo.ExistUserByEmail(ctx, email)
 		if exists {
 			t.Error("expected user not to exist")
@@ -115,7 +103,7 @@ func TestPostgresUserRepository(t *testing.T) {
 	})
 
 	t.Run("Update", func(t *testing.T) {
-		tx, err := pool.Begin(ctx)
+		tx, err := testPool.Begin(ctx)
 		if err != nil {
 			t.Fatalf("failed to begin transaction: %v", err)
 		}
@@ -147,7 +135,7 @@ func TestPostgresUserRepository(t *testing.T) {
 	})
 
 	t.Run("Delete", func(t *testing.T) {
-		tx, err := pool.Begin(ctx)
+		tx, err := testPool.Begin(ctx)
 		if err != nil {
 			t.Fatalf("failed to begin transaction: %v", err)
 		}

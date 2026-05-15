@@ -2,29 +2,74 @@ package repository
 
 import (
 	"context"
+	"log"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/ShoAnn/get-a-j-b/api/internal/domain"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/testcontainers/testcontainers-go/modules/postgres"
 )
 
-func TestPostgresRefreshTokenRepository(t *testing.T) {
-	dbURL := os.Getenv("DATABASE_URL")
-	if dbURL == "" {
-		t.Skip("Skipping integration test: DATABASE_URL not set")
+var testPool *pgxpool.Pool
+
+func setupSchema(connStr string) {
+	// Points to your actual migration files on disk
+	m, err := migrate.New("file://../../db/migrations", connStr)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	ctx := context.Background()
-	pool, err := pgxpool.New(ctx, dbURL)
-	if err != nil {
-		t.Fatalf("failed to connect to database: %v", err)
+	// Runs all "up" migrations to build the whole DB
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		log.Fatal(err)
 	}
-	defer pool.Close()
+}
+func TestMain(m *testing.M) {
+	ctx := context.Background()
+	dbName := "todolist"
+	dbUsername := "user"
+	dbPassword := "password"
+
+	// 1. Spin up the Postgres container
+	postgresContainer, err := postgres.Run(ctx,
+		"postgres:16-alpine",
+		postgres.WithDatabase(dbName),
+		postgres.WithUsername(dbUsername),
+		postgres.WithPassword(dbPassword),
+		postgres.BasicWaitStrategies(),
+	)
+	if err != nil {
+		log.Fatalf("Failed to start container: %s", err)
+	}
+
+	// 2. Get the connection string from the container
+	connStr, _ := postgresContainer.ConnectionString(ctx, "sslmode=disable")
+
+	// 3. Initialize pgxpool
+	testPool, err = pgxpool.New(ctx, connStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// 4. Setup Schema (Migrations)
+	setupSchema(connStr)
+
+	// 5. Run Tests and Cleanup
+	code := m.Run()
+	testPool.Close()
+	postgresContainer.Terminate(ctx)
+	os.Exit(code)
+}
+func TestPostgresRefreshTokenRepository(t *testing.T) {
+	ctx := context.Background()
 
 	t.Run("CreateAndGet", func(t *testing.T) {
-		tx, err := pool.Begin(ctx)
+		tx, err := testPool.Begin(ctx)
 		if err != nil {
 			t.Fatalf("failed to begin transaction: %v", err)
 		}
@@ -68,7 +113,7 @@ func TestPostgresRefreshTokenRepository(t *testing.T) {
 	})
 
 	t.Run("Revoke", func(t *testing.T) {
-		tx, err := pool.Begin(ctx)
+		tx, err := testPool.Begin(ctx)
 		if err != nil {
 			t.Fatalf("failed to begin transaction: %v", err)
 		}
@@ -105,7 +150,7 @@ func TestPostgresRefreshTokenRepository(t *testing.T) {
 	})
 
 	t.Run("RevokeAllForUser", func(t *testing.T) {
-		tx, err := pool.Begin(ctx)
+		tx, err := testPool.Begin(ctx)
 		if err != nil {
 			t.Fatalf("failed to begin transaction: %v", err)
 		}
