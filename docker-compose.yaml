@@ -15,7 +15,7 @@ services:
 
   adminer:
     image: adminer
-    container_name: adminer_jobtracker
+    container_name: adminer_getajob
     restart: always
     ports:
       - "${ADMINER_EXTERNAL_PORT}:8080"
@@ -23,7 +23,7 @@ services:
       - db
 
   api:
-    container_name: go_api_jobtracker
+    container_name: go_api_getajob
     build:
       context: ./apps/api
       dockerfile: Dockerfile
@@ -37,7 +37,7 @@ services:
     restart: unless-stopped
 
   web:
-    container_name: nextjs_jobtracker
+    container_name: nextjs_getajob
     build:
       context: .
       dockerfile: apps/web/Dockerfile
