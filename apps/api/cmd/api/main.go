@@ -113,5 +113,5 @@ func main() {
 	}
 
 	fmt.Printf("Go API server starting on port %s\n", port)
-	log.Fatal(http.ListenAndServe(":"+port, mux))
+	log.Fatal(http.ListenAndServe(":"+port, middleware.Logger(mux)))
 }
