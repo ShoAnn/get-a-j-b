@@ -20,15 +20,15 @@ afterwards you can just `docker-compose up`
 - [x] Create reusable button component with variants (primary, secondary, ghost)
 - [x] Build add application modal/form with validation
 - [x] Create status badge component 'draft', 'submitted', 'under_review', 'interview_scheduled', 'offer_extended', 'accepted', 'rejected', 'withdrawn', 'archived'
-- [ ] Implement list view with fields: title, company, status
-- [ ] Build application card component showing role, company, status, and date
-- [ ] Implement search bar to filter applications
-- [ ] Add filter dropdown by application status
+- [x] Implement list view with fields: title, company, status
+- [x] Build application card component showing role, company, status, and date
+- [x] Implement search bar to filter applications
+- [x] Add filter dropdown by application status
 - [ ] Add sort options by date applied, company name, and status
-- [ ] Add application detail view and add notes section for each application
+- [ ] Add job detail view and add notes section for each job
 - [ ] Build dashboard stats section (total saved, total applied, status chart, days since first application)
-- [ ] Add empty state illustrations when no applications exist
-- [ ] Implement Kanban board view with drag-and-drop functionality to move applications between statuses
+- [ ] Add empty state illustrations when no jobs exist
+- [ ] Implement Kanban board view with drag-and-drop functionality to move jobs between statuses
 - [ ] Add dark mode support using CSS variables / Tailwind class strategy
 
 ## pages
@@ -38,9 +38,9 @@ afterwards you can just `docker-compose up`
 | `/login` | Login | Email + password form, authenticates via `/auth/login` |
 | `/register` | Register | Username + email + password form, creates account via `/auth/register` |
 | `/` | Dashboard | Stats: total saved, total applied, status breakdown chart, days since first application |
-| `/applications` | Applications List | List view with search bar, status filter, sort options, and application cards |
-| `/applications/[id]` | Application Detail | Full details of one application (role, company, status history, notes section) |
-| `/board` | Kanban Board | Drag-and-drop columns per status to move applications between stages |
+| `/jobs` | Jobs List | List view with search bar, status filter, sort options, and job cards |
+| `/jobs/[id]` | Job Detail | Full details of one job (role, company, status history, notes section) |
+| `/board` | Kanban Board | Drag-and-drop columns per status to move jobs between stages |
 | `/settings` | Settings | Update profile, manage uploaded resumes |
 
 ---
