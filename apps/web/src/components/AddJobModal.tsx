@@ -3,29 +3,30 @@
 import { useState, type FormEvent } from "react";
 import Modal from "./Modal";
 import Button from "./Button";
-import { APPLICATION_STATUSES, type ApplicationStatus } from "./StatusBadge";
+import type { JobStatus } from "@/types/job";
+import { JOB_STATUSES } from "./StatusBadge";
 
-export interface ApplicationFormData {
+export interface JobFormData {
   role: string;
   company: string;
-  status: ApplicationStatus;
+  status: JobStatus;
   notes: string;
 }
 
-interface AddApplicationModalProps {
+interface AddJobModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: ApplicationFormData) => void;
+  onSubmit: (data: JobFormData) => void;
 }
 
-export default function AddApplicationModal({
+export default function AddJobModal({
   open,
   onClose,
   onSubmit,
-}: AddApplicationModalProps) {
+}: AddJobModalProps) {
   const [role, setRole] = useState("");
   const [company, setCompany] = useState("");
-  const [status, setStatus] = useState<ApplicationStatus>("draft");
+  const [status, setStatus] = useState<JobStatus>("draft");
   const [notes, setNotes] = useState("");
   const [errors, setErrors] = useState<{ role?: string; company?: string }>({});
 
@@ -58,7 +59,7 @@ export default function AddApplicationModal({
   }
 
   return (
-    <Modal open={open} onClose={handleClose} title="Add Application">
+    <Modal open={open} onClose={handleClose} title="Add Job">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="role" className="text-xs font-medium text-text-secondary">
@@ -99,10 +100,10 @@ export default function AddApplicationModal({
           <select
             id="status"
             value={status}
-            onChange={(e) => setStatus(e.target.value as ApplicationStatus)}
+            onChange={(e) => setStatus(e.target.value as JobStatus)}
             className="rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-sm transition-colors focus:border-violet focus:outline-none"
           >
-            {APPLICATION_STATUSES.map((s) => (
+            {JOB_STATUSES.map((s) => (
               <option key={s} value={s}>
                 {s.replace(/_/g, " ")}
               </option>

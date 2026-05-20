@@ -1,15 +1,6 @@
-export type ApplicationStatus =
-  | "draft"
-  | "submitted"
-  | "under_review"
-  | "interview_scheduled"
-  | "offer_extended"
-  | "accepted"
-  | "rejected"
-  | "withdrawn"
-  | "archived";
+import type { JobStatus } from "@/types/job";
 
-const statusStyles: Record<ApplicationStatus, string> = {
+const statusStyles: Record<JobStatus, string> = {
   draft: "bg-zinc-100 text-zinc-600",
   submitted: "bg-blue-50 text-blue-700",
   under_review: "bg-amber-50 text-amber-700",
@@ -22,7 +13,7 @@ const statusStyles: Record<ApplicationStatus, string> = {
 };
 
 interface StatusBadgeProps {
-  status: ApplicationStatus;
+  status: JobStatus;
 }
 
 export function StatusBadge({ status }: StatusBadgeProps) {
@@ -35,7 +26,7 @@ export function StatusBadge({ status }: StatusBadgeProps) {
   );
 }
 
-export const APPLICATION_STATUSES: ApplicationStatus[] = [
+export const JOB_STATUSES: JobStatus[] = [
   "draft",
   "submitted",
   "under_review",
