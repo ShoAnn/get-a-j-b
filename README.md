@@ -24,11 +24,11 @@ afterwards you can just `docker-compose up`
 - [x] Build application card component showing role, company, status, and date
 - [x] Implement search bar to filter applications
 - [x] Add filter dropdown by application status
-- [ ] Add sort options by date applied, company name, and status
-- [ ] Add job detail view and add notes section for each job
-- [ ] Build dashboard stats section (total saved, total applied, status chart, days since first application)
+- [x] Add sort options by date applied, company name, and status
+- [x] for each job in the list add 'details' button to a job detail page with two column layout, 60% details for the job on the left and notes section on the right
+- [x] Build dashboard page that shows stats (total saved, total applied, status chart, days since first application)
 - [ ] Add empty state illustrations when no jobs exist
-- [ ] Implement Kanban board view with drag-and-drop functionality to move jobs between statuses
+- [ ] Add board page with kanban board view grouped by statuses with drag-and-drop functionality to move jobs between statuses
 - [ ] Add dark mode support using CSS variables / Tailwind class strategy
 
 ## pages
@@ -41,7 +41,7 @@ afterwards you can just `docker-compose up`
 | `/jobs` | Jobs List | List view with search bar, status filter, sort options, and job cards |
 | `/jobs/[id]` | Job Detail | Full details of one job (role, company, status history, notes section) |
 | `/board` | Kanban Board | Drag-and-drop columns per status to move jobs between stages |
-| `/settings` | Settings | Update profile, manage uploaded resumes |
+| `/settings` | Settings | Update profile, manage uploaded files|
 
 ---
 
