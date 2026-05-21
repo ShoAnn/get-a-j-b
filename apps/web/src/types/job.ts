@@ -15,6 +15,7 @@ export interface Job {
   company: string;
   status: JobStatus;
   dateApplied: string;
+  notes?: string;
 }
 
 export interface JobFormData {
