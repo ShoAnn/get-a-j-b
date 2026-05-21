@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { StatusBadge, JOB_STATUSES } from "@/components/StatusBadge";
 import type { Job } from "@/types/job";
 
@@ -32,8 +33,6 @@ export default function Dashboard() {
     {} as Record<string, number>,
   );
 
-  const maxCount = Math.max(...Object.values(statusCounts), 1);
-
   const stats = [
     { label: "Total Saved", value: totalSaved, color: "bg-violet" },
     { label: "Total Applied", value: totalApplied, color: "bg-teal" },
@@ -41,16 +40,24 @@ export default function Dashboard() {
   ];
 
   const statusColors: Record<string, string> = {
-    draft: "bg-zinc-300",
-    submitted: "bg-blue-400",
-    under_review: "bg-amber-400",
-    interview_scheduled: "bg-violet",
-    offer_extended: "bg-teal",
-    accepted: "bg-teal",
-    rejected: "bg-error",
-    withdrawn: "bg-zinc-400",
-    archived: "bg-zinc-300",
+    draft: "#D4D4D8",
+    submitted: "#60A5FA",
+    under_review: "#FBBF24",
+    interview_scheduled: "#7F77DD",
+    offer_extended: "#1D9E75",
+    accepted: "#1D9E75",
+    rejected: "#E24B4A",
+    withdrawn: "#A1A1AA",
+    archived: "#D4D4D8",
   };
+
+  const chartData = JOB_STATUSES.filter((s) => statusCounts[s] > 0).map(
+    (status) => ({
+      name: status.replace(/_/g, " "),
+      value: statusCounts[status],
+      color: statusColors[status],
+    }),
+  );
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 min-h-full">
@@ -99,41 +106,62 @@ export default function Dashboard() {
         {/* Status breakdown */}
         <div className="mt-8 rounded-xl border-[0.5px] border-zinc-300 bg-surface p-6">
           <h2 className="text-sm font-medium uppercase tracking-wider text-text-secondary">
-            Jobs by status
+            Status Breakdown
           </h2>
-          <div className="mt-5 space-y-3">
-            {JOB_STATUSES.map((status) => {
-              const count = statusCounts[status];
-              if (count === 0) return null;
-              const pct = (count / maxCount) * 100;
-              return (
-                <div key={status} className="flex items-center gap-3">
-                  <div className="w-32 shrink-0">
-                    <StatusBadge status={status} />
+          {chartData.length > 0 ? (
+            <div className="mt-4 flex flex-col items-center gap-6 sm:flex-row sm:items-start">
+              <div className="h-56 w-56 shrink-0 min-w-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={90}
+                      dataKey="value"
+                      strokeWidth={0}
+                    >
+                      {chartData.map((entry, i) => (
+                        <Cell key={i} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        borderRadius: 8,
+                        border: "0.5px solid #D4D4D8",
+                        fontSize: 13,
+                        background: "#fff",
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex flex-col gap-2.5">
+                {chartData.map((item) => (
+                  <div key={item.name} className="flex items-center gap-2.5">
+                    <div
+                      className="h-3 w-3 shrink-0 rounded-sm"
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <span className="text-sm capitalize text-midnight">
+                      {item.name}
+                    </span>
+                    <span className="ml-auto text-sm font-medium text-midnight">
+                      {item.value}
+                    </span>
                   </div>
-                  <div className="flex-1">
-                    <div className="h-3 overflow-hidden rounded-full bg-zinc-200">
-                      <div
-                        className={`h-full rounded-full transition-all ${statusColors[status] || "bg-violet"}`}
-                        style={{ width: `${Math.max(pct, 8)}%` }}
-                      />
-                    </div>
-                  </div>
-                  <span className="w-6 text-right text-sm font-medium text-midnight">
-                    {count}
-                  </span>
-                </div>
-              );
-            })}
-            {JOB_STATUSES.every((s) => statusCounts[s] === 0) && (
-              <p className="py-4 text-center text-sm italic text-text-secondary">
-                No jobs yet.{" "}
-                <Link href="/jobs" className="text-violet underline">
-                  Add your first job
-                </Link>
-              </p>
-            )}
-          </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="mt-5 py-4 text-center text-sm italic text-text-secondary">
+              No jobs yet.{" "}
+              <Link href="/jobs" className="text-violet underline">
+                Add your first job
+              </Link>
+            </p>
+          )}
         </div>
 
         {/* Recent activity */}
