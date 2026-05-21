@@ -27,7 +27,7 @@ afterwards you can just `docker-compose up`
 - [x] Add sort options by date applied, company name, and status
 - [x] for each job in the list add 'details' button to a job detail page with two column layout, 60% details for the job on the left and notes section on the right
 - [x] Build dashboard page that shows stats (total saved, total applied, status chart, days since first application)
-- [ ] Add empty state illustrations when no jobs exist
+- [x] Add empty state illustrations when no jobs exist
 - [ ] Add board page with kanban board view grouped by statuses with drag-and-drop functionality to move jobs between statuses
 - [ ] Add dark mode support using CSS variables / Tailwind class strategy
 
