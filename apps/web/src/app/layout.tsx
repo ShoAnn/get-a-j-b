@@ -29,22 +29,20 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <head>
-        <script
+      <body className="min-h-full flex flex-col">
+        <div
           dangerouslySetInnerHTML={{
-            __html: `
+            __html: `<script id="theme-init">
               try {
                 var t = localStorage.getItem('theme');
                 if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                   document.documentElement.classList.add('dark');
                 }
               } catch(e) {}
-            `,
+            ${'</'}script>`,
           }}
         />
-      </head>
-      <body className="min-h-full flex flex-col">
-        <header className="flex items-center justify-end px-6 py-3">
+        <header className="flex items-center justify-end px-6 py-3 dark:bg-midnight dark:text-surface">
           <ThemeToggle />
         </header>
         {children}

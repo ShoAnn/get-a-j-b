@@ -3,24 +3,21 @@
 import { useState, useEffect } from "react";
 
 export default function ThemeToggle() {
-  const [dark, setDark] = useState(() =>
-    document.documentElement.classList.contains("dark"),
-  );
+  const [dark, setDark] = useState(false);
 
   useEffect(() => {
-    if (dark) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
+    setDark(document.documentElement.classList.contains("dark"));
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+    localStorage.setItem("theme", dark ? "dark" : "light");
   }, [dark]);
 
   return (
     <button
       onClick={() => setDark(!dark)}
-      className="flex h-9 w-9 items-center justify-center rounded-lg border-[0.5px] border-zinc-300 bg-surface text-zinc-500 transition-colors hover:text-midnight dark:border-[#333355] dark:text-[#9999AA] dark:hover:text-[#F5F5F0]"
+      className="flex h-9 w-9 items-center justify-center rounded-lg border-[0.5px] border-zinc-300 bg-surface text-zinc-500 transition-colors hover:text-midnight dark:bg-midnight dark:border-[#333355] dark:text-[#9999AA] dark:hover:text-[#F5F5F0]"
       aria-label="Toggle dark mode"
     >
       {dark ? (
