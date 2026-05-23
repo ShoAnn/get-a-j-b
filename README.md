@@ -29,7 +29,7 @@ afterwards you can just `docker-compose up`
 - [x] Build dashboard page that shows stats (total saved, total applied, status chart, days since first application)
 - [x] Add empty state illustrations when no jobs exist
 - [x] Add board page with kanban board view grouped by statuses with drag-and-drop functionality to move jobs between statuses
-- [ ] Add dark mode support using CSS variables / Tailwind class strategy
+- [x] Add dark mode support using CSS variables / Tailwind class strategy
 
 ## pages
 
