@@ -44,16 +44,16 @@ export default function JobsPage() {
   });
 
   return (
-    <div className="flex flex-1 flex-col bg-zinc-50 min-h-full">
+    <div className="flex flex-1 flex-col bg-zinc-50 min-h-full dark:bg-[#1A1A2E]">
       <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-midnight">
+        <h1 className="text-2xl font-semibold tracking-tight text-midnight dark:text-[#F5F5F0]">
           Jobs
         </h1>
 
         <div className="mt-6 flex items-center gap-3">
           <div className="relative flex-1">
             <svg
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-[#9999AA]"
               width="16"
               height="16"
               viewBox="0 0 16 16"
@@ -67,13 +67,13 @@ export default function JobsPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by title or company..."
-              className="w-full rounded-lg border-[0.5px] border-zinc-300 py-[9px] pl-10 pr-3 text-zinc-500 text-[13px] transition-colors focus:border-violet focus:outline-none"
+              className="w-full rounded-lg border-[0.5px] border-zinc-300 py-[9px] pl-10 pr-3 text-zinc-500 text-[13px] transition-colors focus:border-violet focus:outline-none dark:border-[#333355] dark:bg-[#252540] dark:text-[#9999AA] dark:placeholder:text-[#666688]"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as JobStatus | "all")}
-            className="rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-zinc-400 text-[13px] transition-colors focus:border-violet focus:outline-none"
+            className="rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-zinc-400 text-[13px] transition-colors focus:border-violet focus:outline-none dark:border-[#333355] dark:bg-[#252540] dark:text-[#9999AA]"
           >
             <option value="all">All statuses</option>
             {JOB_STATUSES.map((s) => (
@@ -89,7 +89,7 @@ export default function JobsPage() {
               setSortKey(key);
               setSortDir(dir);
             }}
-            className="rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-zinc-400 text-[13px] transition-colors focus:border-violet focus:outline-none"
+            className="rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-zinc-400 text-[13px] transition-colors focus:border-violet focus:outline-none dark:border-[#333355] dark:bg-[#252540] dark:text-[#9999AA]"
           >
             <option value="date-desc">Date (newest)</option>
             <option value="date-asc">Date (oldest)</option>
@@ -101,43 +101,43 @@ export default function JobsPage() {
         </div>
 
         {filtered.length > 0 ? (
-          <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white">
+          <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-[#333355] dark:bg-[#1A1A2E]">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-zinc-200 bg-zinc-50">
-                  <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-text-secondary">
+                <tr className="border-b border-zinc-200 bg-zinc-50 dark:border-[#333355] dark:bg-[#252540]">
+                  <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">
                     Title
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-text-secondary">
+                  <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">
                     Company
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-text-secondary">
+                  <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">
                     Status
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-text-secondary">
+                  <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">
                     Date
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-medium uppercase tracking-wider text-text-secondary">
+                  <th className="px-6 py-4 text-right text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">
                     Action
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-100">
+              <tbody className="divide-y divide-zinc-100 dark:divide-[#333355]">
                 {filtered.map((job) => (
                   <tr
                     key={job.id}
-                    className="transition-colors hover:bg-zinc-50"
+                    className="transition-colors hover:bg-zinc-50 dark:hover:bg-[#252540]"
                   >
-                    <td className="px-6 py-4 text-sm font-medium text-midnight">
+                    <td className="px-6 py-4 text-sm font-medium text-midnight dark:text-[#F5F5F0]">
                       {job.title}
                     </td>
-                    <td className="px-6 py-4 text-sm text-zinc-600">
+                    <td className="px-6 py-4 text-sm text-zinc-600 dark:text-[#9999AA]">
                       {job.company}
                     </td>
                     <td className="px-6 py-4">
                       <StatusBadge status={job.status} />
                     </td>
-                    <td className="px-6 py-4 text-sm text-zinc-500">
+                    <td className="px-6 py-4 text-sm text-zinc-500 dark:text-[#9999AA]">
                       {new Date(job.dateApplied).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
@@ -165,8 +165,8 @@ export default function JobsPage() {
               <path d="M36 20V12a4 4 0 014-4h0a4 4 0 014 4v8" stroke="#D4D4D8" strokeWidth="2" />
               <path d="M56 38l8 8M64 38l-8 8" stroke="#D4D4D8" strokeWidth="2" strokeLinecap="round" />
             </svg>
-            <h3 className="text-lg font-medium text-midnight">No jobs yet</h3>
-            <p className="text-sm text-text-secondary">
+            <h3 className="text-lg font-medium text-midnight dark:text-[#F5F5F0]">No jobs yet</h3>
+            <p className="text-sm text-text-secondary dark:text-[#9999AA]">
               Start tracking your job applications.
             </p>
           </div>
@@ -177,8 +177,8 @@ export default function JobsPage() {
               <path d="M46 46l14 14" stroke="#D4D4D8" strokeWidth="2" strokeLinecap="round" />
               <path d="M28 34h12M34 28v12" stroke="#D4D4D8" strokeWidth="2" strokeLinecap="round" />
             </svg>
-            <h3 className="text-lg font-medium text-midnight">No matching jobs</h3>
-            <p className="text-sm text-text-secondary">
+            <h3 className="text-lg font-medium text-midnight dark:text-[#F5F5F0]">No matching jobs</h3>
+            <p className="text-sm text-text-secondary dark:text-[#9999AA]">
               Try adjusting your search or filter.
             </p>
             <button
