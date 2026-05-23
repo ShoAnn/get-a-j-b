@@ -62,7 +62,7 @@ export default function AddJobModal({
     <Modal open={open} onClose={handleClose} title="Add Job">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="role" className="text-xs font-medium text-text-secondary">
+          <label htmlFor="role" className="text-xs font-medium text-text-secondary dark:text-[#9999AA]">
             Role
           </label>
           <input
@@ -70,7 +70,7 @@ export default function AddJobModal({
             value={role}
             onChange={(e) => setRole(e.target.value)}
             placeholder="e.g. Frontend Engineer"
-            className="rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-sm transition-colors focus:border-violet focus:outline-none"
+            className="rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-sm transition-colors focus:border-violet focus:outline-none dark:border-[#333355] dark:bg-[#1A1A2E] dark:text-[#F5F5F0] dark:placeholder:text-[#666688]"
           />
           {errors.role && (
             <span className="text-xs text-error">{errors.role}</span>
@@ -78,7 +78,7 @@ export default function AddJobModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="company" className="text-xs font-medium text-text-secondary">
+          <label htmlFor="company" className="text-xs font-medium text-text-secondary dark:text-[#9999AA]">
             Company
           </label>
           <input
@@ -86,7 +86,7 @@ export default function AddJobModal({
             value={company}
             onChange={(e) => setCompany(e.target.value)}
             placeholder="e.g. Acme Corp"
-            className="rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-sm transition-colors focus:border-violet focus:outline-none"
+            className="rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-sm transition-colors focus:border-violet focus:outline-none dark:border-[#333355] dark:bg-[#1A1A2E] dark:text-[#F5F5F0] dark:placeholder:text-[#666688]"
           />
           {errors.company && (
             <span className="text-xs text-error">{errors.company}</span>
@@ -94,14 +94,14 @@ export default function AddJobModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="status" className="text-xs font-medium text-text-secondary">
+          <label htmlFor="status" className="text-xs font-medium text-text-secondary dark:text-[#9999AA]">
             Status
           </label>
           <select
             id="status"
             value={status}
             onChange={(e) => setStatus(e.target.value as JobStatus)}
-            className="rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-sm transition-colors focus:border-violet focus:outline-none"
+            className="rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-sm transition-colors focus:border-violet focus:outline-none dark:border-[#333355] dark:bg-[#1A1A2E] dark:text-[#F5F5F0]"
           >
             {JOB_STATUSES.map((s) => (
               <option key={s} value={s}>
@@ -112,7 +112,7 @@ export default function AddJobModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="notes" className="text-xs font-medium text-text-secondary">
+          <label htmlFor="notes" className="text-xs font-medium text-text-secondary dark:text-[#9999AA]">
             Notes
           </label>
           <textarea
@@ -121,7 +121,7 @@ export default function AddJobModal({
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
             placeholder="Optional notes..."
-            className="resize-none rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-sm transition-colors focus:border-violet focus:outline-none"
+            className="resize-none rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-sm transition-colors focus:border-violet focus:outline-none dark:border-[#333355] dark:bg-[#1A1A2E] dark:text-[#F5F5F0] dark:placeholder:text-[#666688]"
           />
         </div>
 

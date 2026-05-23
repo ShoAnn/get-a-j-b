@@ -22,8 +22,8 @@ export default function JobDetailPage() {
 
   if (!job) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center min-h-full gap-4">
-        <h2 className="text-xl font-medium text-midnight">Job not found</h2>
+      <div className="flex flex-1 flex-col items-center justify-center min-h-full gap-4 dark:bg-[#1A1A2E]">
+        <h2 className="text-xl font-medium text-midnight dark:text-[#F5F5F0]">Job not found</h2>
         <Link href="/jobs">
           <Button variant="secondary">Back to Jobs</Button>
         </Link>
@@ -43,7 +43,7 @@ export default function JobDetailPage() {
   const currentIdx = statusFlow.indexOf(job.status);
 
   return (
-    <div className="flex flex-1 flex-col bg-zinc-50 min-h-full">
+    <div className="flex flex-1 flex-col bg-zinc-50 min-h-full dark:bg-[#1A1A2E]">
       <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
         <Link
           href="/jobs"
@@ -58,27 +58,27 @@ export default function JobDetailPage() {
         <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-[3fr_2fr]">
           {/* Left column — Job details */}
           <div>
-            <div className="rounded-xl border-[0.5px] border-zinc-300 bg-surface p-6">
+            <div className="rounded-xl border-[0.5px] border-zinc-300 bg-surface p-6 dark:border-[#333355] dark:bg-[#252540]">
               <div className="flex items-start gap-4">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-violet text-lg font-medium text-white">
                   {job.company.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h1 className="text-2xl font-medium text-midnight">{job.title}</h1>
-                  <p className="mt-1 text-sm text-text-secondary">{job.company}</p>
+                  <h1 className="text-2xl font-medium text-midnight dark:text-[#F5F5F0]">{job.title}</h1>
+                  <p className="mt-1 text-sm text-text-secondary dark:text-[#9999AA]">{job.company}</p>
                 </div>
               </div>
 
-              <div className="mt-6 flex flex-wrap items-center gap-4 border-t border-zinc-200 pt-6">
+              <div className="mt-6 flex flex-wrap items-center gap-4 border-t border-zinc-200 pt-6 dark:border-[#333355]">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wider text-text-secondary">Status</p>
+                  <p className="text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">Status</p>
                   <div className="mt-1.5">
                     <StatusBadge status={job.status} />
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wider text-text-secondary">Date Applied</p>
-                  <p className="mt-1.5 text-sm text-midnight">
+                  <p className="text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">Date Applied</p>
+                  <p className="mt-1.5 text-sm text-midnight dark:text-[#F5F5F0]">
                     {new Date(job.dateApplied).toLocaleDateString("en-US", {
                       month: "long",
                       day: "numeric",
@@ -88,8 +88,8 @@ export default function JobDetailPage() {
                 </div>
                 {currentIdx >= 0 && (
                   <div>
-                    <p className="text-xs font-medium uppercase tracking-wider text-text-secondary">Progress</p>
-                    <p className="mt-1.5 text-sm text-midnight">
+                    <p className="text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">Progress</p>
+                    <p className="mt-1.5 text-sm text-midnight dark:text-[#F5F5F0]">
                       Step {currentIdx + 1} of {statusFlow.length}
                     </p>
                   </div>
@@ -97,8 +97,8 @@ export default function JobDetailPage() {
               </div>
 
               {/* Status timeline */}
-              <div className="mt-6 border-t border-zinc-200 pt-6">
-                <h2 className="text-sm font-medium uppercase tracking-wider text-text-secondary">Status History</h2>
+              <div className="mt-6 border-t border-zinc-200 pt-6 dark:border-[#333355]">
+                <h2 className="text-sm font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">Status History</h2>
                 <div className="mt-4 space-y-3">
                   {statusFlow.map((s, i) => {
                     const isCompleted = i <= currentIdx;
@@ -109,8 +109,8 @@ export default function JobDetailPage() {
                           className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${
                             isCompleted
                               ? "border-violet bg-violet"
-                              : "border-zinc-300 bg-white"
-                          } ${isCurrent ? "ring-2 ring-violet ring-offset-2" : ""}`}
+                              : "border-zinc-300 bg-white dark:border-[#555577] dark:bg-transparent"
+                          } ${isCurrent ? "ring-2 ring-violet ring-offset-2 dark:ring-offset-[#252540]" : ""}`}
                         >
                           {isCompleted && (
                             <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
@@ -120,7 +120,7 @@ export default function JobDetailPage() {
                         </div>
                         <span
                           className={`text-sm capitalize ${
-                            isCompleted ? "font-medium text-midnight" : "text-text-secondary"
+                            isCompleted ? "font-medium text-midnight dark:text-[#F5F5F0]" : "text-text-secondary dark:text-[#9999AA]"
                           }`}
                         >
                           {s.replace(/_/g, " ")}
@@ -135,14 +135,14 @@ export default function JobDetailPage() {
 
           {/* Right column — Notes section */}
           <div>
-            <div className="rounded-xl border-[0.5px] border-zinc-300 bg-surface p-6">
-              <h2 className="text-sm font-medium uppercase tracking-wider text-text-secondary">Notes</h2>
+            <div className="rounded-xl border-[0.5px] border-zinc-300 bg-surface p-6 dark:border-[#333355] dark:bg-[#252540]">
+              <h2 className="text-sm font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">Notes</h2>
               {job.notes ? (
-                <p className="mt-4 text-sm leading-relaxed text-midnight whitespace-pre-wrap">
+                <p className="mt-4 text-sm leading-relaxed text-midnight whitespace-pre-wrap dark:text-[#F5F5F0]">
                   {job.notes}
                 </p>
               ) : (
-                <p className="mt-4 text-sm italic text-text-secondary">
+                <p className="mt-4 text-sm italic text-text-secondary dark:text-[#9999AA]">
                   No notes added yet.
                 </p>
               )}
