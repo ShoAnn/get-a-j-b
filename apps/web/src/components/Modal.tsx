@@ -44,13 +44,13 @@ export default function Modal({ open, onClose, title, children }: ModalProps) {
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="flex w-full max-w-md flex-col gap-6 rounded-xl bg-surface p-6 shadow-lg"
+        className="flex w-full max-w-md flex-col gap-6 rounded-xl bg-surface p-6 shadow-lg dark:bg-[#252540]"
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-medium text-midnight">{title}</h2>
+          <h2 className="text-lg font-medium text-midnight dark:text-[#F5F5F0]">{title}</h2>
           <button
             onClick={onClose}
-            className="flex items-center justify-center rounded-md p-1 text-zinc-400 transition-colors hover:text-midnight"
+            className="flex items-center justify-center rounded-md p-1 text-zinc-400 transition-colors hover:text-midnight dark:hover:text-[#F5F5F0]"
             aria-label="Close"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

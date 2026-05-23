@@ -60,9 +60,9 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="flex flex-1 flex-col bg-zinc-50 min-h-full">
+    <div className="flex flex-1 flex-col bg-zinc-50 min-h-full dark:bg-[#1A1A2E]">
       <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-midnight">
+        <h1 className="text-2xl font-semibold tracking-tight text-midnight dark:text-[#F5F5F0]">
           Dashboard
         </h1>
 
@@ -71,7 +71,7 @@ export default function Dashboard() {
           {stats.map((stat) => (
             <div
               key={stat.label}
-              className="rounded-xl border-[0.5px] border-zinc-300 bg-surface p-5"
+              className="rounded-xl border-[0.5px] border-zinc-300 bg-surface p-5 dark:border-[#333355] dark:bg-[#252540]"
             >
               <div
                 className={`mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg ${stat.color} text-sm font-medium text-white`}
@@ -93,10 +93,10 @@ export default function Dashboard() {
                   </svg>
                 )}
               </div>
-              <p className="text-xs font-medium uppercase tracking-wider text-text-secondary">
+              <p className="text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">
                 {stat.label}
               </p>
-              <p className="mt-1 text-3xl font-semibold text-midnight">
+              <p className="mt-1 text-3xl font-semibold text-midnight dark:text-[#F5F5F0]">
                 {stat.value}
               </p>
             </div>
@@ -104,8 +104,8 @@ export default function Dashboard() {
         </div>
 
         {/* Status breakdown */}
-        <div className="mt-8 rounded-xl border-[0.5px] border-zinc-300 bg-surface p-6">
-          <h2 className="text-sm font-medium uppercase tracking-wider text-text-secondary">
+        <div className="mt-8 rounded-xl border-[0.5px] border-zinc-300 bg-surface p-6 dark:border-[#333355] dark:bg-[#252540]">
+          <h2 className="text-sm font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">
             Status Breakdown
           </h2>
           {chartData.length > 0 ? (
@@ -144,10 +144,10 @@ export default function Dashboard() {
                       className="h-3 w-3 shrink-0 rounded-sm"
                       style={{ backgroundColor: item.color }}
                     />
-                    <span className="text-sm capitalize text-midnight">
+                    <span className="text-sm capitalize text-midnight dark:text-[#F5F5F0]">
                       {item.name}
                     </span>
-                    <span className="ml-auto text-sm font-medium text-midnight">
+                    <span className="ml-auto text-sm font-medium text-midnight dark:text-[#F5F5F0]">
                       {item.value}
                     </span>
                   </div>
@@ -155,7 +155,7 @@ export default function Dashboard() {
               </div>
             </div>
           ) : (
-            <p className="mt-5 py-4 text-center text-sm italic text-text-secondary">
+            <p className="mt-5 py-4 text-center text-sm italic text-text-secondary dark:text-[#9999AA]">
               No jobs yet.{" "}
               <Link href="/jobs" className="text-violet underline">
                 Add your first job
@@ -166,7 +166,7 @@ export default function Dashboard() {
 
         {/* Recent activity */}
         <div className="mt-8">
-          <h2 className="text-sm font-medium uppercase tracking-wider text-text-secondary">
+          <h2 className="text-sm font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">
             Recent Jobs
           </h2>
           <div className="mt-4 space-y-3">
@@ -181,14 +181,14 @@ export default function Dashboard() {
                 <Link
                   key={job.id}
                   href={`/jobs/${job.id}`}
-                  className="flex items-center gap-4 rounded-xl border-[0.5px] border-zinc-300 bg-surface p-4 transition-colors hover:bg-white"
+                  className="flex items-center gap-4 rounded-xl border-[0.5px] border-zinc-300 bg-surface p-4 transition-colors hover:bg-white dark:border-[#333355] dark:bg-[#252540] dark:hover:bg-[#2E2E4A]"
                 >
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet text-xs font-medium text-white">
                     {job.company.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-midnight">{job.title}</p>
-                    <p className="mt-0.5 text-xs text-text-secondary">{job.company}</p>
+                    <p className="text-sm font-medium text-midnight dark:text-[#F5F5F0]">{job.title}</p>
+                    <p className="mt-0.5 text-xs text-text-secondary dark:text-[#9999AA]">{job.company}</p>
                   </div>
                   <StatusBadge status={job.status} />
                 </Link>
