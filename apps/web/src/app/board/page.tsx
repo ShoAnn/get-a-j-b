@@ -53,7 +53,8 @@ function KanbanCard({ job }: { job: Job }) {
       style={style}
       {...listeners}
       {...attributes}
-      className={`rounded-xl border-[0.5px] border-zinc-300 bg-surface p-4 cursor-grab active:cursor-grabbing transition-shadow hover:shadow-md ${
+      suppressHydrationWarning
+      className={`rounded-xl border-[0.5px] border-zinc-300 bg-surface p-4 cursor-grab active:cursor-grabbing transition-shadow hover:shadow-md dark:border-zinc-600 dark:bg-zinc-800 ${
         isDragging ? "opacity-50 z-50" : ""
       }`}
     >
@@ -62,13 +63,13 @@ function KanbanCard({ job }: { job: Job }) {
           {job.company.charAt(0).toUpperCase()}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-midnight">
+          <p className="truncate text-sm font-medium text-midnight dark:text-zinc-100">
             {job.title}
           </p>
-          <p className="mt-0.5 truncate text-xs text-text-secondary">
+          <p className="mt-0.5 truncate text-xs text-text-secondary dark:text-zinc-400">
             {job.company}
           </p>
-          <p className="mt-2 text-xs text-text-secondary">
+          <p className="mt-2 text-xs text-text-secondary dark:text-zinc-400">
             {new Date(job.dateApplied).toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",
@@ -95,24 +96,24 @@ function BoardColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`flex w-[260px] shrink-0 flex-col rounded-xl border-[0.5px] border-zinc-200 bg-zinc-100/50 transition-shadow ${
+      className={`flex w-[260px] shrink-0 flex-col rounded-xl border-[0.5px] border-zinc-200 bg-zinc-100/50 transition-shadow dark:border-zinc-700 dark:bg-zinc-800/50 ${
         isOver ? "ring-2 ring-violet" : ""
       }`}
     >
-      <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3">
-        <h3 className="text-xs font-medium uppercase tracking-wider text-text-secondary">
+      <div className="flex shrink-0 items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-700">
+        <h3 className="text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-zinc-400">
           {status.replace(/_/g, " ")}
         </h3>
-        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-zinc-200 text-xs font-medium text-zinc-600">
+        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-zinc-200 text-xs font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
           {jobs.length}
         </span>
       </div>
-      <div className="flex min-h-[120px] flex-col gap-2 p-3">
+      <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-3">
         {jobs.map((job) => (
           <KanbanCard key={job.id} job={job} />
         ))}
         {jobs.length === 0 && (
-          <p className="py-4 text-center text-xs italic text-text-secondary">
+          <p className="py-4 text-center text-xs italic text-text-secondary dark:text-zinc-400">
             No jobs
           </p>
         )}
@@ -155,14 +156,14 @@ export default function BoardPage() {
   }, []);
 
   return (
-    <div className="flex min-h-full flex-1 flex-col bg-zinc-50">
-      <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-semibold tracking-tight text-midnight">
+    <div className="flex min-h-0 flex-1 flex-col bg-zinc-50 dark:bg-zinc-900">
+      <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col px-4 py-16 sm:px-6 lg:px-8">
+        <h1 className="shrink-0 text-2xl font-semibold tracking-tight text-midnight dark:text-zinc-100">
           Board
         </h1>
 
         <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-          <div className="mt-6 flex gap-4 overflow-x-auto pb-4">
+          <div className="mt-6 flex min-h-0 flex-1 gap-4 overflow-x-auto pb-4">
             {JOB_STATUSES.map((status) => (
               <BoardColumn
                 key={status}
@@ -174,16 +175,16 @@ export default function BoardPage() {
 
           <DragOverlay dropAnimation={null}>
             {activeJob ? (
-              <div className="w-[260px] rotate-3 rounded-xl border-[0.5px] border-zinc-300 bg-surface p-4 shadow-xl">
+              <div className="w-[260px] rotate-3 rounded-xl border-[0.5px] border-zinc-300 bg-surface p-4 shadow-xl dark:border-zinc-600 dark:bg-zinc-800">
                 <div className="flex items-start gap-3">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet text-xs font-medium text-white">
                     {activeJob.company.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-midnight">
+                    <p className="truncate text-sm font-medium text-midnight dark:text-zinc-100">
                       {activeJob.title}
                     </p>
-                    <p className="mt-0.5 truncate text-xs text-text-secondary">
+                    <p className="mt-0.5 truncate text-xs text-text-secondary dark:text-zinc-400">
                       {activeJob.company}
                     </p>
                   </div>
