@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
-import { StatusBadge, JOB_STATUSES } from "@/components/StatusBadge";
+import { JOB_STATUSES } from "@/components/StatusBadge";
 import type { Job } from "@/types/job";
 
 const MOCK_JOBS: Job[] = [
@@ -18,6 +18,9 @@ const MOCK_JOBS: Job[] = [
 export default function Dashboard() {
   const totalSaved = MOCK_JOBS.length;
   const totalApplied = MOCK_JOBS.filter((j) => j.status !== "draft").length;
+  const offerReceived = MOCK_JOBS.filter(
+    (j) => j.status === "offer_extended" || j.status === "accepted",
+  ).length;
 
   const dates = MOCK_JOBS.map((j) => new Date(j.dateApplied).getTime());
   const firstDate = new Date(Math.min(...dates));
@@ -37,6 +40,7 @@ export default function Dashboard() {
     { label: "Total Saved", value: totalSaved, color: "bg-violet" },
     { label: "Total Applied", value: totalApplied, color: "bg-teal" },
     { label: "Days Since First App", value: daysSince, color: "bg-midnight" },
+    { label: "Offer Received", value: offerReceived, color: "bg-emerald" },
   ];
 
   const statusColors: Record<string, string> = {
@@ -67,7 +71,7 @@ export default function Dashboard() {
         </h1>
 
         {/* Stats cards */}
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (
             <div
               key={stat.label}
@@ -92,6 +96,12 @@ export default function Dashboard() {
                     <path d="M8 5v3l2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 )}
+                {stat.label === "Offer Received" && (
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M2 12L6 8L10 12L14 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M2 4h12v8a2 2 0 01-2 2H4a2 2 0 01-2-2V4z" stroke="currentColor" strokeWidth="1.5" />
+                  </svg>
+                )}
               </div>
               <p className="text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">
                 {stat.label}
@@ -103,96 +113,107 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Status breakdown */}
-        <div className="mt-8 rounded-xl border-[0.5px] border-zinc-300 bg-surface p-6 dark:border-[#333355] dark:bg-[#252540]">
-          <h2 className="text-sm font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">
-            Status Breakdown
-          </h2>
-          {chartData.length > 0 ? (
-            <div className="mt-4 flex flex-col items-center gap-6 sm:flex-row sm:items-start">
-              <div className="h-56 w-56 shrink-0 min-w-0">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={chartData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={90}
-                      dataKey="value"
-                      strokeWidth={0}
-                    >
-                      {chartData.map((entry, i) => (
-                        <Cell key={i} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: 8,
-                        border: "0.5px solid #D4D4D8",
-                        fontSize: 13,
-                        background: "#fff",
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="flex flex-col gap-2.5">
-                {chartData.map((item) => (
-                  <div key={item.name} className="flex items-center gap-2.5">
-                    <div
-                      className="h-3 w-3 shrink-0 rounded-sm"
-                      style={{ backgroundColor: item.color }}
-                    />
-                    <span className="text-sm capitalize text-midnight dark:text-[#F5F5F0]">
-                      {item.name}
-                    </span>
-                    <span className="ml-auto text-sm font-medium text-midnight dark:text-[#F5F5F0]">
-                      {item.value}
-                    </span>
+        {/* Status chart + Recent jobs */}
+        <div className="mt-8 flex flex-col gap-4 lg:h-[300px] lg:flex-row">
+          <div className="flex flex-col lg:w-3/5">
+            <div className="flex flex-1 flex-col items-center rounded-xl border-[0.5px] border-zinc-300 bg-surface p-5 dark:border-[#333355] dark:bg-[#252540]">
+              <h2 className="text-sm font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">
+                Jobs by Application Status
+              </h2>
+              {chartData.length > 0 ? (
+                <div className="mt-4 flex flex-1 flex-col items-center justify-center gap-6 sm:flex-row sm:items-start">
+                  <div className="h-54 w-54 shrink-0 min-w-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={chartData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={90}
+                          dataKey="value"
+                          strokeWidth={0}
+                        >
+                          {chartData.map((entry, i) => (
+                            <Cell key={i} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{
+                            borderRadius: 8,
+                            border: "0.5px solid #D4D4D8",
+                            fontSize: 13,
+                            background: "#fff",
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
                   </div>
-                ))}
+                  <div className="flex flex-col gap-2.5">
+                    {chartData.map((item) => (
+                      <div key={item.name} className="flex items-center gap-2.5">
+                        <div
+                          className="h-3 w-3 shrink-0 rounded-sm"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <span className="text-sm capitalize text-midnight dark:text-[#F5F5F0]">
+                          {item.name}
+                        </span>
+                        <span className="ml-auto text-sm font-medium text-midnight dark:text-[#F5F5F0]">
+                          {item.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="mt-5 py-4 text-center text-sm italic text-text-secondary dark:text-[#9999AA]">
+                  No jobs yet.{" "}
+                  <Link href="/jobs" className="text-violet underline">
+                    Add your first job
+                  </Link>
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex flex-col lg:w-2/5">
+            <div className="h-full flex flex-1 flex-col rounded-xl border-[0.5px] border-zinc-300 bg-surface p-6 dark:border-[#333355] dark:bg-[#252540]">
+              <h2 className="text-sm font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">
+                Recent Jobs
+              </h2>
+              <div className="mt-4 min-h-0 flex-1 space-y-2 overflow-auto">
+                {[...MOCK_JOBS]
+                  .sort(
+                    (a, b) =>
+                      new Date(b.dateApplied).getTime() -
+                      new Date(a.dateApplied).getTime(),
+                  )
+                  .map((job) => (
+                    <Link
+                      key={job.id}
+                      href={`/jobs/${job.id}`}
+                      className="group flex items-center gap-3 border-l-2 px-3 py-2.5 transition-colors hover:bg-zinc-100 dark:hover:bg-[#2E2E4A]"
+                      style={{ borderLeftColor: statusColors[job.status] }}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-midnight dark:text-[#F5F5F0]">
+                          {job.title}
+                        </p>
+                        <p className="mt-0.5 text-xs text-text-secondary dark:text-[#9999AA]">
+                          {job.company}
+                        </p>
+                      </div>
+                      <span
+                        className="shrink-0 rounded-full text-[11px] font-medium uppercase tracking-wider"
+                        style={{ color: statusColors[job.status] }}
+                      >
+                        {job.status.replace(/_/g, " ")}
+                      </span>
+                    </Link>
+                  ))}
               </div>
             </div>
-          ) : (
-            <p className="mt-5 py-4 text-center text-sm italic text-text-secondary dark:text-[#9999AA]">
-              No jobs yet.{" "}
-              <Link href="/jobs" className="text-violet underline">
-                Add your first job
-              </Link>
-            </p>
-          )}
-        </div>
-
-        {/* Recent activity */}
-        <div className="mt-8">
-          <h2 className="text-sm font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">
-            Recent Jobs
-          </h2>
-          <div className="mt-4 space-y-3">
-            {[...MOCK_JOBS]
-              .sort(
-                (a, b) =>
-                  new Date(b.dateApplied).getTime() -
-                  new Date(a.dateApplied).getTime(),
-              )
-              .slice(0, 4)
-              .map((job) => (
-                <Link
-                  key={job.id}
-                  href={`/jobs/${job.id}`}
-                  className="flex items-center gap-4 rounded-xl border-[0.5px] border-zinc-300 bg-surface p-4 transition-colors hover:bg-white dark:border-[#333355] dark:bg-[#252540] dark:hover:bg-[#2E2E4A]"
-                >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet text-xs font-medium text-white">
-                    {job.company.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-midnight dark:text-[#F5F5F0]">{job.title}</p>
-                    <p className="mt-0.5 text-xs text-text-secondary dark:text-[#9999AA]">{job.company}</p>
-                  </div>
-                  <StatusBadge status={job.status} />
-                </Link>
-              ))}
           </div>
         </div>
       </div>

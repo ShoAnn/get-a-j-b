@@ -18,34 +18,40 @@ body {
 }
 
 .overflow-x-auto,
-.overflow-y-auto {
+.overflow-y-auto,
+.overflow-auto {
   scrollbar-width: thin;
   scrollbar-color: #d4d4d8 transparent;
 }
 
 .dark .overflow-x-auto,
-.dark .overflow-y-auto {
+.dark .overflow-y-auto,
+.dark .overflow-auto {
   scrollbar-color: #52525b transparent;
 }
 
 .overflow-x-auto::-webkit-scrollbar,
-.overflow-y-auto::-webkit-scrollbar {
+.overflow-y-auto::-webkit-scrollbar,
+.overflow-auto::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 .overflow-x-auto::-webkit-scrollbar-track,
-.overflow-y-auto::-webkit-scrollbar-track {
+.overflow-y-auto::-webkit-scrollbar-track,
+.overflow-auto::-webkit-scrollbar-track {
   background: transparent;
 }
 
 .overflow-x-auto::-webkit-scrollbar-thumb,
-.overflow-y-auto::-webkit-scrollbar-thumb {
+.overflow-y-auto::-webkit-scrollbar-thumb,
+.overflow-auto::-webkit-scrollbar-thumb {
   background: #d4d4d8;
   border-radius: 3px;
 }
 
 .dark .overflow-x-auto::-webkit-scrollbar-thumb,
-.dark .overflow-y-auto::-webkit-scrollbar-thumb {
+.dark .overflow-y-auto::-webkit-scrollbar-thumb,
+.dark .overflow-auto::-webkit-scrollbar-thumb {
   background: #52525b;
 }
