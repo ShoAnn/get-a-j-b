@@ -37,6 +37,9 @@ func (s *jobService) CreateJob(ctx context.Context, userID int, req *domain.Crea
 	if req.SourceURL != nil {
 		job.SourceURL = *req.SourceURL
 	}
+	if req.JobPortal != nil {
+		job.JobPortal = *req.JobPortal
+	}
 
 	return s.repo.Create(ctx, job)
 }
@@ -94,6 +97,9 @@ func (s *jobService) UpdateJob(ctx context.Context, jobID int, userID int, req *
 	}
 	if req.Notes != nil {
 		job.Notes = *req.Notes
+	}
+	if req.JobPortal != nil {
+		job.JobPortal = *req.JobPortal
 	}
 
 	return s.repo.Update(ctx, job)

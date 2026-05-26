@@ -24,10 +24,11 @@ INSERT INTO jobs (
     application_status,
     notes, 
     source_url, 
+    job_portal,
     created_at
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
-RETURNING id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, created_at, updated_at
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
+RETURNING id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, created_at, updated_at, job_portal
 `
 
 type CreateJobParams struct {
@@ -41,6 +42,7 @@ type CreateJobParams struct {
 	ApplicationStatus string
 	Notes             pgtype.Text
 	SourceUrl         string
+	JobPortal         pgtype.Text
 }
 
 func (q *Queries) CreateJob(ctx context.Context, arg CreateJobParams) (Job, error) {
@@ -55,6 +57,7 @@ func (q *Queries) CreateJob(ctx context.Context, arg CreateJobParams) (Job, erro
 		arg.ApplicationStatus,
 		arg.Notes,
 		arg.SourceUrl,
+		arg.JobPortal,
 	)
 	var i Job
 	err := row.Scan(
@@ -73,6 +76,7 @@ func (q *Queries) CreateJob(ctx context.Context, arg CreateJobParams) (Job, erro
 		&i.ContactInfo,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.JobPortal,
 	)
 	return i, err
 }
@@ -86,7 +90,7 @@ func (q *Queries) DeleteJob(ctx context.Context, id int32) (pgconn.CommandTag, e
 }
 
 const getAllJobs = `-- name: GetAllJobs :many
-SELECT id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, created_at, updated_at FROM jobs WHERE user_id = $1 ORDER BY id
+SELECT id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, created_at, updated_at, job_portal FROM jobs WHERE user_id = $1 ORDER BY id
 `
 
 func (q *Queries) GetAllJobs(ctx context.Context, userID pgtype.Int4) ([]Job, error) {
@@ -114,6 +118,7 @@ func (q *Queries) GetAllJobs(ctx context.Context, userID pgtype.Int4) ([]Job, er
 			&i.ContactInfo,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.JobPortal,
 		); err != nil {
 			return nil, err
 		}
@@ -126,7 +131,7 @@ func (q *Queries) GetAllJobs(ctx context.Context, userID pgtype.Int4) ([]Job, er
 }
 
 const getJobById = `-- name: GetJobById :one
-SELECT id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, created_at, updated_at FROM jobs WHERE id = $1
+SELECT id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, created_at, updated_at, job_portal FROM jobs WHERE id = $1
 `
 
 func (q *Queries) GetJobById(ctx context.Context, id int32) (Job, error) {
@@ -148,6 +153,7 @@ func (q *Queries) GetJobById(ctx context.Context, id int32) (Job, error) {
 		&i.ContactInfo,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.JobPortal,
 	)
 	return i, err
 }
@@ -168,9 +174,10 @@ SET
 	END,
     notes = $8,
     source_url = $9,
+    job_portal = $10,
     updated_at = NOW()
-WHERE id = $10
-RETURNING id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, created_at, updated_at
+WHERE id = $11
+RETURNING id, user_id, title, company, location, salary, description, requirements, application_status, status_changed_at, notes, source_url, contact_info, created_at, updated_at, job_portal
 `
 
 type UpdateJobParams struct {
@@ -183,6 +190,7 @@ type UpdateJobParams struct {
 	ApplicationStatus string
 	Notes             pgtype.Text
 	SourceUrl         string
+	JobPortal         pgtype.Text
 	ID                int32
 }
 
@@ -197,6 +205,7 @@ func (q *Queries) UpdateJob(ctx context.Context, arg UpdateJobParams) (Job, erro
 		arg.ApplicationStatus,
 		arg.Notes,
 		arg.SourceUrl,
+		arg.JobPortal,
 		arg.ID,
 	)
 	var i Job
@@ -216,6 +225,7 @@ func (q *Queries) UpdateJob(ctx context.Context, arg UpdateJobParams) (Job, erro
 		&i.ContactInfo,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.JobPortal,
 	)
 	return i, err
 }

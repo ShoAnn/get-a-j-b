@@ -38,6 +38,7 @@ func (r *postgresJobRepository) Create(ctx context.Context, job *domain.Job) (*d
 		ApplicationStatus: job.ApplicationStatus,
 		Notes:             pgtype.Text{String: job.Notes, Valid: job.Notes != ""},
 		SourceUrl:         job.SourceURL,
+		JobPortal:         pgtype.Text{String: job.JobPortal, Valid: job.JobPortal != ""},
 	})
 	if err != nil {
 		return nil, err
@@ -86,6 +87,7 @@ func (r *postgresJobRepository) Update(ctx context.Context, job *domain.Job) (*d
 		ApplicationStatus: job.ApplicationStatus,
 		Notes:             pgtype.Text{String: job.Notes, Valid: job.Notes != ""},
 		SourceUrl:         job.SourceURL,
+		JobPortal:         pgtype.Text{String: job.JobPortal, Valid: job.JobPortal != ""},
 	})
 	if err != nil {
 		return nil, err
@@ -120,6 +122,7 @@ func toDomainJob(dbJob db.Job) *domain.Job {
 		StatusChangedAt:   statusChangedAt,
 		Notes:             dbJob.Notes.String,
 		SourceURL:         dbJob.SourceUrl,
+		JobPortal:         dbJob.JobPortal.String,
 		CreatedAt:         dbJob.CreatedAt.Time.Format("2006-01-02 15:04:05"),
 	}
 }

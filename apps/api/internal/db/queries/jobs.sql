@@ -10,9 +10,10 @@ INSERT INTO jobs (
     application_status,
     notes, 
     source_url, 
+    job_portal,
     created_at
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
 RETURNING *;
 
 -- name: GetAllJobs :many
@@ -37,8 +38,9 @@ SET
 	END,
     notes = $8,
     source_url = $9,
+    job_portal = $10,
     updated_at = NOW()
-WHERE id = $10
+WHERE id = $11
 RETURNING *;
 
 -- name: DeleteJob :execresult

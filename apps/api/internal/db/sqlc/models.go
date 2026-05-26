@@ -76,6 +76,7 @@ type Job struct {
 	ContactInfo       pgtype.Text
 	CreatedAt         pgtype.Timestamp
 	UpdatedAt         pgtype.Timestamp
+	JobPortal         pgtype.Text
 }
 
 type RefreshToken struct {

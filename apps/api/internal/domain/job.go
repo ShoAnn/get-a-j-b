@@ -15,6 +15,7 @@ type Job struct {
 	StatusChangedAt   string `json:"status_changed_at"`
 	Notes             string `json:"notes"`
 	SourceURL         string `json:"source_url"`
+	JobPortal         string `json:"job_portal"`
 	CreatedAt         string `json:"created_at"`
 }
 
@@ -28,6 +29,7 @@ type CreateJobRequest struct {
 	ApplicationStatus *string `json:"current_status"`
 	Notes             *string `json:"notes"`
 	SourceURL         *string `json:"source_url"`
+	JobPortal         *string `json:"job_portal"`
 }
 
 type UpdateJobRequest struct {
@@ -40,6 +42,7 @@ type UpdateJobRequest struct {
 	SourceURL         *string `json:"source_url"`
 	ApplicationStatus *string `json:"current_status"`
 	Notes             *string `json:"notes"`
+	JobPortal         *string `json:"job_portal"`
 }
 
 type JobRepository interface {

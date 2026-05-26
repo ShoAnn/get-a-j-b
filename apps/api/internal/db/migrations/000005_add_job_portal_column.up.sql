@@ -1,0 +1,2 @@
+ALTER TABLE jobs
+ADD COLUMN job_portal VARCHAR(255) NULL;
