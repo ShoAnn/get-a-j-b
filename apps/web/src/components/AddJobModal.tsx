@@ -11,6 +11,7 @@ export interface JobFormData {
   company: string;
   status: JobStatus;
   notes: string;
+  jobPortal: string;
 }
 
 interface AddJobModalProps {
@@ -28,6 +29,7 @@ export default function AddJobModal({
   const [company, setCompany] = useState("");
   const [status, setStatus] = useState<JobStatus>("draft");
   const [notes, setNotes] = useState("");
+  const [jobPortal, setJobPortal] = useState("");
   const [errors, setErrors] = useState<{ role?: string; company?: string }>({});
 
   function validate() {
@@ -41,11 +43,12 @@ export default function AddJobModal({
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!validate()) return;
-    onSubmit({ role: role.trim(), company: company.trim(), status, notes: notes.trim() });
+    onSubmit({ role: role.trim(), company: company.trim(), status, notes: notes.trim(), jobPortal: jobPortal.trim() });
     setRole("");
     setCompany("");
     setStatus("draft");
     setNotes("");
+    setJobPortal("");
     setErrors({});
   }
 
@@ -54,6 +57,7 @@ export default function AddJobModal({
     setCompany("");
     setStatus("draft");
     setNotes("");
+    setJobPortal("");
     setErrors({});
     onClose();
   }
@@ -109,6 +113,19 @@ export default function AddJobModal({
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="jobPortal" className="text-xs font-medium text-text-secondary dark:text-[#9999AA]">
+            Job Portal
+          </label>
+          <input
+            id="jobPortal"
+            value={jobPortal}
+            onChange={(e) => setJobPortal(e.target.value)}
+            placeholder="e.g. LinkedIn, Indeed, Company Website"
+            className="rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-sm transition-colors focus:border-violet focus:outline-none dark:border-[#333355] dark:bg-[#1A1A2E] dark:text-[#F5F5F0] dark:placeholder:text-[#666688]"
+          />
         </div>
 
         <div className="flex flex-col gap-1.5">

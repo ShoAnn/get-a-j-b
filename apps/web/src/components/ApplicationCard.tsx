@@ -21,6 +21,11 @@ export function ApplicationCard({ job }: ApplicationCardProps) {
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <StatusBadge status={job.status} />
+            {job.jobPortal && (
+              <span className="text-xs text-text-secondary dark:text-[#9999AA]">
+                {job.jobPortal}
+              </span>
+            )}
             <span className="text-xs text-text-secondary dark:text-[#9999AA]">
               {new Date(job.dateApplied).toLocaleDateString("en-US", {
                 month: "short",

@@ -2,17 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { StatusBadge, JOB_STATUSES } from "@/components/StatusBadge";
 import type { Job, JobStatus } from "@/types/job";
 
 const MOCK_JOBS: Job[] = [
-  { id: "1", title: "Frontend Engineer", company: "Stripe", status: "submitted", dateApplied: "2025-12-01", notes: "Referred by John. Need to prep for system design." },
-  { id: "2", title: "Senior Frontend Developer", company: "Vercel", status: "under_review", dateApplied: "2025-12-05", notes: "Great company culture. Submitted portfolio." },
-  { id: "3", title: "Full Stack Engineer", company: "Notion", status: "interview_scheduled", dateApplied: "2025-11-28", notes: "Interview on Dec 15. Review React patterns and SQL." },
-  { id: "4", title: "UI Engineer", company: "Linear", status: "rejected", dateApplied: "2025-11-15" },
-  { id: "5", title: "Software Engineer", company: "Figma", status: "draft", dateApplied: "2025-12-10", notes: "Need to tailor resume for this role." },
-  { id: "6", title: "React Native Developer", company: "Expo", status: "offer_extended", dateApplied: "2025-11-20", notes: "Offer received: $180k + equity. Waiting on competing offers." },
-  { id: "7", title: "Backend Engineer", company: "Supabase", status: "accepted", dateApplied: "2025-10-01" },
+  { id: "1", title: "Frontend Engineer", company: "Stripe", status: "submitted", dateApplied: "2025-12-01", notes: "Referred by John. Need to prep for system design.", jobPortal: "LinkedIn" },
+  { id: "2", title: "Senior Frontend Developer", company: "Vercel", status: "under_review", dateApplied: "2025-12-05", notes: "Great company culture. Submitted portfolio.", jobPortal: "Company Website" },
+  { id: "3", title: "Full Stack Engineer", company: "Notion", status: "interview_scheduled", dateApplied: "2025-11-28", notes: "Interview on Dec 15. Review React patterns and SQL.", jobPortal: "LinkedIn" },
+  { id: "4", title: "UI Engineer", company: "Linear", status: "rejected", dateApplied: "2025-11-15", jobPortal: "Indeed" },
+  { id: "5", title: "Software Engineer", company: "Figma", status: "draft", dateApplied: "2025-12-10", notes: "Need to tailor resume for this role.", jobPortal: "Glassdoor" },
+  { id: "6", title: "React Native Developer", company: "Expo", status: "offer_extended", dateApplied: "2025-11-20", notes: "Offer received: $180k + equity. Waiting on competing offers.", jobPortal: "LinkedIn" },
+  { id: "7", title: "Backend Engineer", company: "Supabase", status: "accepted", dateApplied: "2025-10-01", jobPortal: "Company Website" },
 ];
 
 const STATUS_ORDER: Record<JobStatus, number> = {
@@ -24,15 +25,19 @@ type SortKey = "date" | "company" | "status";
 type SortDir = "asc" | "desc";
 
 export default function JobsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const searchParams = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [statusFilter, setStatusFilter] = useState<JobStatus | "all">("all");
   const [sortKey, setSortKey] = useState<SortKey>("date");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
 
   const filtered = MOCK_JOBS.filter((job) => {
+    const q = searchQuery.toLowerCase();
     const matchesSearch =
-      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.company.toLowerCase().includes(searchQuery.toLowerCase());
+      job.title.toLowerCase().includes(q) ||
+      job.company.toLowerCase().includes(q) ||
+      (job.notes && job.notes.toLowerCase().includes(q)) ||
+      (job.jobPortal && job.jobPortal.toLowerCase().includes(q));
     const matchesStatus = statusFilter === "all" || job.status === statusFilter;
     return matchesSearch && matchesStatus;
   }).sort((a, b) => {
@@ -112,6 +117,9 @@ export default function JobsPage() {
                     Company
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">
+                    Portal
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">
                     Status
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">
@@ -133,6 +141,9 @@ export default function JobsPage() {
                     </td>
                     <td className="px-6 py-4 text-sm text-zinc-600 dark:text-[#9999AA]">
                       {job.company}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-zinc-500 dark:text-[#9999AA]">
+                      {job.jobPortal || "—"}
                     </td>
                     <td className="px-6 py-4">
                       <StatusBadge status={job.status} />

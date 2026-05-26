@@ -16,6 +16,7 @@ export interface Job {
   status: JobStatus;
   dateApplied: string;
   notes?: string;
+  jobPortal?: string;
 }
 
 export interface JobFormData {
@@ -23,4 +24,5 @@ export interface JobFormData {
   company: string;
   status: JobStatus;
   notes: string;
+  jobPortal: string;
 }

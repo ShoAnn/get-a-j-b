@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import ThemeToggle from "@/components/ThemeToggle";
+import Header from "@/components/Header";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -42,9 +42,7 @@ export default function RootLayout({
             ${'</'}script>`,
           }}
         />
-        <header className="flex items-center justify-end px-6 py-3 dark:bg-midnight dark:text-surface">
-          <ThemeToggle />
-        </header>
+        <Header />
         {children}
       </body>
     </html>
