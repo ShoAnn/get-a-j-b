@@ -6,6 +6,8 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --color-midnight: #1A1A2E;
+  --color-midnight-border: #333355;
+  --color-midnight-light: #252540;
   --color-violet: #7F77DD;
   --color-teal: #1D9E75;
   --color-surface: #F5F5F0;
@@ -20,7 +22,7 @@ body {
 .overflow-x-auto,
 .overflow-y-auto,
 .overflow-auto {
-  scrollbar-width: thin;
+  scrollbar-width: auto;
   scrollbar-color: #d4d4d8 transparent;
 }
 
@@ -54,4 +56,20 @@ body {
 .dark .overflow-y-auto::-webkit-scrollbar-thumb,
 .dark .overflow-auto::-webkit-scrollbar-thumb {
   background: #52525b;
+}
+
+.board-columns-scroll {
+  background:
+    linear-gradient(#fafafa, #fafafa) left / 3px 100% local no-repeat,
+    linear-gradient(#fafafa, #fafafa) right / 3px 100% local no-repeat,
+    linear-gradient(#d4d4d8, #d4d4d8) left / 3px 100% scroll no-repeat,
+    linear-gradient(#d4d4d8, #d4d4d8) right / 3px 100% scroll no-repeat;
+}
+
+.dark .board-columns-scroll {
+  background:
+    linear-gradient(#1A1A2E, #1A1A2E) left / 3px 100% local no-repeat,
+    linear-gradient(#1A1A2E, #1A1A2E) right / 3px 100% local no-repeat,
+    linear-gradient(#52525b, #52525b) left / 3px 100% scroll no-repeat,
+    linear-gradient(#52525b, #52525b) right / 3px 100% scroll no-repeat;
 }

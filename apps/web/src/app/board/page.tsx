@@ -43,8 +43,8 @@ function KanbanCard({ job }: { job: Job }) {
 
   const style = transform
     ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-      }
+      transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+    }
     : undefined;
 
   return (
@@ -54,9 +54,8 @@ function KanbanCard({ job }: { job: Job }) {
       {...listeners}
       {...attributes}
       suppressHydrationWarning
-      className={`rounded-xl border-[0.5px] border-zinc-300 bg-surface p-4 cursor-grab active:cursor-grabbing transition-shadow hover:shadow-md dark:border-zinc-600 dark:bg-zinc-800 ${
-        isDragging ? "opacity-50 z-50" : ""
-      }`}
+      className={`rounded-xl border-[0.5px] border-zinc-300 bg-surface p-4 cursor-grab active:cursor-grabbing transition-shadow hover:shadow-md dark:border-zinc-600 dark:bg-midnight ${isDragging ? "opacity-50 z-50" : ""
+        }`}
     >
       <div className="flex items-start gap-3">
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet text-xs font-medium text-white">
@@ -96,9 +95,8 @@ function BoardColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`flex w-[260px] shrink-0 flex-col rounded-xl border-[0.5px] border-zinc-200 bg-zinc-100/50 transition-shadow dark:border-zinc-700 dark:bg-zinc-800/50 ${
-        isOver ? "ring-2 ring-violet" : ""
-      }`}
+      className={`flex w-[260px] shrink-0 flex-col rounded-xl border-[0.5px] border-zinc-200 bg-zinc-200 transition-shadow dark:border-midnight-border dark:bg-midnight-light ${isOver ? "ring-2 ring-violet" : ""
+        }`}
     >
       <div className="flex shrink-0 items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-700">
         <h3 className="text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-zinc-400">
@@ -156,14 +154,11 @@ export default function BoardPage() {
   }, []);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-zinc-50 dark:bg-zinc-900">
-      <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col px-4 py-16 sm:px-6 lg:px-8">
-        <h1 className="shrink-0 text-2xl font-semibold tracking-tight text-midnight dark:text-zinc-100">
-          Board
-        </h1>
+    <div className="flex min-h-full flex-1 flex-col bg-zinc-50 dark:bg-midnight">
+      <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
 
         <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-          <div className="mt-6 flex min-h-0 flex-1 gap-4 overflow-x-auto pb-4">
+          <div className="board-columns-scroll mt-6 flex min-h-0 flex-1 gap-4 overflow-x-auto pb-4">
             {JOB_STATUSES.map((status) => (
               <BoardColumn
                 key={status}

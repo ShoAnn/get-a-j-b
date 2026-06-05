@@ -122,8 +122,8 @@ export default function Dashboard() {
               </h2>
               {chartData.length > 0 ? (
                 <div className="mt-4 flex flex-1 flex-col items-center justify-center gap-6 sm:flex-row sm:items-start">
-                  <div className="h-54 w-54 shrink-0 min-w-0">
-                    <ResponsiveContainer width="100%" height="100%">
+                  <div className="h-54 w-54 shrink-0">
+                    <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 320, height: 200 }}>
                       <PieChart>
                         <Pie
                           data={chartData}
@@ -133,6 +133,7 @@ export default function Dashboard() {
                           outerRadius={90}
                           dataKey="value"
                           strokeWidth={0}
+                          isAnimationActive={false}
                         >
                           {chartData.map((entry, i) => (
                             <Cell key={i} fill={entry.color} />
