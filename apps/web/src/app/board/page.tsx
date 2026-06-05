@@ -95,7 +95,7 @@ function BoardColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`flex w-[260px] shrink-0 flex-col rounded-xl border-[0.5px] border-zinc-200 bg-zinc-200 transition-shadow dark:border-midnight-border dark:bg-midnight-light ${isOver ? "ring-2 ring-violet" : ""
+      className={`flex w-[260px] shrink-0 flex-col rounded-xl border-[0.5px] border-zinc-200 bg-zinc-200 transition-shadow dark:border-midnight-border dark:bg-midnight ${isOver ? "ring-2 ring-violet mt-1" : ""
         }`}
     >
       <div className="flex shrink-0 items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-700">
