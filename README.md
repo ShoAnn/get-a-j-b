@@ -15,7 +15,7 @@ docker-compose up --build
 
 afterwards you can just `docker-compose up`
 
-## todo:
+## done:
 - [x] Set up project scaffolding with Vite + React + Tailwind
 - [x] Create reusable button component with variants (primary, secondary, ghost)
 - [x] Build add application modal/form with validation
@@ -30,6 +30,32 @@ afterwards you can just `docker-compose up`
 - [x] Add empty state illustrations when no jobs exist
 - [x] Add board page with kanban board view grouped by statuses with drag-and-drop functionality to move jobs between statuses
 - [x] Add dark mode support using CSS variables / Tailwind class strategy
+
+## todo:
+
+### Frontend — API Integration
+- [x] Create API client module (fetch wrapper with base URL, auth headers, error handling)
+- [ ] Wire auth flows: login page, register page, JWT storage (cookie/localStorage), protected routes
+- [ ] Connect Jobs List page to `GET /jobs` (loading, empty, error states)
+- [ ] Connect Job Detail page to `GET /jobs/{id}`
+- [ ] Connect AddJobModal to `POST /jobs` with mutation feedback
+- [ ] Connect Kanban Board to backend (drag → `PUT /jobs/{id}` status update)
+- [ ] Connect Dashboard stats to backend (aggregate from `GET /jobs`)
+
+### Backend — Gaps
+- [ ] Wire `Logout` handler into the router (`POST /auth/logout`)
+- [ ] Add handler-level/integration tests for HTTP endpoints
+- [ ] Add CORS middleware (needed since Next.js and API run on different ports)
+
+### Features — Not Started
+- [ ] Build Settings page (update profile, manage uploaded files)
+- [ ] Build resume upload UI (backend handlers exist, no frontend)
+- [ ] Implement notification system
+
+### Polish
+- [ ] Add loading skeletons and error boundaries to all pages
+- [ ] Add pagination to `GET /jobs` (currently returns all user jobs at once)
+- [ ] Either add tests to `package.json` or remove the placeholder test script
 
 ## pages
 
