@@ -85,6 +85,7 @@ func main() {
 	mux.HandleFunc("POST /auth/register", authHandler.Register)
 	mux.HandleFunc("POST /auth/login", authHandler.Login)
 	mux.HandleFunc("POST /auth/refresh", authHandler.RefreshToken)
+	mux.HandleFunc("POST /auth/logout", authHandler.Logout)
 
 	// Protected routes
 	// Jobs
