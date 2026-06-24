@@ -78,35 +78,35 @@ func main() {
 	mux := http.NewServeMux()
 
 	// Public routes
-	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("GET /api/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
 	})
-	mux.HandleFunc("POST /auth/register", authHandler.Register)
-	mux.HandleFunc("POST /auth/login", authHandler.Login)
-	mux.HandleFunc("POST /auth/refresh", authHandler.RefreshToken)
-	mux.HandleFunc("POST /auth/logout", authHandler.Logout)
+	mux.HandleFunc("POST /api/auth/register", authHandler.Register)
+	mux.HandleFunc("POST /api/auth/login", authHandler.Login)
+	mux.HandleFunc("POST /api/auth/refresh", authHandler.RefreshToken)
+	mux.HandleFunc("POST /api/auth/logout", authHandler.Logout)
 
 	// Protected routes
 	// Jobs
-	mux.Handle("POST /jobs", authMiddleware.Auth(http.HandlerFunc(jobHandler.CreateJob)))
-	mux.Handle("GET /jobs", authMiddleware.Auth(http.HandlerFunc(jobHandler.GetAllJobs)))
-	mux.Handle("GET /jobs/{id}", authMiddleware.Auth(http.HandlerFunc(jobHandler.GetJobByID)))
-	mux.Handle("PUT /jobs/{id}", authMiddleware.Auth(http.HandlerFunc(jobHandler.UpdateJob)))
-	mux.Handle("DELETE /jobs/{id}", authMiddleware.Auth(http.HandlerFunc(jobHandler.DeleteJob)))
+	mux.Handle("POST /api/jobs", authMiddleware.Auth(http.HandlerFunc(jobHandler.CreateJob)))
+	mux.Handle("GET /api/jobs", authMiddleware.Auth(http.HandlerFunc(jobHandler.GetAllJobs)))
+	mux.Handle("GET /api/jobs/{id}", authMiddleware.Auth(http.HandlerFunc(jobHandler.GetJobByID)))
+	mux.Handle("PUT /api/jobs/{id}", authMiddleware.Auth(http.HandlerFunc(jobHandler.UpdateJob)))
+	mux.Handle("DELETE /api/jobs/{id}", authMiddleware.Auth(http.HandlerFunc(jobHandler.DeleteJob)))
 
 	// Resumes
-	mux.Handle("POST /resumes", authMiddleware.Auth(http.HandlerFunc(resumeHandler.CreateResume)))
-	mux.Handle("GET /resumes", authMiddleware.Auth(http.HandlerFunc(resumeHandler.GetAllResumes)))
-	mux.Handle("GET /resumes/{id}", authMiddleware.Auth(http.HandlerFunc(resumeHandler.GetResumeByID)))
-	mux.Handle("PUT /resumes/{id}", authMiddleware.Auth(http.HandlerFunc(resumeHandler.UpdateResume)))
-	mux.Handle("DELETE /resumes/{id}", authMiddleware.Auth(http.HandlerFunc(resumeHandler.DeleteResume)))
+	mux.Handle("POST /api/resumes", authMiddleware.Auth(http.HandlerFunc(resumeHandler.CreateResume)))
+	mux.Handle("GET /api/resumes", authMiddleware.Auth(http.HandlerFunc(resumeHandler.GetAllResumes)))
+	mux.Handle("GET /api/resumes/{id}", authMiddleware.Auth(http.HandlerFunc(resumeHandler.GetResumeByID)))
+	mux.Handle("PUT /api/resumes/{id}", authMiddleware.Auth(http.HandlerFunc(resumeHandler.UpdateResume)))
+	mux.Handle("DELETE /api/resumes/{id}", authMiddleware.Auth(http.HandlerFunc(resumeHandler.DeleteResume)))
 
 	// Users
-	mux.Handle("GET /users", authMiddleware.Auth(http.HandlerFunc(userHandler.GetAllUsers)))
-	mux.Handle("GET /users/{id}", authMiddleware.Auth(http.HandlerFunc(userHandler.GetUserByID)))
-	mux.Handle("PUT /users/{id}", authMiddleware.Auth(http.HandlerFunc(userHandler.UpdateUser)))
-	mux.Handle("DELETE /users/{id}", authMiddleware.Auth(http.HandlerFunc(userHandler.DeleteUser)))
+	mux.Handle("GET /api/users", authMiddleware.Auth(http.HandlerFunc(userHandler.GetAllUsers)))
+	mux.Handle("GET /api/users/{id}", authMiddleware.Auth(http.HandlerFunc(userHandler.GetUserByID)))
+	mux.Handle("PUT /api/users/{id}", authMiddleware.Auth(http.HandlerFunc(userHandler.UpdateUser)))
+	mux.Handle("DELETE /api/users/{id}", authMiddleware.Auth(http.HandlerFunc(userHandler.DeleteUser)))
 
 	port := os.Getenv("PORT")
 	if port == "" {

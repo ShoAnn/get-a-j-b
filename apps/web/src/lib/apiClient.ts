@@ -1,8 +1,6 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 	const res = await fetch(
-		`${BASE_URL}/api/${path}`,
+		`/api${path}`,
 		{
 			...options,
 			credentials: "include",

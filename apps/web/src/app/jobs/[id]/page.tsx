@@ -31,10 +31,6 @@ export default function JobDetailPage() {
     );
   }
 
-  const statusHistory: { status: JobStatus; date: string }[] = [
-    { status: "draft", date: job.dateApplied },
-  ];
-
   const statusFlow: JobStatus[] = [
     "draft", "submitted", "under_review", "interview_scheduled",
     "offer_extended", "accepted",

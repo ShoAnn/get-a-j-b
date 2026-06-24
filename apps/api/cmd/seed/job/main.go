@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/ShoAnn/get-a-j-b/api/internal/config"
@@ -92,6 +93,10 @@ func main() {
 			}
 			dir = parent
 		}
+	}
+
+	if !strings.HasPrefix(migrationsPath, "file://") {
+		migrationsPath = "file://" + migrationsPath
 	}
 
 	fmt.Printf("Migrations path: %s\n", migrationsPath)
