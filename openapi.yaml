@@ -1,0 +1,909 @@
+openapi: "3.1.0"
+info:
+  title: Get-a-J*b API
+  description: |
+    Job application tracker API. Manage jobs, resumes, and users
+    with JWT-based authentication and refresh token rotation.
+  version: "1.0.0"
+  contact:
+    name: ShoAnn
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /api/health:
+    get:
+      operationId: healthCheck
+      summary: Health check
+      tags: [Health]
+      responses:
+        "200":
+          description: Server is healthy
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: OK
+
+  /api/auth/register:
+    post:
+      operationId: register
+      summary: Register a new user
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password]
+              properties:
+                username:
+                  type: string
+                  minLength: 5
+                  description: Must be at least 5 characters
+                  example: johndoe
+                email:
+                  type: string
+                  format: email
+                  example: john@example.com
+                password:
+                  type: string
+                  minLength: 6
+                  writeOnly: true
+                  example: secret123
+      responses:
+        "201":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponseNoRefresh"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "409":
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 409
+                message: Email already exists
+
+  /api/auth/login:
+    post:
+      operationId: login
+      summary: Log in with email and password
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: john@example.com
+                password:
+                  type: string
+                  writeOnly: true
+                  example: secret123
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 401
+                message: Invalid email or password
+
+  /api/auth/refresh:
+    post:
+      operationId: refreshToken
+      summary: Refresh access token using refresh token
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token:
+                  type: string
+                  example: dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4
+      responses:
+        "200":
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          description: Invalid, expired, or revoked refresh token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalid:
+                  summary: Invalid token
+                  value:
+                    code: 401
+                    message: Invalid refresh token
+                expired:
+                  summary: Expired token
+                  value:
+                    code: 401
+                    message: Refresh token expired
+                revoked:
+                  summary: Revoked token
+                  value:
+                    code: 401
+                    message: Refresh token revoked
+        "404":
+          description: Refresh token not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 404
+                message: Refresh token not found
+
+  /api/auth/logout:
+    post:
+      operationId: logout
+      summary: Logout and revoke refresh token
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token:
+                  type: string
+                  example: dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4
+      responses:
+        "204":
+          description: Logout successful, no content
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "404":
+          description: Refresh token not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 404
+                message: Refresh token not found
+
+  /api/jobs:
+    post:
+      operationId: createJob
+      summary: Create a new job entry
+      tags: [Jobs]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateJobRequest"
+      responses:
+        "201":
+          description: Job created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    get:
+      operationId: getAllJobs
+      summary: List all jobs for the authenticated user
+      tags: [Jobs]
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: List of jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /api/jobs/{id}:
+    get:
+      operationId: getJobById
+      summary: Get a job by ID
+      tags: [Jobs]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Job details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "400":
+          description: Invalid job ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 400
+                message: Invalid input
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 403
+                message: Forbidden
+        "404":
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 404
+                message: Job not found
+    put:
+      operationId: updateJob
+      summary: Update a job by ID
+      tags: [Jobs]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateJobRequest"
+      responses:
+        "200":
+          description: Job updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 404
+                message: Job not found
+    delete:
+      operationId: deleteJob
+      summary: Delete a job by ID
+      tags: [Jobs]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Job deleted successfully
+        "400":
+          description: Invalid job ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 400
+                message: Invalid input
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 404
+                message: Job not found
+
+  /api/resumes:
+    post:
+      operationId: createResume
+      summary: Create a new resume entry
+      tags: [Resumes]
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateResumeRequest"
+      responses:
+        "201":
+          description: Resume created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Resume"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+    get:
+      operationId: getAllResumes
+      summary: List all resumes for the authenticated user
+      tags: [Resumes]
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: List of resumes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Resume"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /api/resumes/{id}:
+    get:
+      operationId: getResumeById
+      summary: Get a resume by ID
+      tags: [Resumes]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Resume details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Resume"
+        "400":
+          description: Invalid resume ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 400
+                message: Invalid input
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
+          description: Resume not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 404
+                message: Resume not found
+    put:
+      operationId: updateResume
+      summary: Update a resume by ID
+      tags: [Resumes]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateResumeRequest"
+      responses:
+        "200":
+          description: Resume updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Resume"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
+          description: Resume not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 404
+                message: Resume not found
+    delete:
+      operationId: deleteResume
+      summary: Delete a resume by ID
+      tags: [Resumes]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Resume deleted successfully
+        "400":
+          description: Invalid resume ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 400
+                message: Invalid input
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
+          description: Resume not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 404
+                message: Resume not found
+
+  /api/users:
+    get:
+      operationId: getAllUsers
+      summary: List all users
+      tags: [Users]
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+
+  /api/users/{id}:
+    get:
+      operationId: getUserById
+      summary: Get a user by ID
+      tags: [Users]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Invalid user ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 400
+                message: Invalid input
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 404
+                message: User not found
+    put:
+      operationId: updateUser
+      summary: Update a user by ID
+      tags: [Users]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRequest"
+      responses:
+        "200":
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 404
+                message: User not found
+        "409":
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 409
+                message: Email already exists
+    delete:
+      operationId: deleteUser
+      summary: Soft-delete a user by ID
+      tags: [Users]
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: User deleted successfully
+        "400":
+          description: Invalid user ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 400
+                message: Invalid input
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: 404
+                message: User not found
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token (JWT, 15-minute expiry)
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: HTTP status code
+        message:
+          type: string
+          description: Error message
+      required: [code, message]
+
+    ValidationError:
+      type: object
+      properties:
+        errors:
+          type: object
+          additionalProperties:
+            type: string
+          description: Field-level validation error messages
+          example:
+            email: must be a valid email address
+            username: this field is required
+      required: [errors]
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT access token (15-minute expiry)
+        refresh_token:
+          type: string
+          description: Refresh token (7-day expiry, for obtaining new access tokens)
+      required: [token, refresh_token]
+
+    AuthResponseNoRefresh:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT access token (15-minute expiry)
+      required: [token]
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          example: user
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-01-15T10:00:00Z"
+        updated_at:
+          type: string
+          nullable: true
+          format: date-time
+          example: "2025-01-15T10:00:00Z"
+      required: [id, username, email, role, created_at]
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 5
+          description: Must be at least 5 characters if provided
+        email:
+          type: string
+          format: email
+
+    Job:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+          description: Owner user ID
+        title:
+          type: string
+        company:
+          type: string
+        location:
+          type: string
+        salary:
+          type: integer
+        description:
+          type: string
+        requirements:
+          type: string
+        current_status:
+          type: string
+          enum: [draft, submitted, under_review, interview_scheduled, offer_extended, accepted, rejected, withdrawn, archived]
+        status_changed_at:
+          type: string
+          format: date-time
+        notes:
+          type: string
+          nullable: true
+        source_url:
+          type: string
+          format: uri
+        job_portal:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required: [id, user_id, title, company, location, salary, requirements, current_status, status_changed_at, source_url, created_at]
+
+    CreateJobRequest:
+      type: object
+      required: [title, company, location, salary, requirements]
+      properties:
+        title:
+          type: string
+        company:
+          type: string
+        location:
+          type: string
+        salary:
+          type: integer
+        description:
+          type: string
+        requirements:
+          type: string
+        current_status:
+          type: string
+          enum: [draft, submitted, under_review, interview_scheduled, offer_extended, accepted, rejected, withdrawn, archived]
+          default: draft
+        notes:
+          type: string
+        source_url:
+          type: string
+          format: uri
+        job_portal:
+          type: string
+
+    UpdateJobRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        company:
+          type: string
+        location:
+          type: string
+        salary:
+          type: integer
+        description:
+          type: string
+        requirements:
+          type: string
+        source_url:
+          type: string
+          format: uri
+        current_status:
+          type: string
+          enum: [draft, submitted, under_review, interview_scheduled, offer_extended, accepted, rejected, withdrawn, archived]
+        notes:
+          type: string
+        job_portal:
+          type: string
+
+    Resume:
+      type: object
+      properties:
+        id:
+          type: integer
+        label:
+          type: string
+        user_id:
+          type: integer
+        file_url:
+          type: string
+          format: uri
+      required: [id, label, user_id, file_url]
+
+    CreateResumeRequest:
+      type: object
+      required: [label, content]
+      properties:
+        label:
+          type: string
+          description: Display label for the resume
+        content:
+          type: string
+          format: uri
+          description: URL to the resume file (sent as field "content")
+
+    UpdateResumeRequest:
+      type: object
+      properties:
+        label:
+          type: string
+        file_url:
+          type: string
+          format: uri
+
+  responses:
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ValidationError"
+    UnauthorizedError:
+      description: Missing or invalid JWT token
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            code: 401
+            message: Unauthorized
+
+tags:
+  - name: Health
+    description: Health check
+  - name: Authentication
+    description: Auth endpoints (register, login, refresh, logout)
+  - name: Jobs
+    description: Job tracking CRUD
+  - name: Resumes
+    description: Resume CRUD
+  - name: Users
+    description: User management

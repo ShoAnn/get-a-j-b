@@ -41,7 +41,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.validate.Struct(input); err != nil {
-		h.writeValidationError(w, err)
+		writeValidationError(w, err)
 		return
 	}
 
@@ -78,7 +78,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.validate.Struct(input); err != nil {
-		h.writeValidationError(w, err)
+		writeValidationError(w, err)
 		return
 	}
 
@@ -109,7 +109,7 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.validate.Struct(input); err != nil {
-		h.writeValidationError(w, err)
+		writeValidationError(w, err)
 		return
 	}
 
@@ -136,7 +136,7 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.validate.Struct(input); err != nil {
-		h.writeValidationError(w, err)
+		writeValidationError(w, err)
 		return
 	}
 
@@ -164,23 +164,4 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Printf("Failed to encode response: %v", err)
 	}
-}
-
-func (h *AuthHandler) writeValidationError(w http.ResponseWriter, err error) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusBadRequest)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"errors": h.formatValidationErrors(err),
-	})
-}
-
-func (h *AuthHandler) formatValidationErrors(err error) map[string]string {
-	messages := make(map[string]string)
-	var ve validator.ValidationErrors
-	if errors.As(err, &ve) {
-		for _, fe := range ve {
-			messages[fe.Field()] = validationMessage(fe)
-		}
-	}
-	return messages
 }
