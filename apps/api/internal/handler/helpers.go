@@ -57,3 +57,5 @@ func registerJSONTagNameFunc(v *validator.Validate) {
 		return strings.Split(name, ",")[0]
 	})
 }
+
+func setAccessTokenCookie(w http.ResponseWriter)
