@@ -1,11 +1,17 @@
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+import z from "zod";
+
+async function request<T>(
+	path: string,
+	schema: z.ZodType<T>,
+	options: RequestInit = {}
+): Promise<T> {
 	const res = await fetch(
 		`/api${path}`,
 		{
 			...options,
 			credentials: "include",
 			headers: {
-				"Content-Type": "application/json",
+				...(options.body ? { "Content-Type": "application/json" } : {}),
 				...options.headers,
 			}
 		}
@@ -14,18 +20,27 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 		const error = await res.json().catch(() => ({}))
 		throw new Error(error.message ?? `http error: ${res.status}`)
 	}
-	return res.json() as Promise<T>;
-}
-
-async function login(formData: FormData) {
-	// validation
-	// send auth
-	// store token
+	const json = await res.json()
+	const parsedJson = schema.safeParse(json)
+	if (!parsedJson.success) {
+		throw new Error(
+			`Form Validation failed: ${parsedJson.error.issues.map(i => `${i.path.join(".")}: ${i.message}`).join(", ")}`
+		)
+	}
+	return parsedJson.data
 }
 
 export const apiClient = {
-	get: <T>(path: string) => request<T>(path, { method: "GET" }),
-	post: <T>(path: string, body: unknown) => request<T>(path, { method: "POST", body: JSON.stringify(body) }),
-	put: <T>(path: string, body: unknown) => request<T>(path, { method: "PUT", body: JSON.stringify(body) }),
-	delete: <T>(path: string) => request<T>(path, { method: "DELETE" }),
+	get: <T>(path: string, schema: z.ZodType<T>) => request<T>(path, schema, { method: "GET" }),
+	post: <T>(path: string, schema: z.ZodType<T>, body: unknown) => request<T>(
+		path,
+		schema,
+		{ method: "POST", body: JSON.stringify(body) }
+	),
+	put: <T>(path: string, schema: z.ZodType<T>, body: unknown) => request<T>(
+		path,
+		schema,
+		{ method: "PUT", body: JSON.stringify(body) }
+	),
+	delete: <T>(path: string, schema: z.ZodType<T>) => request<T>(path, schema, { method: "DELETE" }),
 }

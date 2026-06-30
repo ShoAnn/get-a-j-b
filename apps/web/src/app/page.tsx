@@ -23,9 +23,9 @@ export default function Dashboard() {
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        apiClient.get<Job[]>("/jobs").then(setJobs).finally(() => setLoading(false));
-    }, []);
+    // useEffect(() => {
+    //     apiClient.get<Job[]>("/jobs").then(setJobs).finally(() => setLoading(false));
+    // }, []);
 
     const totalSaved = jobs.length;
     const totalApplied = jobs.filter((j) => j.status !== "draft").length;

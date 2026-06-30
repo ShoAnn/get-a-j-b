@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { StatusBadge, JOB_STATUSES } from "@/components/StatusBadge";
@@ -24,7 +24,7 @@ const STATUS_ORDER: Record<JobStatus, number> = {
 type SortKey = "date" | "company" | "status";
 type SortDir = "asc" | "desc";
 
-export default function JobsPage() {
+function JobsPageContent() {
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [statusFilter, setStatusFilter] = useState<JobStatus | "all">("all");
@@ -205,5 +205,13 @@ export default function JobsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function JobsPage() {
+  return (
+    <Suspense fallback={<div />}>
+      <JobsPageContent />
+    </Suspense>
   );
 }
