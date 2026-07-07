@@ -20,6 +20,11 @@ async function request<T>(
 		const error = await res.json().catch(() => ({}))
 		throw new Error(error.message ?? `http error: ${res.status}`)
 	}
+
+	if (res.status === 204 || res.headers.get("content-length") === "0") {
+		return schema.parse(undefined)
+	}
+
 	const json = await res.json()
 	const parsedJson = schema.safeParse(json)
 	if (!parsedJson.success) {
