@@ -26,12 +26,12 @@ func NewResumeHandler(svc domain.ResumeService) *ResumeHandler {
 func (h *ResumeHandler) CreateResume(w http.ResponseWriter, r *http.Request) {
 	claims, err := middleware.GetClaimsFromContext(r.Context())
 	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 	var req domain.CreateResumeRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		writeJSONError(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
@@ -42,10 +42,10 @@ func (h *ResumeHandler) CreateResume(w http.ResponseWriter, r *http.Request) {
 
 	resume, err := h.svc.CreateResume(r.Context(), claims.UserID, &req)
 	if errors.Is(err, domain.ErrUnauthorized) {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		writeJSONError(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	} else if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -59,16 +59,16 @@ func (h *ResumeHandler) CreateResume(w http.ResponseWriter, r *http.Request) {
 func (h *ResumeHandler) GetAllResumes(w http.ResponseWriter, r *http.Request) {
 	claims, err := middleware.GetClaimsFromContext(r.Context())
 	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	resumes, err := h.svc.GetAllResumes(r.Context(), claims.UserID)
 	if errors.Is(err, domain.ErrUnauthorized) {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		writeJSONError(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	} else if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -81,25 +81,25 @@ func (h *ResumeHandler) GetAllResumes(w http.ResponseWriter, r *http.Request) {
 func (h *ResumeHandler) GetResumeByID(w http.ResponseWriter, r *http.Request) {
 	claims, err := middleware.GetClaimsFromContext(r.Context())
 	if err != nil {
-		http.Error(w, "Internal server error", http.StatusNotFound)
+		writeJSONError(w, "Internal server error", http.StatusNotFound)
 		return
 	}
 
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid resume ID", http.StatusBadRequest)
+		writeJSONError(w, "Invalid resume ID", http.StatusBadRequest)
 		return
 	}
 	resume, err := h.svc.GetByID(r.Context(), id, claims.UserID)
 	if errors.Is(err, domain.ErrResumeNotFound) {
-		http.Error(w, "Resume not found", http.StatusNotFound)
+		writeJSONError(w, "Resume not found", http.StatusNotFound)
 		return
 	} else if errors.Is(err, domain.ErrUnauthorized) {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		writeJSONError(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	} else if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -112,20 +112,20 @@ func (h *ResumeHandler) GetResumeByID(w http.ResponseWriter, r *http.Request) {
 func (h *ResumeHandler) UpdateResume(w http.ResponseWriter, r *http.Request) {
 	claims, err := middleware.GetClaimsFromContext(r.Context())
 	if err != nil {
-		http.Error(w, "Internal server error", http.StatusNotFound)
+		writeJSONError(w, "Internal server error", http.StatusNotFound)
 		return
 	}
 
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid resume ID", http.StatusBadRequest)
+		writeJSONError(w, "Invalid resume ID", http.StatusBadRequest)
 		return
 	}
 
 	var req domain.UpdateResumeRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		writeJSONError(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
@@ -136,13 +136,13 @@ func (h *ResumeHandler) UpdateResume(w http.ResponseWriter, r *http.Request) {
 
 	resume, err := h.svc.UpdateResume(r.Context(), id, claims.UserID, &req)
 	if errors.Is(err, domain.ErrResumeNotFound) {
-		http.Error(w, "Resume not found", http.StatusNotFound)
+		writeJSONError(w, "Resume not found", http.StatusNotFound)
 		return
 	} else if errors.Is(err, domain.ErrUnauthorized) {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		writeJSONError(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	} else if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -155,26 +155,26 @@ func (h *ResumeHandler) UpdateResume(w http.ResponseWriter, r *http.Request) {
 func (h *ResumeHandler) DeleteResume(w http.ResponseWriter, r *http.Request) {
 	claims, err := middleware.GetClaimsFromContext(r.Context())
 	if err != nil {
-		http.Error(w, "Internal server error", http.StatusNotFound)
+		writeJSONError(w, "Internal server error", http.StatusNotFound)
 		return
 	}
 
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid resume ID", http.StatusBadRequest)
+		writeJSONError(w, "Invalid resume ID", http.StatusBadRequest)
 		return
 	}
 
 	err = h.svc.DeleteResume(r.Context(), id, claims.UserID)
 	if errors.Is(err, domain.ErrResumeNotFound) {
-		http.Error(w, "Resume not found", http.StatusNotFound)
+		writeJSONError(w, "Resume not found", http.StatusNotFound)
 		return
 	} else if errors.Is(err, domain.ErrUnauthorized) {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		writeJSONError(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	} else if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 

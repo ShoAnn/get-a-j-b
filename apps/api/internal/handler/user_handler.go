@@ -25,7 +25,7 @@ func NewUserHandler(svc domain.UserService) *UserHandler {
 func (h *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := h.svc.GetAllUsers(r.Context())
 	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -39,16 +39,16 @@ func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		writeJSONError(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
 
 	user, err := h.svc.GetUserByID(r.Context(), id)
 	if errors.Is(err, domain.ErrUserNotFound) {
-		http.Error(w, "User not found", http.StatusNotFound)
+		writeJSONError(w, "User not found", http.StatusNotFound)
 		return
 	} else if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -62,13 +62,13 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		writeJSONError(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
 
 	var input domain.UpdateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, "Invalid input", http.StatusBadRequest)
+		writeJSONError(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
 
@@ -79,16 +79,16 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.svc.UpdateUser(r.Context(), id, &input)
 	if errors.Is(err, domain.ErrUserNotFound) {
-		http.Error(w, "User not found", http.StatusNotFound)
+		writeJSONError(w, "User not found", http.StatusNotFound)
 		return
 	} else if errors.Is(err, domain.ErrUnauthorized) {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		writeJSONError(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	} else if errors.Is(err, domain.ErrEmailAlreadyExists) {
-		http.Error(w, "Email already exists", http.StatusConflict)
+		writeJSONError(w, "Email already exists", http.StatusConflict)
 		return
 	} else if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -102,16 +102,16 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		writeJSONError(w, "Invalid user ID", http.StatusBadRequest)
 		return
 	}
 
 	err = h.svc.DeleteUser(r.Context(), id)
 	if errors.Is(err, domain.ErrUserNotFound) {
-		http.Error(w, "User not found", http.StatusNotFound)
+		writeJSONError(w, "User not found", http.StatusNotFound)
 		return
 	} else if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 

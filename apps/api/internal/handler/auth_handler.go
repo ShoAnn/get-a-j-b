@@ -37,7 +37,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, "Invalid input", http.StatusBadRequest)
+		writeJSONError(w, "invalid input", http.StatusBadRequest)
 		return
 	}
 	if err := h.validate.Struct(input); err != nil {
@@ -51,10 +51,10 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		Password: input.Password,
 	})
 	if errors.Is(err, domain.ErrEmailAlreadyExists) {
-		http.Error(w, "Email already exists", http.StatusConflict)
+		writeJSONError(w, "email already exist", http.StatusConflict)
 		return
 	} else if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, "internal server error", http.StatusConflict)
 		return
 	}
 
@@ -73,7 +73,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, "Invalid input", http.StatusBadRequest)
+		writeJSONError(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
 
@@ -84,10 +84,10 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	authResponse, err := h.svc.Login(r.Context(), input.Email, input.Password)
 	if errors.Is(err, domain.ErrInvalidCredentials) {
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		writeJSONError(w, "Invalid credentials", http.StatusUnauthorized)
 		return
 	} else if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -104,7 +104,7 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, "Invalid input", http.StatusBadRequest)
+		writeJSONError(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
 
@@ -115,10 +115,10 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	err := h.svc.Logout(r.Context(), input.RefreshToken)
 	if errors.Is(err, domain.ErrRefreshTokenNotFound) {
-		http.Error(w, "Refresh token not found", http.StatusNotFound)
+		writeJSONError(w, "Refresh token not found", http.StatusNotFound)
 		return
 	} else if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -131,7 +131,7 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, "Invalid input", http.StatusBadRequest)
+		writeJSONError(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
 
@@ -143,19 +143,19 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	authResponse, err := h.svc.RefreshToken(r.Context(), input.RefreshToken)
 	switch {
 	case errors.Is(err, domain.ErrRefreshTokenNotFound):
-		http.Error(w, "Refresh token not found", http.StatusNotFound)
+		writeJSONError(w, "Refresh token not found", http.StatusNotFound)
 		return
 	case errors.Is(err, domain.ErrRefreshTokenInvalid):
-		http.Error(w, "Invalid refresh token", http.StatusUnauthorized)
+		writeJSONError(w, "Invalid refresh token", http.StatusUnauthorized)
 		return
 	case errors.Is(err, domain.ErrRefreshTokenExpired):
-		http.Error(w, "Refresh token expired", http.StatusUnauthorized)
+		writeJSONError(w, "Refresh token expired", http.StatusUnauthorized)
 		return
 	case errors.Is(err, domain.ErrRefreshTokenRevoked):
-		http.Error(w, "Refresh token revoked", http.StatusUnauthorized)
+		writeJSONError(w, "Refresh token revoked", http.StatusUnauthorized)
 		return
 	case err != nil:
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
