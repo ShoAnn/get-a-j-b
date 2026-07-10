@@ -4,7 +4,8 @@ import { useState } from "react";
 import Button from "./Button";
 import z from "zod";
 import { apiClient } from "@/lib/apiClient";
-import { LoginFormSchema } from "@/types/auth";
+import { LoginResponseSchema } from "@/types/auth";
+import { useRouter } from "next/navigation";
 
 const emailSchema = z.object({
     email: z.email("Invalid email format")
@@ -15,23 +16,34 @@ export default function LoginForm() {
     const [password, setPassword] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
+    const [message, setMessage] = useState("");
     const isFormValid = email.length > 0 && password.length > 0;
+
+    const router = useRouter();
 
     const handleSubmit = async (e: React.SubmitEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
+        if (!isFormValid) {
+            setError("Please enter a valid username/password");
+            setIsSubmitting(false);
+            return;
+        }
 
-        const result = emailSchema.safeParse(email);
+        const result = emailSchema.safeParse({ email });
         if (!result.success) {
-            setError(result.error?.issues[0].message)
+            setError(result.error?.issues[0].message);
+            setIsSubmitting(false);
             return;
         }
 
         try {
-            const res = await apiClient.post("/api/auth/login", LoginFormSchema, { email, password });
+            const res = await apiClient.post("/api/auth/login", LoginResponseSchema, { email, password });
+            setMessage("welcome" + res.user.username);
+            router.push("/");
         } catch (err) {
             if (err instanceof Error) {
-                setError("Login failed")
+                setError("Login failed " + err);
             }
         } finally {
             setIsSubmitting(false);
@@ -40,6 +52,8 @@ export default function LoginForm() {
 
     return (
         <form onSubmit={handleSubmit}>
+            {error && <h2 className="text-red-500">{error}</h2>}
+            {message && <h2 className="text-green-500">{message}</h2>}
             <input
                 type="email"
                 name="email"
@@ -47,8 +61,16 @@ export default function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
             />
-            <input type="password" name="password" placeholder="password" />
-            <Button type="button" variant="primary" >Submit</Button>
+            <input
+                type="password"
+                name="password"
+                placeholder="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+            />
+            <Button type="submit" disabled={isSubmitting} variant="primary" >
+                {isSubmitting ? "..." : "Submit"}
+            </Button>
         </form>
     );
 }
