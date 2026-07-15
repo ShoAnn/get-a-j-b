@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/ShoAnn/get-a-j-b/api/internal/domain"
 )
@@ -20,13 +21,18 @@ func (m *AuthMiddleware) Auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Check for the presence of the Authorization header
 		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
+		prefix := "Bearer "
+		if !strings.HasPrefix(authHeader, prefix) {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		token := strings.TrimPrefix(authHeader, prefix)
+		if token == "" {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 
-		tokenStr := authHeader[len("Bearer "):]
-		claims, err := m.authService.ValidateToken(tokenStr)
+		claims, err := m.authService.ValidateToken(token)
 		if err != nil {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
