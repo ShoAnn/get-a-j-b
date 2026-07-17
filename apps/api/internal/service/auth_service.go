@@ -144,7 +144,7 @@ func (s *AuthService) RefreshToken(ctx context.Context, refreshTokenStr string) 
 	}
 
 	return &domain.AuthResponse{
-		Token:        accessToken,
+		AccessToken:  accessToken,
 		RefreshToken: newRefreshToken,
 	}, nil
 }
