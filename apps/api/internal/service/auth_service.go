@@ -46,8 +46,21 @@ func (s *AuthService) Register(ctx context.Context, req *domain.CreateUserReques
 		return nil, err
 	}
 
+	refreshToken, err := GenerateRefreshToken(32)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.tokenRepo.Create(ctx, &domain.RefreshToken{
+		UserID:    user.ID,
+		Token:     refreshToken,
+		ExpiresAt: time.Now().Add(7 * 24 * time.Hour),
+	})
+
 	return &domain.AuthResponse{
-		Token: token,
+		AccessToken:  token,
+		RefreshToken: refreshToken,
+		ExpiresIn:    "900",
 	}, nil
 }
 
@@ -78,8 +91,9 @@ func (s *AuthService) Login(ctx context.Context, email, password string) (*domai
 	})
 
 	return &domain.AuthResponse{
-		Token:        accessToken,
+		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
+		ExpiresIn:    "900",
 	}, nil
 }
 

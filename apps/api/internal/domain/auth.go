@@ -7,8 +7,9 @@ import (
 )
 
 type AuthResponse struct {
-	Token        string `json:"token"`
+	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token,omitempty"`
+	ExpiresIn    string `json:"expires_in"`
 }
 
 type Claims struct {
