@@ -26,7 +26,7 @@ func NewResumeHandler(svc domain.ResumeService) *ResumeHandler {
 func (h *ResumeHandler) CreateResume(w http.ResponseWriter, r *http.Request) {
 	claims, err := middleware.GetClaimsFromContext(r.Context())
 	if err != nil {
-		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 	var req domain.CreateResumeRequest
@@ -59,7 +59,7 @@ func (h *ResumeHandler) CreateResume(w http.ResponseWriter, r *http.Request) {
 func (h *ResumeHandler) GetAllResumes(w http.ResponseWriter, r *http.Request) {
 	claims, err := middleware.GetClaimsFromContext(r.Context())
 	if err != nil {
-		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 
@@ -81,7 +81,7 @@ func (h *ResumeHandler) GetAllResumes(w http.ResponseWriter, r *http.Request) {
 func (h *ResumeHandler) GetResumeByID(w http.ResponseWriter, r *http.Request) {
 	claims, err := middleware.GetClaimsFromContext(r.Context())
 	if err != nil {
-		writeJSONError(w, "Internal server error", http.StatusNotFound)
+		writeJSONError(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 
@@ -112,7 +112,7 @@ func (h *ResumeHandler) GetResumeByID(w http.ResponseWriter, r *http.Request) {
 func (h *ResumeHandler) UpdateResume(w http.ResponseWriter, r *http.Request) {
 	claims, err := middleware.GetClaimsFromContext(r.Context())
 	if err != nil {
-		writeJSONError(w, "Internal server error", http.StatusNotFound)
+		writeJSONError(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 
@@ -155,7 +155,7 @@ func (h *ResumeHandler) UpdateResume(w http.ResponseWriter, r *http.Request) {
 func (h *ResumeHandler) DeleteResume(w http.ResponseWriter, r *http.Request) {
 	claims, err := middleware.GetClaimsFromContext(r.Context())
 	if err != nil {
-		writeJSONError(w, "Internal server error", http.StatusNotFound)
+		writeJSONError(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 

@@ -26,7 +26,7 @@ func NewJobHandler(svc domain.JobService) *JobHandler {
 func (h *JobHandler) CreateJob(w http.ResponseWriter, r *http.Request) {
 	claims, err := middleware.GetClaimsFromContext(r.Context())
 	if err != nil {
-		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 	var req domain.CreateJobRequest
@@ -59,7 +59,7 @@ func (h *JobHandler) CreateJob(w http.ResponseWriter, r *http.Request) {
 func (h *JobHandler) GetAllJobs(w http.ResponseWriter, r *http.Request) {
 	claims, err := middleware.GetClaimsFromContext(r.Context())
 	if err != nil {
-		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 	jobs, err := h.svc.ListAllJobs(r.Context(), claims.UserID)
@@ -84,7 +84,7 @@ func (h *JobHandler) GetJobByID(w http.ResponseWriter, r *http.Request) {
 
 	claims, err := middleware.GetClaimsFromContext(r.Context())
 	if err != nil {
-		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 	job, err := h.svc.GetJobByID(r.Context(), id, claims.UserID)
@@ -111,7 +111,7 @@ func (h *JobHandler) UpdateJob(w http.ResponseWriter, r *http.Request) {
 	}
 	claims, err := middleware.GetClaimsFromContext(r.Context())
 	if err != nil {
-		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 
@@ -152,7 +152,7 @@ func (h *JobHandler) DeleteJob(w http.ResponseWriter, r *http.Request) {
 	}
 	claims, err := middleware.GetClaimsFromContext(r.Context())
 	if err != nil {
-		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
+		writeJSONError(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/ShoAnn/get-a-j-b/api/internal/domain"
+	"github.com/ShoAnn/get-a-j-b/api/internal/middleware"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -99,21 +100,26 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	var input struct {
-		RefreshToken string `json:"refresh_token" validate:"required"`
+	// get token from header
+	authHeader := r.Header.Get("Authorization")
+	if authHeader == "" {
+		writeJSONError(w, "Unauthorized access", http.StatusBadRequest)
+		return
+	}
+	parts := strings.SplitN(authHeader, " ", 2)
+	if len(parts) != 2 || parts[0] != "Bearer" {
+		writeJSONError(w, "Unauthorized access", http.StatusBadRequest)
+		return
 	}
 
+	// FUTURE NOTE: change empty json to no json if necessary
+	var input struct{}
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		writeJSONError(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
 
-	if err := h.validate.Struct(input); err != nil {
-		writeValidationError(w, err)
-		return
-	}
-
-	err := h.svc.Logout(r.Context(), input.RefreshToken)
+	err := h.svc.Logout(r.Context(), parts[1])
 	if errors.Is(err, domain.ErrRefreshTokenNotFound) {
 		writeJSONError(w, "Refresh token not found", http.StatusNotFound)
 		return

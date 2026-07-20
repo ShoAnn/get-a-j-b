@@ -85,9 +85,11 @@ func main() {
 	mux.HandleFunc("POST /api/auth/register", authHandler.Register)
 	mux.HandleFunc("POST /api/auth/login", authHandler.Login)
 	mux.HandleFunc("POST /api/auth/refresh", authHandler.RefreshToken)
-	mux.HandleFunc("POST /api/auth/logout", authHandler.Logout)
 
 	// Protected routes
+	// Logout
+	mux.Handle("POST /api/auth/logout", authMiddleware.Auth(http.HandlerFunc(authHandler.Logout)))
+
 	// Jobs
 	mux.Handle("POST /api/jobs", authMiddleware.Auth(http.HandlerFunc(jobHandler.CreateJob)))
 	mux.Handle("GET /api/jobs", authMiddleware.Auth(http.HandlerFunc(jobHandler.GetAllJobs)))

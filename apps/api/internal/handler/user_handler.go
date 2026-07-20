@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/ShoAnn/get-a-j-b/api/internal/domain"
+	"github.com/ShoAnn/get-a-j-b/api/internal/middleware"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -23,6 +24,15 @@ func NewUserHandler(svc domain.UserService) *UserHandler {
 }
 
 func (h *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
+	claims, err := middleware.GetClaimsFromContext(r.Context())
+	if err != nil {
+		writeJSONError(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+	if claims.Role != "admin" {
+		writeJSONError(w, "Access forbidden", http.StatusForbidden)
+		return
+	}
 	users, err := h.svc.GetAllUsers(r.Context())
 	if err != nil {
 		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
@@ -36,10 +46,19 @@ func (h *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
+	claims, err := middleware.GetClaimsFromContext(r.Context())
+	if err != nil {
+		writeJSONError(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		writeJSONError(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+	if claims.UserID != id {
+		writeJSONError(w, "Access forbidden", http.StatusForbidden)
 		return
 	}
 
@@ -59,10 +78,19 @@ func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
+	claims, err := middleware.GetClaimsFromContext(r.Context())
+	if err != nil {
+		writeJSONError(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		writeJSONError(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+	if claims.UserID != id {
+		writeJSONError(w, "Access forbidden", http.StatusForbidden)
 		return
 	}
 
@@ -99,10 +127,19 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	claims, err := middleware.GetClaimsFromContext(r.Context())
+	if err != nil {
+		writeJSONError(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		writeJSONError(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+	if claims.UserID != id {
+		writeJSONError(w, "Access forbidden", http.StatusForbidden)
 		return
 	}
 

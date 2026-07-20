@@ -30,15 +30,11 @@ func (s *UserService) GetUserByID(ctx context.Context, id int) (*domain.User, er
 	return user, nil
 }
 
+// TODO: i confused forbidden with unauthorized
 func (s *UserService) UpdateUser(ctx context.Context, id int, user *domain.UpdateUserRequest) (*domain.User, error) {
 	existingUser, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return nil, domain.ErrUserNotFound
-	}
-
-	callerId := ctx.Value("user_id").(int)
-	if callerId != existingUser.ID {
-		return nil, domain.ErrUnauthorized
 	}
 
 	if user.Username != nil {
