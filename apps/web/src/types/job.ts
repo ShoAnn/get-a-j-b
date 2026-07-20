@@ -1,3 +1,6 @@
+import { JOB_STATUSES } from "@/components/StatusBadge";
+import z from "zod";
+
 export type JobStatus =
   | "draft"
   | "submitted"
@@ -19,10 +22,11 @@ export interface Job {
   jobPortal?: string;
 }
 
-export interface JobFormData {
-  role: string;
-  company: string;
-  status: JobStatus;
-  notes: string;
-  jobPortal: string;
-}
+const statusArray = JOB_STATUSES.map(status => status)
+export const JobSchema = z.object({
+  title: z.string(),
+  company: z.string(),
+  status: z.enum(statusArray),
+  notes: z.string(),
+  jobPortal: z.string(),
+})

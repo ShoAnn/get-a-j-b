@@ -12,19 +12,18 @@ export const RegisterSchema = z.object({
     error: "Passwords do not match",
     path: ["confirmPassword"]
 })
-export const RegisterResponseSchema = z.object({
-    user: UserSchema,
-})
-export type RegisterResponse = z.infer<typeof RegisterResponseSchema>
 
 export const LoginFormSchema = z.object({
     email: z.email(),
     password: z.string()
 })
 
-export const LoginResponseSchema = z.object({
-    user: UserSchema,
+export const AuthResponseSchema = z.object({
+    accessToken: z.string(),
+    refreshToken: z.string(),
+    expiryTime: z.string().regex(/^\d+$/)
 })
 
-export type LoginResponse = z.infer<typeof LoginResponseSchema>
+export type AuthResponse = z.infer<typeof AuthResponseSchema>
 
+export const LogoutResponseSchema = z.void();

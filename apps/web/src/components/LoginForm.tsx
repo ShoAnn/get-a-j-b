@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Button from "./Button";
 import z from "zod";
-import { apiClient } from "@/lib/apiClient";
+import { apiClient } from "@/lib/client/api";
 import { LoginResponseSchema } from "@/types/auth";
 import { useRouter } from "next/navigation";
 
@@ -16,7 +16,6 @@ export default function LoginForm() {
     const [password, setPassword] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
-    const [message, setMessage] = useState("");
     const isFormValid = email.length > 0 && password.length > 0;
 
     const router = useRouter();
@@ -38,8 +37,7 @@ export default function LoginForm() {
         }
 
         try {
-            const res = await apiClient.post("/api/auth/login", LoginResponseSchema, { email, password });
-            setMessage("welcome" + res.user.username);
+            await apiClient.post("/api/auth/login", LoginResponseSchema, { email, password });
             router.push("/");
         } catch (err) {
             if (err instanceof Error) {
@@ -53,7 +51,6 @@ export default function LoginForm() {
     return (
         <form onSubmit={handleSubmit}>
             {error && <h2 className="text-red-500">{error}</h2>}
-            {message && <h2 className="text-green-500">{message}</h2>}
             <input
                 type="email"
                 name="email"
