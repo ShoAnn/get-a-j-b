@@ -5,7 +5,7 @@ import Link from "next/link";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { JOB_STATUSES } from "@/components/StatusBadge";
 import type { Job } from "@/types/job";
-import { apiClient } from "@/lib/apiClient";
+import { apiClient } from "@/lib/client/api";
 
 const statusColors: Record<string, string> = {
     draft: "#D4D4D8",

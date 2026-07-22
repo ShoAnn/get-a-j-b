@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/ShoAnn/get-a-j-b/api/internal/domain"
-	"github.com/ShoAnn/get-a-j-b/api/internal/middleware"
 	"github.com/go-playground/validator/v10"
 )
 

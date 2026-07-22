@@ -1,13 +1,11 @@
 import z from "zod"
-import { UserSchema } from "./user"
 
 export const RegisterSchema = z.object({
-    id: z.string(),
     email: z.email(),
     username: z.string().min(3),
     password: z.string().min(6),
     confirmPassword: z.string(),
-    role: z.enum(['admin', 'user'])
+    role: z.enum(['admin', 'user']).optional(),
 }).refine((data) => data.password === data.confirmPassword, {
     error: "Passwords do not match",
     path: ["confirmPassword"]

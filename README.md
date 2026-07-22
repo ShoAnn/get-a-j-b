@@ -35,7 +35,7 @@ afterwards you can just `docker-compose up`
 
 ### Frontend — API Integration
 - [x] Create API client module (fetch wrapper with base URL, auth headers, error handling)
-- [ ] Wire auth flows: login page, register page, JWT storage (httponly cookie), protected routes
+- [x] Wire auth flows: login page, register page, JWT storage (httponly cookie), protected routes
 - [ ] Connect Jobs List page to `GET /jobs` (loading, empty, error states)
 - [ ] Connect Job Detail page to `GET /jobs/{id}`
 - [ ] Connect AddJobModal to `POST /jobs` with mutation feedback

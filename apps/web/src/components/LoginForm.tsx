@@ -4,7 +4,7 @@ import { useState } from "react";
 import Button from "./Button";
 import z from "zod";
 import { apiClient } from "@/lib/client/api";
-import { LoginResponseSchema } from "@/types/auth";
+import { AuthResponseSchema } from "@/types/auth";
 import { useRouter } from "next/navigation";
 
 const emailSchema = z.object({
@@ -37,7 +37,7 @@ export default function LoginForm() {
         }
 
         try {
-            await apiClient.post("/api/auth/login", LoginResponseSchema, { email, password });
+            await apiClient.post("/api/auth/login", AuthResponseSchema, { email, password });
             router.push("/");
         } catch (err) {
             if (err instanceof Error) {
@@ -49,7 +49,7 @@ export default function LoginForm() {
     }
 
     return (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="w-3xl flex flex-col border-10 border-midnight">
             {error && <h2 className="text-red-500">{error}</h2>}
             <input
                 type="email"
