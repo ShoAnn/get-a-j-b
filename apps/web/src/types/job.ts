@@ -2,31 +2,31 @@ import { JOB_STATUSES } from "@/components/StatusBadge";
 import z from "zod";
 
 export type JobStatus =
-  | "draft"
-  | "submitted"
-  | "under_review"
-  | "interview_scheduled"
-  | "offer_extended"
-  | "accepted"
-  | "rejected"
-  | "withdrawn"
-  | "archived";
-
-export interface Job {
-  id: string;
-  title: string;
-  company: string;
-  status: JobStatus;
-  dateApplied: string;
-  notes?: string;
-  jobPortal?: string;
-}
+    | "draft"
+    | "submitted"
+    | "under_review"
+    | "interview_scheduled"
+    | "offer_extended"
+    | "accepted"
+    | "rejected"
+    | "withdrawn"
+    | "archived";
 
 const statusArray = JOB_STATUSES.map(status => status)
 export const JobSchema = z.object({
-  title: z.string(),
-  company: z.string(),
-  status: z.enum(statusArray),
-  notes: z.string(),
-  jobPortal: z.string(),
+    id: z.string(),
+    userId: z.string(),
+    title: z.string(),
+    company: z.string(),
+    location: z.string(),
+    salary: z.number(), // TODO: fix salary in the backend
+    status: z.enum(statusArray),
+    statusChangedAt: z.string(),
+    description: z.string(),
+    requirements: z.string(),
+    notes: z.string(),
+    jobPortal: z.string(),
+    sourceURL: z.string(),
 })
+
+export type Job = z.infer<typeof JobSchema>

@@ -1,3 +1,4 @@
+import { HttpError, ValidationError } from "@/types/errors";
 import z from "zod";
 
 async function request<T>(
@@ -18,7 +19,7 @@ async function request<T>(
 	)
 	if (!res.ok) {
 		const error = await res.json().catch(() => ({}))
-		throw new Error(error.message ?? `http error: ${res.status}`)
+		throw new HttpError(`http error: ${error.message}`, res.status)
 	}
 
 	if (res.status === 204 || res.headers.get("content-length") === "0") {
@@ -28,9 +29,15 @@ async function request<T>(
 	const json = await res.json()
 	const parsedJson = schema.safeParse(json)
 	if (!parsedJson.success) {
-		throw new Error(
-			`Form Validation failed: ${parsedJson.error.issues.map(i => `${i.path.join(".")}: ${i.message}`).join(", ")}`
-		)
+		throw new ValidationError(
+			'Validation failed',
+			parsedJson.error.issues.reduce((fields, i) => {
+				const key = i.path.join('.');
+				fields[key] = fields[key] || [];
+				fields[key].push(i.message);
+				return fields;
+			}, {} as Record<string, string[]>)
+		);
 	}
 	return parsedJson.data
 }
