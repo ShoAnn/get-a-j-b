@@ -1,8 +1,10 @@
+import { zodErrorToFields } from "@/lib/helpers";
 import { internalApiClient } from "@/lib/server/api";
 import { setAuthCookies } from "@/lib/setAuthCookies";
 import { AuthResponseSchema, RegisterSchema } from "@/types/auth";
-import { HttpError, ValidationError } from "@/types/errors";
+import { HttpError } from "@/types/errors";
 import { NextRequest, NextResponse } from "next/server";
+import { ZodError } from "zod";
 
 export async function POST(request: NextRequest) {
     try {
@@ -23,10 +25,11 @@ export async function POST(request: NextRequest) {
         await setAuthCookies(accessToken, refreshToken, expiryTime);
         return NextResponse.json({ success: true });
     } catch (err) {
-        if (err instanceof ValidationError) {
+        if (err instanceof ZodError) {
+            const fields = zodErrorToFields(err);
             return NextResponse.json(
-                { error: err.message, fields: err.fields },
-                { status: err.statusCode }
+                { error: 'Validation failed', fields },
+                { status: 422 }
             );
         }
         if (err instanceof HttpError) {

@@ -1,4 +1,4 @@
-import { HttpError, ValidationError } from "@/types/errors";
+import { HttpError } from "@/types/errors";
 import z from "zod";
 
 async function request<T>(
@@ -29,15 +29,7 @@ async function request<T>(
 	const json = await res.json()
 	const parsedJson = schema.safeParse(json)
 	if (!parsedJson.success) {
-		throw new ValidationError(
-			'Validation failed',
-			parsedJson.error.issues.reduce((fields, i) => {
-				const key = i.path.join('.');
-				fields[key] = fields[key] || [];
-				fields[key].push(i.message);
-				return fields;
-			}, {} as Record<string, string[]>)
-		);
+		throw parsedJson.error;
 	}
 	return parsedJson.data
 }
