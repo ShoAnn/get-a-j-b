@@ -19,7 +19,7 @@ export const JobSchema = z.object({
     title: z.string(),
     company: z.string(),
     location: z.string(),
-    salary: z.number(), // TODO: fix salary in the backend
+    salary: z.number(),
     description: z.string(),
     requirements: z.string(),
     status: z.enum(statusArray),
