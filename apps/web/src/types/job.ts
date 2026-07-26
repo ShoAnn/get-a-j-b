@@ -20,13 +20,14 @@ export const JobSchema = z.object({
     company: z.string(),
     location: z.string(),
     salary: z.number(), // TODO: fix salary in the backend
-    status: z.enum(statusArray),
-    statusChangedAt: z.string(),
     description: z.string(),
     requirements: z.string(),
+    status: z.enum(statusArray),
+    statusChangedAt: z.string(),
     notes: z.string(),
-    jobPortal: z.string(),
     sourceURL: z.string(),
+    jobPortal: z.string(),
+    createdAt: z.string(),
 })
 
 export type Job = z.infer<typeof JobSchema>

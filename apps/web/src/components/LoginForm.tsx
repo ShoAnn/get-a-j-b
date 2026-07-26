@@ -16,6 +16,7 @@ export default function LoginForm() {
     const [password, setPassword] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
     const isFormValid = email.length > 0 && password.length > 0;
 
     const router = useRouter();
@@ -38,6 +39,7 @@ export default function LoginForm() {
 
         try {
             await apiClient.post("/api/auth/login", AuthResponseSchema, { email, password });
+            setSuccess("login success");
             router.push("/");
         } catch (err) {
             if (err instanceof Error) {
@@ -51,6 +53,7 @@ export default function LoginForm() {
     return (
         <form onSubmit={handleSubmit} className="w-3xl flex flex-col border-10 border-midnight">
             {error && <h2 className="text-red-500">{error}</h2>}
+            {success && <h2 className="text-red-500">{success}</h2>}
             <input
                 type="email"
                 name="email"
