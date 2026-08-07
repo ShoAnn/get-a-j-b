@@ -3,7 +3,7 @@ import { zodErrorToFields } from "@/lib/helpers";
 import { requireAuth } from "@/lib/requireAuth";
 import { internalApiClient } from "@/lib/server/api";
 import { HttpError } from "@/types/errors";
-import { JobSchema, UpdateJobsSchema } from "@/types/job";
+import { JobSchema, UpdateJobSchema } from "@/types/job";
 import { NextRequest, NextResponse } from "next/server";
 import z, { ZodError } from "zod";
 
@@ -38,7 +38,7 @@ export async function PUT(request: NextRequest) {
     try {
         const token = await requireAuth();
         const body = await request.json();
-        const validatedInput = UpdateJobsSchema.safeParse(body);
+        const validatedInput = UpdateJobSchema.safeParse(body);
         const data = await internalApiClient.put('/jobs', JobSchema, validatedInput,
             { headers: { Authorization: `Bearer ${token}` }, }
         );

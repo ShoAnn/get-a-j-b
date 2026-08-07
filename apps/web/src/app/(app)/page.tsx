@@ -32,7 +32,7 @@ export default function Dashboard() {
         (j) => j.status === "offer_extended" || j.status === "accepted",
     ).length;
 
-    const dates = jobs.map((j) => new Date(j.dateApplied).getTime());
+    const dates = jobs.map((j) => new Date(j.createdAt).getTime());
     const firstDate = dates.length > 0 ? new Date(Math.min(...dates)) : new Date();
     const daysSince = Math.floor(
         (Date.now() - firstDate.getTime()) / (1000 * 60 * 60 * 24),
@@ -196,8 +196,8 @@ export default function Dashboard() {
                                         {[...jobs]
                                             .sort(
                                                 (a, b) =>
-                                                    new Date(b.dateApplied).getTime() -
-                                                    new Date(a.dateApplied).getTime(),
+                                                    new Date(b.createdAt).getTime() -
+                                                    new Date(a.createdAt).getTime(),
                                             )
                                             .map((job) => (
                                                 <Link

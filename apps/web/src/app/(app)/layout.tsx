@@ -7,7 +7,10 @@ export default async function AppLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    await requireAuth();
+    const branch = process.env.BRANCH;
+    if (branch == "prod" && branch == "production") {
+        await requireAuth();
+    }
     return (
         <>
             <Header />

@@ -1,10 +1,13 @@
 "use client";
 
-import { Job, JobStatus } from "@/types/job";
+import { Job, JobSchema, JobStatus } from "@/types/job";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { JOB_STATUSES, StatusBadge } from "./StatusBadge";
+import { apiClient } from "@/lib/client/api";
+import z from "zod";
+import { HttpError } from "@/types/errors";
 
 const STATUS_ORDER: Record<JobStatus, number> = {
     draft: 0, submitted: 1, under_review: 2, interview_scheduled: 3,
@@ -21,12 +24,39 @@ export function JobsList() {
     const [statusFilter, setStatusFilter] = useState<JobStatus | "all">("all");
     const [sortKey, setSortKey] = useState<SortKey>("date");
     const [sortDir, setSortDir] = useState<SortDir>("desc");
+    const [loading, setLoading] = useState<Boolean>(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        fetch('/api/jobs', { credentials: 'include' })
-            .then(res => { if (!res.ok) throw new Error(res.statusText); return res.json(); })
-            .then(data => { if (Array.isArray(data)) setJobs(data); })
+        let cancelled = false;
+
+        async function fetchJobs() {
+            setLoading(true);
+            setError(null);
+            try {
+                const data = await apiClient.get(`/jobs`, z.array(JobSchema));
+                if (!cancelled) setJobs(data);
+            } catch (err) {
+                if (cancelled) return;
+                if (err instanceof HttpError) {
+                    setError(`Request failed (${err.statusCode}): ${err.message}`);
+                } else if (err instanceof z.ZodError) {
+                    setError("Unexpected response shape from server");
+                } else {
+                    setError("Something went wrong");
+                }
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        }
+
+        fetchJobs();
+
+        return () => {
+            cancelled = true;
+        };
     }, []);
+
 
     const filtered = jobs.filter((job: Job) => {
         const q = searchQuery.toLowerCase();
@@ -128,6 +158,8 @@ export function JobsList() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-100 dark:divide-[#333355]">
+                                {loading && <h1>LOADING...</h1>}
+                                {error && <h1 className="text-red">something went wrong</h1>}
                                 {filtered.map((job: Job) => (
                                     <tr
                                         key={job.id}

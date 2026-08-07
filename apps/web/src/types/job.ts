@@ -32,7 +32,7 @@ export const JobSchema = z.object({
 
 export type Job = z.infer<typeof JobSchema>
 
-export const CreateJobsSchema = z.object({
+export const CreateJobSchema = z.object({
     title: z.string(),
     company: z.string(),
     location: z.string(),
@@ -45,7 +45,7 @@ export const CreateJobsSchema = z.object({
     jobPortal: z.string().optional(),
 })
 
-export const UpdateJobsSchema = z.object({
+export const UpdateJobSchema = z.object({
     title: z.string(),
     company: z.string(),
     location: z.string(),
@@ -57,3 +57,5 @@ export const UpdateJobsSchema = z.object({
     notes: z.string().optional(),
     jobPortal: z.string().optional(),
 })
+
+export type UpdateJob = z.infer<typeof UpdateJobSchema>;
