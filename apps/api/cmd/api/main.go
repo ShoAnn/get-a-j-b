@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/ShoAnn/get-a-j-b/api/internal/handler"
@@ -73,6 +74,11 @@ func main() {
 
 	// Middleware
 	authMiddleware := middleware.NewAuthMiddleware(authService)
+	allowedOrigins := strings.Split(os.Getenv("CORS_ALLOWED_ORIGINS"), ",")
+	if len(allowedOrigins) == 1 && allowedOrigins[0] == "" {
+		allowedOrigins = []string{"http://localhost:3000"}
+	}
+	corsMiddleware := middleware.NewCORS(allowedOrigins)
 
 	// Router
 	mux := http.NewServeMux()
@@ -117,5 +123,5 @@ func main() {
 	}
 
 	fmt.Printf("Go API server starting on port %s\n", port)
-	log.Fatal(http.ListenAndServe(":"+port, middleware.Logger(mux)))
+	log.Fatal(http.ListenAndServe(":"+port, middleware.Logger(corsMiddleware.Middleware(mux))))
 }
