@@ -24,7 +24,7 @@ export function JobsList() {
     const [statusFilter, setStatusFilter] = useState<JobStatus | "all">("all");
     const [sortKey, setSortKey] = useState<SortKey>("date");
     const [sortDir, setSortDir] = useState<SortDir>("desc");
-    const [loading, setLoading] = useState<Boolean>(true);
+    const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -153,7 +153,7 @@ export function JobsList() {
                                         Date
                                     </th>
                                     <th className="px-6 py-4 text-right text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">
-                                        Action
+                                        <span className="sr-only">Actions</span>
                                     </th>
                                 </tr>
                             </thead>
@@ -187,9 +187,24 @@ export function JobsList() {
                                         <td className="px-6 py-4 text-right">
                                             <Link
                                                 href={`/jobs/${job.id}`}
-                                                className="inline-flex items-center justify-center rounded-lg border border-violet px-4 py-[6px] text-xs font-medium text-violet transition-colors hover:bg-[#F5F3FF] active:bg-[#EBE9FA]"
+                                                aria-label={`View details for ${job.title} at ${job.company}`}
+                                                className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-violet text-violet transition-colors hover:bg-[#F5F3FF] active:bg-[#EBE9FA] dark:hover:bg-[#3A3A5C]"
                                             >
-                                                Details
+                                                <svg
+                                                    width="12"
+                                                    height="12"
+                                                    viewBox="0 0 12 12"
+                                                    fill="none"
+                                                    aria-hidden="true"
+                                                >
+                                                    <path
+                                                        d="M4 2l4 4-4 4"
+                                                        stroke="currentColor"
+                                                        strokeWidth="1.8"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                    />
+                                                </svg>
                                             </Link>
                                         </td>
                                     </tr>

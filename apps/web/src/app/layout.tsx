@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { MswProvider } from "@/mocks/MswProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,6 +30,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
+        <MswProvider>
         <div
           dangerouslySetInnerHTML={{
             __html: `<script id="theme-init">
@@ -42,6 +44,7 @@ export default function RootLayout({
           }}
         />
         {children}
+        </MswProvider>
       </body>
     </html>
   );

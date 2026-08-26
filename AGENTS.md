@@ -1,0 +1,2 @@
+- Follow the existing coding conventions and project structuring
+- Always check for deprecated functions or packages

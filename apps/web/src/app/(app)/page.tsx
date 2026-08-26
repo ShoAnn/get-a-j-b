@@ -5,6 +5,10 @@ import Link from "next/link";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { JOB_STATUSES } from "@/components/StatusBadge";
 import type { Job } from "@/types/job";
+import { JobSchema } from "@/types/job";
+import { apiClient } from "@/lib/client/api";
+import { HttpError } from "@/types/errors";
+import z from "zod";
 
 const statusColors: Record<string, string> = {
     draft: "#D4D4D8",
@@ -21,10 +25,37 @@ const statusColors: Record<string, string> = {
 export default function Dashboard() {
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    // useEffect(() => {
-    //     apiClient.get<Job[]>("/jobs").then(setJobs).finally(() => setLoading(false));
-    // }, []);
+    useEffect(() => {
+        let cancelled = false;
+
+        async function fetchJobs() {
+            setLoading(true);
+            setError(null);
+            try {
+                const data = await apiClient.get("/jobs", z.array(JobSchema));
+                if (!cancelled) setJobs(data);
+            } catch (err) {
+                if (cancelled) return;
+                if (err instanceof HttpError) {
+                    setError(`Request failed (${err.statusCode}): ${err.message}`);
+                } else if (err instanceof z.ZodError) {
+                    setError("Unexpected response shape from server");
+                } else {
+                    setError("Something went wrong");
+                }
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        }
+
+        fetchJobs();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     const totalSaved = jobs.length;
     const totalApplied = jobs.filter((j) => j.status !== "draft").length;
@@ -77,6 +108,8 @@ export default function Dashboard() {
                             />
                         ))}
                     </div>
+                ) : error ? (
+                    <p className="mt-6 text-sm text-red-600">{error}</p>
                 ) : (
                     <>
                         {/* Stats cards */}
@@ -199,6 +232,7 @@ export default function Dashboard() {
                                                     new Date(b.createdAt).getTime() -
                                                     new Date(a.createdAt).getTime(),
                                             )
+                                            .slice(0, 5)
                                             .map((job) => (
                                                 <Link
                                                     key={job.id}
@@ -222,6 +256,11 @@ export default function Dashboard() {
                                                     </span>
                                                 </Link>
                                             ))}
+                                        {jobs.length === 0 && (
+                                            <p className="px-3 py-2.5 text-sm italic text-text-secondary dark:text-[#9999AA]">
+                                                No jobs yet.
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
