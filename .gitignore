@@ -8,6 +8,9 @@ package-lock.json
 
 # Go
 /apps/api/server
+/apps/api/job
+/apps/api/cmd/api/api
+*.exe
 tmp/
 
 # Docker
