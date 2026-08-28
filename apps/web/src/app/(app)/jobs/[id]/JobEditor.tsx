@@ -48,6 +48,12 @@ function formatSalary(salary: number): string {
     return new Intl.NumberFormat("en-US").format(salary);
 }
 
+function parseSalary(value: string): number {
+    if (value === "") return 0;
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+}
+
 export default function JobEditor({
     jobId,
     initialJob,
@@ -76,18 +82,7 @@ export default function JobEditor({
     const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof UpdateJob, string>>>({});
 
     const isDirty = useMemo(
-        () => JSON.stringify({ ...formData }) !== JSON.stringify({
-            title: job.title,
-            company: job.company,
-            location: job.location,
-            salary: job.salary,
-            description: job.description,
-            requirements: job.requirements,
-            sourceURL: job.sourceURL,
-            status: job.status,
-            notes: job.notes,
-            jobPortal: job.jobPortal,
-        }),
+        () => Object.entries(formData).some(([key, value]) => value !== job[key as keyof Job]),
         [formData, job]
     );
 
@@ -99,7 +94,7 @@ export default function JobEditor({
         const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
-            [name]: name === "salary" ? Number(value) : value,
+            [name]: name === "salary" ? parseSalary(value) : value,
         }));
         if (fieldErrors[name as keyof UpdateJob]) {
             setFieldErrors((prev) => ({ ...prev, [name]: undefined }));

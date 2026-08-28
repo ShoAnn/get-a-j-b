@@ -87,5 +87,5 @@ export default function JobDetail() {
         );
     }
 
-    return <JobEditor jobId={jobID} initialJob={job} onSaved={setJob} />;
+    return <JobEditor key={jobID} jobId={jobID} initialJob={job} onSaved={setJob} />;
 }

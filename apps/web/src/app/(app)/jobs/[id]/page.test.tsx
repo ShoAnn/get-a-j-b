@@ -149,6 +149,32 @@ describe("JobEditor", () => {
       expect(screen.getByText(/Save failed/)).toBeInTheDocument();
     });
   });
+
+  it("treats cleared salary as 0 and detects the change with an error-free save", async () => {
+    mockedApi.put.mockResolvedValueOnce(MOCK_JOB);
+    setup();
+
+    fireEvent.click(screen.getByText("120,000"));
+    fireEvent.change(screen.getByLabelText("Salary"), {
+      target: { value: "" },
+    });
+    expect((screen.getByRole("button", { name: "Save" }) as HTMLButtonElement).disabled).toBe(false);
+
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    await waitFor(() => {
+      expect(mockedApi.put).toHaveBeenCalledWith(
+        "/jobs/job-1",
+        expect.anything(),
+        expect.objectContaining({ salary: 0 }),
+      );
+    });
+    await waitFor(() => {
+      expect(mockedApi.put.mock.calls[0][2]).not.toHaveProperty(
+        "salary",
+        Number.NaN,
+      );
+    });
+  });
 });
 
 describe("JobDetailPage", () => {
