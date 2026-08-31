@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Button from "./Button";
 import { apiClient } from "@/lib/client/api";
-import { AuthResponseSchema, RegisterSchema } from "@/types/auth";
+import { RegisterSchema } from "@/types/auth";
 import { useRouter } from "next/navigation";
+import z from "zod";
 
 const roles = ["admin", "user"];
 
@@ -41,7 +42,7 @@ export default function RegisterForm({ showRoleSelect }: { showRoleSelect: boole
         }
 
         try {
-            await apiClient.post("/api/auth/register", AuthResponseSchema, parsedInput);
+            await apiClient.post("/auth/register", z.void(), parsedInput.data);
             router.push("/");
         } catch (err) {
             if (err instanceof Error) {

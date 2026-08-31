@@ -1,95 +1,199 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import JobEditor from "./JobEditor";
 import JobDetailPage from "./page";
+import type { Job } from "@/types/job";
 
-vi.mock("next/link", () => ({
-  default: ({ children, href, className }: any) => (
-    <a href={href} className={className}>
-      {children}
-    </a>
-  ),
+vi.mock("@/lib/client/api", () => ({
+  apiClient: {
+    get: vi.fn(),
+    put: vi.fn(),
+  },
 }));
 
-const mockParams = vi.hoisted(() => ({ id: "1" }));
+import { apiClient } from "@/lib/client/api";
+const mockedApi = vi.mocked(apiClient);
+
 vi.mock("next/navigation", () => ({
-  useParams: () => mockParams,
+  useParams: () => ({ id: "job-1" }),
 }));
+
+const MOCK_JOB: Job = {
+  id: "job-1",
+  userId: "user-1",
+  title: "Frontend Engineer",
+  company: "Stripe",
+  location: "Remote",
+  salary: 120000,
+  description: "Build UIs",
+  requirements: "React, TypeScript",
+  status: "submitted",
+  statusChangedAt: "2025-12-01T00:00:00Z",
+  notes: "Referred by John.",
+  sourceURL: "https://stripe.com/careers",
+  jobPortal: "LinkedIn",
+  createdAt: "2025-11-20T00:00:00Z",
+};
+
+describe("JobEditor", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  function setup() {
+    const onSaved = vi.fn();
+    render(<JobEditor jobId="job-1" initialJob={MOCK_JOB} onSaved={onSaved} />);
+    return { onSaved };
+  }
+
+  it("renders job details as text elements in view mode", () => {
+    setup();
+    expect(screen.getByText("Frontend Engineer")).toBeInTheDocument();
+    expect(screen.getByText("Stripe")).toBeInTheDocument();
+    expect(screen.getByText("Remote")).toBeInTheDocument();
+    expect(screen.getByText("Build UIs")).toBeInTheDocument();
+    expect(screen.getByText("Referred by John.")).toBeInTheDocument();
+    // no inputs rendered while in view mode
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  });
+
+  it("renders formatted salary and status badge in view mode", () => {
+    setup();
+    expect(screen.getByText("120,000")).toBeInTheDocument();
+    const badge = screen.getAllByText("submitted")[0];
+    expect(badge.className).toContain("rounded-lg");
+  });
+
+  it("shows placeholder text for empty notes", () => {
+    render(
+      <JobEditor
+        jobId="job-1"
+        initialJob={{ ...MOCK_JOB, notes: "" }}
+        onSaved={vi.fn()}
+      />,
+    );
+    expect(screen.getByText("No notes added yet.")).toBeInTheDocument();
+  });
+
+  it("switches all fields to inputs when any field is clicked", () => {
+    setup();
+    fireEvent.click(screen.getByText("Stripe"));
+    expect(screen.getByLabelText("Title")).toHaveAttribute("type", "text");
+    expect(screen.getByLabelText("Company")).toHaveAttribute("type", "text");
+    expect(screen.getByLabelText("Location")).toHaveAttribute("type", "text");
+    expect(screen.getByLabelText("Salary")).toHaveAttribute("type", "number");
+    expect(screen.getByLabelText("Source URL")).toHaveAttribute("type", "text");
+    expect(screen.getByLabelText("Description").tagName).toBe("TEXTAREA");
+    expect(screen.getByLabelText("Requirements").tagName).toBe("TEXTAREA");
+    expect(screen.getByLabelText("Notes").tagName).toBe("TEXTAREA");
+    expect(screen.getByLabelText("Status").tagName).toBe("SELECT");
+    expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Discard" })).toBeInTheDocument();
+  });
+
+  it("discards changes and returns to view mode", () => {
+    setup();
+    fireEvent.click(screen.getByText("Frontend Engineer"));
+    fireEvent.change(screen.getByLabelText("Title"), {
+      target: { value: "Backend Engineer" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Discard" }));
+    expect(mockedApi.put).not.toHaveBeenCalled();
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    expect(screen.getByText("Frontend Engineer")).toBeInTheDocument();
+  });
+
+  it("saves via PUT /jobs/{id} and returns to view mode", async () => {
+    const updated = { ...MOCK_JOB, title: "Senior Frontend Engineer" };
+    mockedApi.put.mockResolvedValueOnce(updated);
+    const { onSaved } = setup();
+
+    fireEvent.click(screen.getByText("Frontend Engineer"));
+    fireEvent.change(screen.getByLabelText("Title"), {
+      target: { value: "Senior Frontend Engineer" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    await waitFor(() => {
+      expect(mockedApi.put).toHaveBeenCalledWith(
+        "/jobs/job-1",
+        expect.anything(),
+        expect.objectContaining({ title: "Senior Frontend Engineer" }),
+      );
+    });
+    await waitFor(() => {
+      expect(onSaved).toHaveBeenCalledWith(updated);
+    });
+    // back in view mode showing the saved value
+    await waitFor(() => {
+      expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    });
+    expect(screen.getByText("Senior Frontend Engineer")).toBeInTheDocument();
+  });
+
+  it("disables Save until a change is made and shows error when PUT fails", async () => {
+    const { HttpError } = await import("@/types/errors");
+    mockedApi.put.mockRejectedValueOnce(new HttpError("boom", 500));
+    setup();
+
+    fireEvent.click(screen.getByText("Frontend Engineer"));
+    const save = screen.getByRole("button", { name: "Save" }) as HTMLButtonElement;
+    expect(save.disabled).toBe(true);
+
+    fireEvent.change(screen.getByLabelText("Title"), {
+      target: { value: "Changed" },
+    });
+    expect((screen.getByRole("button", { name: "Save" }) as HTMLButtonElement).disabled).toBe(false);
+
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    await waitFor(() => {
+      expect(screen.getByText(/Save failed/)).toBeInTheDocument();
+    });
+  });
+
+  it("treats cleared salary as 0 and detects the change with an error-free save", async () => {
+    mockedApi.put.mockResolvedValueOnce(MOCK_JOB);
+    setup();
+
+    fireEvent.click(screen.getByText("120,000"));
+    fireEvent.change(screen.getByLabelText("Salary"), {
+      target: { value: "" },
+    });
+    expect((screen.getByRole("button", { name: "Save" }) as HTMLButtonElement).disabled).toBe(false);
+
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    await waitFor(() => {
+      expect(mockedApi.put).toHaveBeenCalledWith(
+        "/jobs/job-1",
+        expect.anything(),
+        expect.objectContaining({ salary: 0 }),
+      );
+    });
+    await waitFor(() => {
+      expect(mockedApi.put.mock.calls[0][2]).not.toHaveProperty(
+        "salary",
+        Number.NaN,
+      );
+    });
+  });
+});
 
 describe("JobDetailPage", () => {
   beforeEach(() => {
-    mockParams.id = "1";
+    vi.clearAllMocks();
   });
 
-  it("renders job title and company for a found job", () => {
+  it("fetches the job by id and renders it in view mode", async () => {
+    mockedApi.get.mockResolvedValueOnce(MOCK_JOB);
     render(<JobDetailPage />);
-    expect(
-      screen.getByRole("heading", { name: "Frontend Engineer" }),
-    ).toBeInTheDocument();
-    expect(screen.getByText("Stripe")).toBeInTheDocument();
+    expect(await screen.findByText("Frontend Engineer")).toBeInTheDocument();
+    expect(mockedApi.get).toHaveBeenCalledWith("/jobs/job-1", expect.anything());
   });
 
-  it("renders status badge", () => {
+  it("shows not-found state on 404", async () => {
+    const { HttpError } = await import("@/types/errors");
+    mockedApi.get.mockRejectedValueOnce(new HttpError("not found", 404));
     render(<JobDetailPage />);
-    const matches = screen.getAllByText("submitted");
-    expect(matches.length).toBe(2);
-    expect(matches[0].tagName).toBe("SPAN");
-    expect(matches[0].className).toContain("rounded-lg");
-  });
-
-  it("renders step progress", () => {
-    render(<JobDetailPage />);
-    expect(screen.getByText("Step 2 of 6")).toBeInTheDocument();
-  });
-
-  it("renders date applied", () => {
-    render(<JobDetailPage />);
-    const expectedDate = new Date("2025-12-01").toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    });
-    expect(screen.getByText(expectedDate)).toBeInTheDocument();
-  });
-
-  it("renders job portal section", () => {
-    render(<JobDetailPage />);
-    expect(
-      screen.getByText("Job Portal"),
-    ).toBeInTheDocument();
-    expect(screen.getByText("LinkedIn")).toBeInTheDocument();
-  });
-
-  it("renders notes", () => {
-    render(<JobDetailPage />);
-    expect(
-      screen.getByText("Referred by John. Need to prep for system design."),
-    ).toBeInTheDocument();
-  });
-
-  it("shows 'No notes added yet' placeholder when notes is empty", () => {
-    mockParams.id = "4";
-    render(<JobDetailPage />);
-    expect(
-      screen.getByText("No notes added yet."),
-    ).toBeInTheDocument();
-  });
-
-  it("shows 'Job not found' for non-existent id", () => {
-    mockParams.id = "999";
-    render(<JobDetailPage />);
-    expect(
-      screen.getByText("Job not found"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /Back to Jobs/i }),
-    ).toHaveAttribute("href", "/jobs");
-  });
-
-  it("renders status history timeline steps", () => {
-    render(<JobDetailPage />);
-    expect(screen.getByText("Status History")).toBeInTheDocument();
-    expect(screen.getByText("draft")).toBeInTheDocument();
-    expect(screen.getByText("under review")).toBeInTheDocument();
-    expect(screen.getByText("interview scheduled")).toBeInTheDocument();
+    expect(await screen.findByText("Job not found")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Back to Jobs/i })).toHaveAttribute("href", "/jobs");
   });
 });

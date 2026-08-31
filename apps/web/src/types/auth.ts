@@ -17,9 +17,9 @@ export const LoginFormSchema = z.object({
 })
 
 export const AuthResponseSchema = z.object({
-    accessToken: z.string(),
-    refreshToken: z.string(),
-    expiryTime: z.string().regex(/^\d+$/)
+    access_token: z.string(),
+    refresh_token: z.string(),
+    expires_in: z.string()
 })
 
 export type AuthResponse = z.infer<typeof AuthResponseSchema>

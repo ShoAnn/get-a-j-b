@@ -24,7 +24,7 @@ func TestAuthService_Register(t *testing.T) {
 	if err != nil {
 		t.Errorf("expected no error, got %v", err)
 	}
-	if resp.Token == "" {
+	if resp.AccessToken == "" {
 		t.Error("expected token, got empty string")
 	}
 }
@@ -44,7 +44,7 @@ func TestAuthService_Login(t *testing.T) {
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
-		if resp.Token == "" {
+		if resp.AccessToken == "" {
 			t.Error("expected access token")
 		}
 		if resp.RefreshToken == "" {
@@ -79,7 +79,7 @@ func TestAuthService_RefreshToken(t *testing.T) {
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
-		if resp.Token == "" {
+		if resp.AccessToken == "" {
 			t.Error("expected new access token")
 		}
 		if resp.RefreshToken == "" {

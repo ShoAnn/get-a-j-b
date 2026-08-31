@@ -1,0 +1,14 @@
+.git
+.idea
+.vscode
+.DS_Store
+*.md
+.env
+.env.*
+tmp
+server
+job
+cmd/api/api
+*.exe
+*.test
+*.out

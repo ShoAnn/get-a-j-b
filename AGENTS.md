@@ -1,0 +1,3 @@
+- Follow the existing coding conventions and project structuring
+- Always check for deprecated functions or packages
+- For the front end always minimize the scope of client components to the smallest component

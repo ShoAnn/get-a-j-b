@@ -61,7 +61,7 @@ func TestUserService_UpdateUser(t *testing.T) {
 	s := NewUserService(repo)
 
 	t.Run("Unauthorized", func(t *testing.T) {
-		ctx := context.WithValue(context.Background(), "user_id", 2)
+		ctx := context.WithValue(context.Background(), domain.ContextKeyClaims, &domain.Claims{UserID: 2})
 		newUsername := "newuser"
 		_, err := s.UpdateUser(ctx, 1, &domain.UpdateUserRequest{Username: &newUsername})
 		if !errors.Is(err, domain.ErrUnauthorized) {
@@ -70,7 +70,7 @@ func TestUserService_UpdateUser(t *testing.T) {
 	})
 
 	t.Run("Success", func(t *testing.T) {
-		ctx := context.WithValue(context.Background(), "user_id", 1)
+		ctx := context.WithValue(context.Background(), domain.ContextKeyClaims, &domain.Claims{UserID: 1})
 		newUsername := "newuser"
 		user, err := s.UpdateUser(ctx, 1, &domain.UpdateUserRequest{Username: &newUsername})
 		if err != nil {
@@ -83,7 +83,7 @@ func TestUserService_UpdateUser(t *testing.T) {
 
 	t.Run("EmailAlreadyExists", func(t *testing.T) {
 		repo.users[2] = &domain.User{ID: 2, Email: "existing@example.com"}
-		ctx := context.WithValue(context.Background(), "user_id", 1)
+		ctx := context.WithValue(context.Background(), domain.ContextKeyClaims, &domain.Claims{UserID: 1})
 		newEmail := "existing@example.com"
 		_, err := s.UpdateUser(ctx, 1, &domain.UpdateUserRequest{Email: &newEmail})
 		if !errors.Is(err, domain.ErrEmailAlreadyExists) {

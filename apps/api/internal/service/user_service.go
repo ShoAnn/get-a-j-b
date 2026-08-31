@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/ShoAnn/get-a-j-b/api/internal/domain"
+	"github.com/ShoAnn/get-a-j-b/api/internal/middleware"
 )
 
 type UserService struct {
@@ -35,6 +36,14 @@ func (s *UserService) UpdateUser(ctx context.Context, id int, user *domain.Updat
 	existingUser, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return nil, domain.ErrUserNotFound
+	}
+
+	claims, err := middleware.GetClaimsFromContext(ctx)
+	if err != nil {
+		return nil, domain.ErrUnauthorized
+	}
+	if claims.UserID != id {
+		return nil, domain.ErrUnauthorized
 	}
 
 	if user.Username != nil {
