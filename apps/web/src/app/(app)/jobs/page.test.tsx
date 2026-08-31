@@ -5,11 +5,24 @@ vi.mock("next/navigation", () => ({
     useSearchParams: () => new URLSearchParams(),
 }));
 
+const mockGet = vi.fn();
+vi.mock("@/lib/client/api", () => ({
+    apiClient: {
+        get: (...args: unknown[]) => mockGet(...args),
+    },
+}));
+
 import JobsPage from "./page";
 
 describe("JobsPage", () => {
-    it("renders JobsList inside Suspense", async () => {
+    it("renders Jobs heading with view toggle buttons", () => {
         render(<JobsPage />);
-        expect(await screen.findByText("Jobs", {}, { timeout: 3000 })).toBeInTheDocument();
+        expect(screen.getByText("Board view")).toBeInTheDocument();
+        expect(screen.getByText("List view")).toBeInTheDocument();
+    });
+
+    it("defaults to list view", () => {
+        render(<JobsPage />);
+        expect(screen.getByText("List view")).toBeInTheDocument();
     });
 });

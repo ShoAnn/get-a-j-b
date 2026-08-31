@@ -27,17 +27,6 @@ const links = [
       </svg>
     ),
   },
-  {
-    href: "/board",
-    label: "Board",
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-        <rect x="1.5" y="1.5" width="4" height="15" rx="1" stroke="currentColor" strokeWidth="1.3" />
-        <rect x="7" y="1.5" width="4" height="15" rx="1" stroke="currentColor" strokeWidth="1.3" />
-        <rect x="12.5" y="1.5" width="4" height="15" rx="1" stroke="currentColor" strokeWidth="1.3" />
-      </svg>
-    ),
-  },
 ];
 
 export default function Sidebar() {
