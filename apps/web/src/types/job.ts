@@ -59,3 +59,18 @@ export const UpdateJobSchema = z.object({
 })
 
 export type UpdateJob = z.infer<typeof UpdateJobSchema>;
+
+export const PatchJobSchema = z.object({
+    status: z.enum(statusArray).optional(),
+    notes: z.string().optional(),
+    title: z.string().optional(),
+    company: z.string().optional(),
+    location: z.string().optional(),
+    salary: z.number().optional(),
+    requirements: z.string().optional(),
+    description: z.string().optional(),
+    sourceURL: z.string().optional(),
+    jobPortal: z.string().optional(),
+}).strict();
+
+export type PatchJob = z.infer<typeof PatchJobSchema>;

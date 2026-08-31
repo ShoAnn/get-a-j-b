@@ -61,6 +61,37 @@ export default function Header() {
     setShowAddModal(false);
   }
 
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
+
+  async function handleLogout() {
+    setLogoutError("");
+    setIsLoggingOut(true);
+    try {
+      const res = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!res.ok && res.status !== 204) {
+        const body = await res.json().catch(() => ({} as Record<string, unknown>));
+        const message =
+          (typeof body.message === "string" && body.message) ||
+          (typeof body.error === "string" && body.error) ||
+          "We couldn't sign you out. Please try again.";
+        setLogoutError(message);
+        setIsLoggingOut(false);
+        return;
+      }
+      setShowUserMenu(false);
+      setShowMobileMenu(false);
+      router.push("/login");
+      router.refresh();
+    } catch {
+      setLogoutError("Unable to reach the server. Please check your connection.");
+      setIsLoggingOut(false);
+    }
+  }
+
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/80 backdrop-blur-md dark:border-[#333355] dark:bg-[#1A1A2E]/80">
@@ -158,12 +189,18 @@ export default function Header() {
                     Settings
                   </Link>
                   <hr className="my-1 border-zinc-200 dark:border-[#333355]" />
-                  <button className="flex w-full items-center gap-2 px-4 py-2 text-sm text-error transition-colors hover:bg-zinc-50 dark:hover:bg-[#2E2E4A]">
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                    aria-label="Log out"
+                    className="flex w-full items-center gap-2 px-4 py-2 text-sm text-error transition-colors hover:bg-zinc-50 disabled:opacity-60 dark:hover:bg-[#2E2E4A]"
+                  >
                     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="text-error">
                       <path d="M5.5 3.5V2a1 1 0 011-1h4a1 1 0 011 1v11a1 1 0 01-1 1h-4a1 1 0 01-1-1v-1.5" stroke="currentColor" strokeWidth="1.2" />
                       <path d="M2 7.5h6m-2-2l2 2-2 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                    Log out
+                    {isLoggingOut ? "Signing out..." : "Log out"}
                   </button>
                 </div>
               )}
@@ -279,12 +316,18 @@ export default function Header() {
                   </svg>
                   Settings
                 </Link>
-                <button className="flex w-full items-center gap-2 px-3 py-2 text-sm text-error transition-colors hover:bg-zinc-50 dark:hover:bg-[#2E2E4A]">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  aria-label="Log out"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-error transition-colors hover:bg-zinc-50 disabled:opacity-60 dark:hover:bg-[#2E2E4A]"
+                >
                   <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="text-error">
                     <path d="M5.5 3.5V2a1 1 0 011-1h4a1 1 0 011 1v11a1 1 0 01-1 1h-4a1 1 0 01-1-1v-1.5" stroke="currentColor" strokeWidth="1.2" />
                     <path d="M2 7.5h6m-2-2l2 2-2 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                  Log out
+                  {isLoggingOut ? "Signing out..." : "Log out"}
                 </button>
               </div>
             </div>
@@ -293,6 +336,12 @@ export default function Header() {
       </header>
 
       <AddJobModal open={showAddModal} onClose={() => setShowAddModal(false)} onSubmit={handleAddJob} />
+
+      {logoutError && (
+        <div role="alert" aria-live="polite" className="fixed right-4 top-16 z-50 max-w-sm rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 shadow dark:border-red-800 dark:bg-red-950 dark:text-red-200">
+          {logoutError}
+        </div>
+      )}
     </>
   );
 }

@@ -99,9 +99,19 @@ describe("apiClient", () => {
             await expect(apiClient.get("/jobs", z.any())).rejects.toBeInstanceOf(HttpError);
         });
 
-        it("includes server message in HttpError", async () => {
+        it("uses server message field when present", async () => {
             fetchMock.mockResolvedValue(mockResponse(500, { message: "boom" }));
-            await expect(apiClient.get("/jobs", z.any())).rejects.toThrow(/boom/);
+            await expect(apiClient.get("/jobs", z.any())).rejects.toThrow(/^boom$/);
+        });
+
+        it("falls back to error field when message is absent", async () => {
+            fetchMock.mockResolvedValue(mockResponse(400, { error: "bad input" }));
+            await expect(apiClient.get("/jobs", z.any())).rejects.toThrow(/^bad input$/);
+        });
+
+        it("falls back to status text when no message body", async () => {
+            fetchMock.mockResolvedValue(mockResponse(502, {}));
+            await expect(apiClient.get("/jobs", z.any())).rejects.toThrow(/status 502/);
         });
 
         it("returns parsed data on success", async () => {

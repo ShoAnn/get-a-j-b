@@ -12,7 +12,10 @@ export async function POST(request: NextRequest) {
         const parsed = RegisterSchema.safeParse(body);
         if (!parsed.success) {
             const fields = zodErrorToFields(parsed.error);
-            return NextResponse.json({ error: 'Validation failed', fields }, { status: 422 });
+            return NextResponse.json(
+                { error: "Please check the form for errors.", fields },
+                { status: 422 }
+            );
         }
         const { email, password, username } = parsed.data;
         const safeInput = { email, password, username };
@@ -28,18 +31,33 @@ export async function POST(request: NextRequest) {
         if (err instanceof ZodError) {
             const fields = zodErrorToFields(err);
             return NextResponse.json(
-                { error: 'Validation failed', fields },
+                { error: "Please check the form for errors.", fields },
                 { status: 422 }
             );
         }
         if (err instanceof HttpError) {
-            if (err.statusCode == 400) {
-                return NextResponse.json({ error: `Bad request ${err.message}` }, { status: 400 });
+            if (err.statusCode === 409) {
+                return NextResponse.json(
+                    { error: "An account with this email already exists." },
+                    { status: 409 }
+                );
             }
-            if (err.statusCode == 409) {
-                return NextResponse.json({ error: `Conflict: ${err.message}` }, { status: 409 });
+            if (err.statusCode === 400) {
+                return NextResponse.json(
+                    { error: "Some details don't look right. Please review and try again." },
+                    { status: 400 }
+                );
+            }
+            if (err.statusCode >= 500) {
+                return NextResponse.json(
+                    { error: "The server is having trouble. Please try again in a moment." },
+                    { status: 502 }
+                );
             }
         }
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        return NextResponse.json(
+            { error: "Something went wrong. Please try again." },
+            { status: 500 }
+        );
     }
 }

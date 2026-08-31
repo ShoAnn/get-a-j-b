@@ -61,11 +61,11 @@ describe("POST /api/auth/register", () => {
         expect(mocks.setAuthCookies).toHaveBeenCalledWith("a", "r", "900");
     });
 
-    it("returns 422 with Zod fields when validation fails", async () => {
+    it("returns 422 with friendly error when validation fails", async () => {
         const res = await POST(makeRequest({ email: "bad", password: "x", username: "" }) as never);
         expect(res.status).toBe(422);
         const body = await res.json();
-        expect(body.error).toBe("Validation failed");
+        expect(body.error).toMatch(/check the form/i);
         expect(body.fields).toBeDefined();
     });
 
@@ -76,24 +76,30 @@ describe("POST /api/auth/register", () => {
         confirmPassword: "password123",
     };
 
-    it("returns 400 on bad request from Go", async () => {
+    it("returns 400 with friendly error on bad request from Go", async () => {
         mocks.internalApiPost.mockRejectedValue(new HttpError("bad", 400));
 
         const res = await POST(makeRequest(validBody) as never);
         expect(res.status).toBe(400);
+        const body = await res.json();
+        expect(body.error).toMatch(/don't look right/i);
     });
 
-    it("returns 409 on conflict", async () => {
+    it("returns 409 with friendly conflict message", async () => {
         mocks.internalApiPost.mockRejectedValue(new HttpError("conflict", 409));
 
         const res = await POST(makeRequest(validBody) as never);
         expect(res.status).toBe(409);
+        const body = await res.json();
+        expect(body.error).toMatch(/already exists/i);
     });
 
-    it("returns 500 on unexpected error", async () => {
+    it("returns 500 with friendly error on unexpected error", async () => {
         mocks.internalApiPost.mockRejectedValue(new Error("boom"));
 
         const res = await POST(makeRequest(validBody) as never);
         expect(res.status).toBe(500);
+        const body = await res.json();
+        expect(body.error).toMatch(/something went wrong/i);
     });
 });

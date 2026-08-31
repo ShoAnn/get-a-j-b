@@ -12,7 +12,10 @@ export async function POST(request: NextRequest) {
         const validatedInput = LoginFormSchema.safeParse(body);
         if (!validatedInput.success) {
             const fields = zodErrorToFields(validatedInput.error);
-            return NextResponse.json({ error: 'Validation failed', fields }, { status: 422 });
+            return NextResponse.json(
+                { error: "Please check your email and password.", fields },
+                { status: 422 }
+            );
         }
         const { access_token, refresh_token, expires_in } = await internalApiClient.post(
             "/auth/login",
@@ -25,15 +28,33 @@ export async function POST(request: NextRequest) {
         if (err instanceof ZodError) {
             const fields = zodErrorToFields(err);
             return NextResponse.json(
-                { error: 'Validation failed', fields },
+                { error: "Please check your email and password.", fields },
                 { status: 422 }
             );
         }
         if (err instanceof HttpError) {
-            if (err.statusCode == 401) {
-                return NextResponse.json({ error: `${err.message}` }, { status: 401 });
+            if (err.statusCode === 401) {
+                return NextResponse.json(
+                    { error: "Incorrect email or password." },
+                    { status: 401 }
+                );
+            }
+            if (err.statusCode === 400) {
+                return NextResponse.json(
+                    { error: "Invalid email or password format." },
+                    { status: 400 }
+                );
+            }
+            if (err.statusCode >= 500) {
+                return NextResponse.json(
+                    { error: "The server is having trouble. Please try again in a moment." },
+                    { status: 502 }
+                );
             }
         }
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        return NextResponse.json(
+            { error: "Something went wrong. Please try again." },
+            { status: 500 }
+        );
     }
 }

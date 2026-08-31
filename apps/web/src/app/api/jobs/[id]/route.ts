@@ -3,7 +3,7 @@ import { zodErrorToFields } from "@/lib/helpers";
 import { requireAuth } from "@/lib/requireAuth";
 import { internalApiClient } from "@/lib/server/api";
 import { HttpError } from "@/types/errors";
-import { JobSchema, UpdateJobSchema } from "@/types/job";
+import { JobSchema, PatchJobSchema, UpdateJobSchema } from "@/types/job";
 import { NextRequest, NextResponse } from "next/server";
 import z, { ZodError } from "zod";
 
@@ -58,6 +58,35 @@ export async function PUT(request: NextRequest, context: RouteContext) {
             );
         }
         const data = await internalApiClient.put(`/jobs/${id}`, JobSchema, validatedInput.data,
+            { headers: { Authorization: `Bearer ${token}` }, }
+        );
+        return NextResponse.json(data);
+    } catch (err) {
+        return errorResponse(err);
+    }
+}
+
+export async function PATCH(request: NextRequest, context: RouteContext) {
+    try {
+        const { id } = await context.params;
+        const token = await requireAuth();
+        const body = await request.json();
+        const validatedInput = PatchJobSchema.safeParse(body);
+        if (!validatedInput.success) {
+            const fields = zodErrorToFields(validatedInput.error);
+            return NextResponse.json(
+                { error: "Some fields don't look right.", fields },
+                { status: 422 }
+            );
+        }
+        // Translate frontend field names to Go wire field names.
+        const wireBody: Record<string, unknown> = {};
+        if (validatedInput.data.status !== undefined) wireBody.current_status = validatedInput.data.status;
+        for (const [key, value] of Object.entries(validatedInput.data)) {
+            if (key === "status") continue;
+            if (value !== undefined) wireBody[key] = value;
+        }
+        const data = await internalApiClient.put(`/jobs/${id}`, JobSchema, wireBody,
             { headers: { Authorization: `Bearer ${token}` }, }
         );
         return NextResponse.json(data);

@@ -18,8 +18,12 @@ async function request<T>(
 		}
 	)
 	if (!res.ok) {
-		const error = await res.json().catch(() => ({}))
-		throw new HttpError(`http error: ${error.message}`, res.status)
+		const body = await res.json().catch(() => ({} as Record<string, unknown>))
+		const message =
+			(typeof body.message === "string" && body.message) ||
+			(typeof body.error === "string" && body.error) ||
+			`Request failed with status ${res.status}`;
+		throw new HttpError(message, res.status)
 	}
 
 	if (res.status === 204 || res.headers.get("content-length") === "0") {

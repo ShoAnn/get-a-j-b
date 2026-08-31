@@ -49,7 +49,7 @@ describe("RegisterForm", () => {
 
         await user.click(screen.getByRole("button", { name: /Register/i }));
 
-        expect(screen.getByText("Please enter a valid username/password")).toBeInTheDocument();
+        expect(screen.getByText("Please fill in your email, username, and password.")).toBeInTheDocument();
         expect(mockPost).not.toHaveBeenCalled();
     });
 
@@ -100,9 +100,10 @@ describe("RegisterForm", () => {
         expect(mockPush).toHaveBeenCalledWith("/");
     });
 
-    it("displays error when registration fails", async () => {
+    it("displays friendly error for 409 conflict", async () => {
         const user = userEvent.setup();
-        mockPost.mockRejectedValue(new Error("Email already exists"));
+        const { HttpError } = await import("@/types/errors");
+        mockPost.mockRejectedValue(new HttpError("conflict", 409));
 
         render(<RegisterForm showRoleSelect={true} />);
 
@@ -114,7 +115,7 @@ describe("RegisterForm", () => {
         await user.click(screen.getByRole("button", { name: /Register/i }));
 
         await waitFor(() => {
-            expect(screen.getByText(/Login failed/i)).toBeInTheDocument();
+            expect(screen.getByText(/already exists/i)).toBeInTheDocument();
         });
         expect(mockPush).not.toHaveBeenCalled();
     });
@@ -136,7 +137,7 @@ describe("RegisterForm", () => {
         await user.click(screen.getByRole("button", { name: /Register/i }));
 
         await waitFor(() => {
-            expect(screen.getByRole("button", { name: "..." })).toBeDisabled();
+            expect(screen.getByRole("button", { name: /Creating account/ })).toBeDisabled();
         });
 
         resolvePost(undefined);
