@@ -70,10 +70,10 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
     try {
         const { id } = await context.params;
         const token = await requireAuth();
-        const data = await internalApiClient.delete(`/jobs/${id}`, z.void(),
+        await internalApiClient.delete(`/jobs/${id}`, z.void(),
             { headers: { Authorization: `Bearer ${token}` }, }
         );
-        return NextResponse.json(data);
+        return new NextResponse(null, { status: 204 });
     } catch (err) {
         return errorResponse(err);
     }

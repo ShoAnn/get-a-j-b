@@ -1,15 +1,21 @@
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import { requireAuth } from "@/lib/requireAuth";
+import { redirect } from "next/navigation";
 
 export default async function AppLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    const branch = process.env.BRANCH;
-    if (branch == "prod" && branch == "production") {
-        await requireAuth();
+    // const branch = process.env.BRANCH;
+    // if (branch == "prod" && branch == "production") {
+    //     await requireAuth();
+    // }
+    try {
+      await requireAuth();
+    } catch {
+      redirect('/login');
     }
     return (
         <>

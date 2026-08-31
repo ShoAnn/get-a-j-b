@@ -1,0 +1,32 @@
+.git
+.idea
+.vscode
+.DS_Store
+*.md
+docker-compose.yaml
+docker-log.txt
+logs
+node_modules
+.env
+.env.*
+!.env.example
+openapi.yaml
+sqlc.yaml
+package.json
+package-lock.json
+gemini.md
+
+# API
+apps/api/tmp
+apps/api/server
+apps/api/job
+apps/api/cmd/api/api
+*.exe
+
+# Web
+apps/web/.next
+apps/web/node_modules
+apps/web/.git
+apps/web/coverage
+apps/web/test-results
+apps/web/playwright-report

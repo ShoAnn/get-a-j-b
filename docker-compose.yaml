@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:18.1-alpine3.22
+    image: postgres:18.1-alpine
     container_name: postgres_getajob
     environment:
       POSTGRES_USER: ${DB_USER}
@@ -13,15 +13,21 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   adminer:
-    image: adminer
+    image: adminer:standalone
     container_name: adminer_getajob
     restart: always
     ports:
       - "${ADMINER_EXTERNAL_PORT}:8080"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   api:
     container_name: go_api_getajob
@@ -30,30 +36,46 @@ services:
       dockerfile: Dockerfile
     env_file:
       - .env
+    environment:
+      POSTGRES_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}?sslmode=disable
     volumes:
       - ./apps/api:/app
-      - ./.env:/app/.env
+      - ./apps/api/tmp:/app/tmp
+      - ./.env:/app/.env:ro
+      - go_mod_cache:/go/pkg/mod
+      - go_build_cache:/root/.cache/go-build
     ports:
       - "${API_EXTERNAL_PORT}:8080"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     command: ["air"]
     restart: unless-stopped
 
   web:
     container_name: nextjs_getajob
     build:
-      context: .
-      dockerfile: apps/web/Dockerfile
+      context: ./apps/web
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     env_file:
       - .env
+    environment:
+      PORT: 3000
+      API_URL: http://api:8080
+    volumes:
+      - ./apps/web:/app
+      - ./apps/web/.next:/app/.next
+      - web_node_modules:/app/node_modules
     ports:
       - "${WEB_EXTERNAL_PORT}:3000"
     depends_on:
       - api
     restart: unless-stopped
-    environment:
-      NEXT_PUBLIC_API_URL: http://api:8080
 
 volumes:
   postgres_data:
+  go_mod_cache:
+  go_build_cache:
+  web_node_modules:

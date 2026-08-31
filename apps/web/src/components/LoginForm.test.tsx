@@ -58,15 +58,7 @@ describe("LoginForm", () => {
 
     it("calls apiClient.post and redirects on successful login", async () => {
         const user = userEvent.setup();
-        mockPost.mockResolvedValue({
-            user: {
-                id: "1",
-                email: "test@example.com",
-                username: "testuser",
-                role: "user",
-                registeredAt: new Date(),
-            },
-        });
+        mockPost.mockResolvedValue(undefined);
 
         render(<LoginForm />);
 
@@ -76,7 +68,7 @@ describe("LoginForm", () => {
 
         await waitFor(() => {
             expect(mockPost).toHaveBeenCalledWith(
-                "/api/auth/login",
+                "/auth/login",
                 expect.anything(),
                 { email: "test@example.com", password: "password123" }
             );

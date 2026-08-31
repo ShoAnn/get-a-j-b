@@ -9,7 +9,7 @@ async function request<T>(
 	options: RequestInit = {}
 ): Promise<T> {
 	const res = await fetch(
-		`${API_URL + path}`,
+		`${API_URL}/api${path}`,
 		{
 			...options,
 			headers: {

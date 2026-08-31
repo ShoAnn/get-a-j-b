@@ -13,12 +13,12 @@ export async function refresh() {
     const token = cookieStore.get("refresh_token")?.value;
     if (!token) return false
     try {
-        const { accessToken, refreshToken, expiryTime } = await internalApiClient.post(
+        const { access_token, refresh_token, expires_in } = await internalApiClient.post(
             "/auth/refresh",
             AuthResponseSchema,
             { token }
         );
-        await setAuthCookies(accessToken, refreshToken, expiryTime);
+        await setAuthCookies(access_token, refresh_token, expires_in);
         return true;
     } catch (err) {
         return false;

@@ -10,20 +10,20 @@ export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const parsed = RegisterSchema.safeParse(body);
-        const safeInput = {
-            email: parsed.data?.email,
-            password: parsed.data?.password,
-            role: parsed.data?.role ?? "user",
-        };
+        if (!parsed.success) {
+            const fields = zodErrorToFields(parsed.error);
+            return NextResponse.json({ error: 'Validation failed', fields }, { status: 422 });
+        }
+        const { email, password, username } = parsed.data;
+        const safeInput = { email, password, username };
 
-        const { accessToken, refreshToken, expiryTime } = await internalApiClient.post(
+        const { access_token, refresh_token, expires_in } = await internalApiClient.post(
             "/auth/register",
             AuthResponseSchema,
             safeInput
         );
-
-        await setAuthCookies(accessToken, refreshToken, expiryTime);
-        return NextResponse.json({ success: true });
+        await setAuthCookies(access_token, refresh_token, expires_in);
+        return new NextResponse(null, { status: 204 });
     } catch (err) {
         if (err instanceof ZodError) {
             const fields = zodErrorToFields(err);

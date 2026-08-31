@@ -4,7 +4,6 @@ import { useState } from "react";
 import Button from "./Button";
 import z from "zod";
 import { apiClient } from "@/lib/client/api";
-import { AuthResponseSchema } from "@/types/auth";
 import { useRouter } from "next/navigation";
 
 const emailSchema = z.object({
@@ -38,7 +37,7 @@ export default function LoginForm() {
         }
 
         try {
-            await apiClient.post("/api/auth/login", AuthResponseSchema, { email, password });
+            await apiClient.post("/auth/login", z.void(), { email, password });
             setSuccess("login success");
             router.push("/");
         } catch (err) {

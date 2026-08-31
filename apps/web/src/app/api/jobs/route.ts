@@ -44,7 +44,11 @@ export async function POST(request: NextRequest) {
         const token = await requireAuth();
         const body = await request.json();
         const validatedInput = CreateJobSchema.safeParse(body);
-        const data = await internalApiClient.post('/jobs', JobSchema, validatedInput,
+        if (!validatedInput.success) {
+            const fields = zodErrorToFields(validatedInput.error);
+            return NextResponse.json({ error: 'Validation failed', fields }, { status: 422 });
+        }
+        const data = await internalApiClient.post('/jobs', JobSchema, validatedInput.data,
             { headers: { Authorization: `Bearer ${token}` }, }
         );
         return NextResponse.json(data);

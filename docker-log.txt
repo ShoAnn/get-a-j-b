@@ -1,0 +1,172 @@
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.05kB done
+#1 DONE 0.0s
+
+#2 [api internal] load build definition from Dockerfile
+#2 transferring dockerfile: 539B done
+#2 WARN: FromPlatformFlagConstDisallowed: FROM --platform flag should not use constant value "linux/amd64" (line 2)
+#2 DONE 0.0s
+
+#3 [web internal] load build definition from Dockerfile
+#3 transferring dockerfile: 212B done
+#3 WARN: FromPlatformFlagConstDisallowed: FROM --platform flag should not use constant value "linux/amd64" (line 1)
+#3 DONE 0.0s
+
+#4 [web internal] load metadata for docker.io/library/node:23-alpine
+#4 DONE 1.3s
+
+#5 [api internal] load metadata for docker.io/library/golang:1.25-alpine
+#5 DONE 1.3s
+
+#6 [web internal] load .dockerignore
+#6 transferring context: 2B done
+#6 DONE 0.0s
+
+#7 [api internal] load .dockerignore
+#7 transferring context: 2B done
+#7 DONE 0.0s
+
+#8 [api internal] load build context
+#8 transferring context: 4.29kB 0.0s done
+#8 DONE 0.0s
+
+#9 [web 1/5] FROM docker.io/library/node:23-alpine@sha256:a34e14ef1df25b58258956049ab5a71ea7f0d498e41d0b514f4b8de09af09456
+#9 resolve docker.io/library/node:23-alpine@sha256:a34e14ef1df25b58258956049ab5a71ea7f0d498e41d0b514f4b8de09af09456 0.1s done
+#9 DONE 0.1s
+
+#10 [web internal] load build context
+#10 transferring context: 36.77kB 0.1s done
+#10 DONE 0.1s
+
+#11 [api 1/6] FROM docker.io/library/golang:1.25-alpine@sha256:1ae0735f00daffa3aaf1363a5184c0d2dc55c78e3db4ec70241cdac97bf84b59
+#11 resolve docker.io/library/golang:1.25-alpine@sha256:1ae0735f00daffa3aaf1363a5184c0d2dc55c78e3db4ec70241cdac97bf84b59
+#11 resolve docker.io/library/golang:1.25-alpine@sha256:1ae0735f00daffa3aaf1363a5184c0d2dc55c78e3db4ec70241cdac97bf84b59 0.0s done
+#11 DONE 0.1s
+
+#12 [web 3/5] COPY apps/web/package.json ./
+#12 CACHED
+
+#13 [web 4/5] RUN npm install
+#13 CACHED
+
+#14 [web 2/5] WORKDIR /app
+#14 CACHED
+
+#15 [web 5/5] COPY apps/web/ .
+#15 CACHED
+
+#16 [api 4/6] COPY go.mod go.sum ./
+#16 CACHED
+
+#17 [api 2/6] RUN apk add --no-cache curl tar &&     curl -fsSL -o /tmp/air.tar.gz "https://github.com/air-verse/air/releases/download/v1.65.3/air_1.65.3_linux_amd64.tar.gz" &&     tar -C /usr/local/bin -xzf /tmp/air.tar.gz air &&     chmod +x /usr/local/bin/air &&     rm /tmp/air.tar.gz &&     /usr/local/bin/air -v
+#17 CACHED
+
+#18 [api 3/6] WORKDIR /app
+#18 CACHED
+
+#19 [api 5/6] RUN go mod download
+#19 CACHED
+
+#20 [web] exporting to image
+#20 exporting layers 0.0s done
+#20 exporting manifest sha256:3262f498df6781c6d9d6c26b88347d26128f854e3af42774be3ce12b6b945d85 done
+#20 exporting config sha256:4d8998112437a353627c5f401a139cdae971cbb501bc8607aa05b6106d7fc165 done
+#20 exporting attestation manifest sha256:6590a6a3a9971eaa648526b3c2ea08ab0c60fc1a024f1bf05b3b1f95ecc6d7e3 0.0s done
+#20 exporting manifest list sha256:46e87e6482bf5619f0cb9c24cf9d965d2fa7cde2e9265d19d7cef38bda5e1616
+#20 exporting manifest list sha256:46e87e6482bf5619f0cb9c24cf9d965d2fa7cde2e9265d19d7cef38bda5e1616 0.0s done
+#20 naming to docker.io/library/get-a-j-b-web:latest done
+#20 unpacking to docker.io/library/get-a-j-b-web:latest 0.0s done
+#20 DONE 0.2s
+
+#21 [api 6/6] COPY . .
+#21 DONE 0.1s
+
+#22 [api] exporting to image
+#22 exporting layers 0.1s done
+#22 exporting manifest sha256:927f45c131c9c97ced4d13154105346f1ebf254af3784c1c4538179592bd4ad6 0.0s done
+#22 exporting config sha256:0f2ecae0c27fbdba6b2bb1129c8e329b07df7abcddf447c2875b8572cce48737 0.0s done
+#22 exporting attestation manifest sha256:82e6aafc54102b59c8eccf76d74f8fafc9e389732c0d0428e6850d7b3ec73a30
+#22 exporting attestation manifest sha256:82e6aafc54102b59c8eccf76d74f8fafc9e389732c0d0428e6850d7b3ec73a30 0.0s done
+#22 exporting manifest list sha256:bb39c84bdca8b2dddcf4e040aff806e75b667af92227996df94c9b8ec09ebb3e 0.0s done
+#22 naming to docker.io/library/get-a-j-b-api:latest done
+#22 unpacking to docker.io/library/get-a-j-b-api:latest
+#22 ...
+
+#23 [web] resolving provenance for metadata file
+#23 DONE 0.0s
+
+#22 [api] exporting to image
+#22 unpacking to docker.io/library/get-a-j-b-api:latest 11.4s done
+#22 DONE 11.7s
+
+#24 [api] resolving provenance for metadata file
+#24 DONE 0.0s
+Attaching to adminer_getajob, go_api_getajob, nextjs_getajob, postgres_getajob
+postgres_getajob  | The files belonging to this database system will be owned by user "postgres".
+postgres_getajob  | This user must also own the server process.
+postgres_getajob  | 
+postgres_getajob  | The database cluster will be initialized with locale "en_US.utf8".
+postgres_getajob  | The default database encoding has accordingly been set to "UTF8".
+postgres_getajob  | The default text search configuration will be set to "english".
+postgres_getajob  | 
+postgres_getajob  | Data page checksums are enabled.
+postgres_getajob  | 
+postgres_getajob  | fixing permissions on existing directory /var/lib/postgresql/18/docker ... ok
+postgres_getajob  | creating subdirectories ... ok
+postgres_getajob  | selecting dynamic shared memory implementation ... posix
+postgres_getajob  | selecting default "max_connections" ... 100
+postgres_getajob  | selecting default "shared_buffers" ... 128MB
+postgres_getajob  | selecting default time zone ... UTC
+postgres_getajob  | creating configuration files ... ok
+postgres_getajob  | running bootstrap script ... ok
+[Knextjs_getajob exited with code 255 (restarting)
+postgres_getajob  | performing post-bootstrap initialization ... ok
+postgres_getajob  | syncing data to disk ... ok
+postgres_getajob  | 
+postgres_getajob  | 
+postgres_getajob  | Success. You can now start the database server using:
+postgres_getajob  | 
+postgres_getajob  |     pg_ctl -D /var/lib/postgresql/18/docker -l logfile start
+postgres_getajob  | 
+nextjs_getajob    | exec /usr/local/bin/docker-entrypoint.sh: exec format error
+nextjs_getajob    | exec /usr/local/bin/docker-entrypoint.sh: exec format error
+[Knextjs_getajob exited with code 255 (restarting)
+nextjs_getajob    | exec /usr/local/bin/docker-entrypoint.sh: exec format error
+postgres_getajob  | waiting for server to start....2026-08-28 04:37:55.995 UTC [44] LOG:  starting PostgreSQL 18.1 on x86_64-pc-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit
+postgres_getajob  | 2026-08-28 04:37:55.998 UTC [44] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+postgres_getajob  | 2026-08-28 04:37:56.006 UTC [50] LOG:  database system was shut down at 2026-08-28 04:37:55 UTC
+postgres_getajob  | 2026-08-28 04:37:56.013 UTC [44] LOG:  database system is ready to accept connections
+postgres_getajob  |  done
+postgres_getajob  | server started
+postgres_getajob  | CREATE DATABASE
+postgres_getajob  | 
+postgres_getajob  | 
+postgres_getajob  | /usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+postgres_getajob  | 
+postgres_getajob  | waiting for server to shut down...2026-08-28 04:37:56.232 UTC [44] LOG:  received fast shutdown request
+postgres_getajob  | .2026-08-28 04:37:56.235 UTC [44] LOG:  aborting any active transactions
+postgres_getajob  | 2026-08-28 04:37:56.238 UTC [44] LOG:  background worker "logical replication launcher" (PID 53) exited with exit code 1
+postgres_getajob  | 2026-08-28 04:37:56.239 UTC [48] LOG:  shutting down
+postgres_getajob  | 2026-08-28 04:37:56.241 UTC [48] LOG:  checkpoint starting: shutdown immediate
+[Knextjs_getajob exited with code 255 (restarting)
+postgres_getajob  | 2026-08-28 04:37:56.352 UTC [48] LOG:  checkpoint complete: wrote 911 buffers (5.6%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.036 s, sync=0.064 s, total=0.113 s; sync files=303, longest=0.004 s, average=0.001 s; distance=4106 kB, estimate=4106 kB; lsn=0/1AF0240, redo lsn=0/1AF0240
+postgres_getajob  | 2026-08-28 04:37:56.375 UTC [44] LOG:  database system is shut down
+postgres_getajob  |  done
+postgres_getajob  | server stopped
+postgres_getajob  | 
+postgres_getajob  | PostgreSQL init process complete; ready for start up.
+postgres_getajob  | 
+nextjs_getajob    | exec /usr/local/bin/docker-entrypoint.sh: exec format error
+[Knextjs_getajob exited with code 255 (restarting)
+nextjs_getajob    | exec /usr/local/bin/docker-entrypoint.sh: exec format error
+[Knextjs_getajob exited with code 255 (restarting)
+[Knextjs_getajob exited with code 255 (restarting)
+nextjs_getajob    | exec /usr/local/bin/docker-entrypoint.sh: exec format error
+[Knextjs_getajob exited with code 255 (restarting)
+nextjs_getajob    | exec /usr/local/bin/docker-entrypoint.sh: exec format error
+[Knextjs_getajob exited with code 255 (restarting)
+nextjs_getajob    | exec /usr/local/bin/docker-entrypoint.sh: exec format error
+nextjs_getajob    | exec /usr/local/bin/docker-entrypoint.sh: exec format error
+[Knextjs_getajob exited with code 255 (restarting)
+[Knextjs_getajob exited with code 255 (restarting)
+nextjs_getajob    | exec /usr/local/bin/docker-entrypoint.sh: exec format error
