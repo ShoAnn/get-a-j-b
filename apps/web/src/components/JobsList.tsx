@@ -3,9 +3,12 @@
 import { Job, JobSchema, JobStatus } from "@/types/job";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
-import { JOB_STATUSES, StatusBadge } from "./StatusBadge";
+import { useState, useEffect, useRef } from "react";
+import { JOB_STATUSES, StatusBadge, statusStyles } from "./StatusBadge";
+import AddJobModal from "./AddJobModal";
+import { useAddJob } from "./useAddJob";
 import { apiClient } from "@/lib/client/api";
+import { useJobsRefresh } from "./JobsRefresh";
 import z from "zod";
 import { HttpError } from "@/types/errors";
 
@@ -18,6 +21,8 @@ type SortKey = "date" | "company" | "status";
 type SortDir = "asc" | "desc";
 
 export function JobsList() {
+    const { version, highlightedId } = useJobsRefresh();
+    const { open, setOpen, isSubmitting, submit } = useAddJob();
     const [jobs, setJobs] = useState<Job[]>([]);
     const searchParams = useSearchParams();
     const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
@@ -26,6 +31,25 @@ export function JobsList() {
     const [sortDir, setSortDir] = useState<SortDir>("desc");
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [statusMenuOpen, setStatusMenuOpen] = useState(false);
+    const statusMenuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!statusMenuOpen) return;
+        function onClickOutside(e: MouseEvent) {
+            if (statusMenuRef.current && !statusMenuRef.current.contains(e.target as Node)) {
+                setStatusMenuOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", onClickOutside);
+        return () => document.removeEventListener("mousedown", onClickOutside);
+    }, [statusMenuOpen]);
+
+    useEffect(() => {
+        if (!highlightedId) return;
+        const el = document.querySelector('[data-highlighted="true"]');
+        el?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, [highlightedId, jobs]);
 
     useEffect(() => {
         let cancelled = false;
@@ -55,7 +79,7 @@ export function JobsList() {
         return () => {
             cancelled = true;
         };
-    }, []);
+    }, [version]);
 
 
     const filtered = jobs.filter((job: Job) => {
@@ -76,13 +100,9 @@ export function JobsList() {
     });
 
     return (
-        <div className="flex flex-1 flex-col bg-zinc-50 min-h-full dark:bg-[#1A1A2E]">
-            <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-                <h1 className="text-2xl font-semibold tracking-tight text-midnight dark:text-[#F5F5F0]">
-                    Jobs
-                </h1>
-
-                <div className="mt-6 flex items-center gap-3">
+        <div className="mt-6">
+            <div className="flex flex-col">
+                <div className="flex items-center gap-3">
                     <div className="relative flex-1">
                         <svg
                             className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-[#9999AA]"
@@ -102,18 +122,79 @@ export function JobsList() {
                             className="w-full rounded-lg border-[0.5px] border-zinc-300 py-[9px] pl-10 pr-3 text-zinc-500 text-[13px] transition-colors focus:border-violet focus:outline-none dark:border-[#333355] dark:bg-[#252540] dark:text-[#9999AA] dark:placeholder:text-[#666688]"
                         />
                     </div>
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value as JobStatus | "all")}
-                        className="rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-zinc-400 text-[13px] transition-colors focus:border-violet focus:outline-none dark:border-[#333355] dark:bg-[#252540] dark:text-[#9999AA]"
+                    <button
+                        type="button"
+                        onClick={() => setOpen(true)}
+                        className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-violet px-3 py-[9px] text-sm font-medium text-white transition-colors hover:bg-[#6B63C9] active:bg-[#5A52B8]"
                     >
-                        <option value="all">All statuses</option>
-                        {JOB_STATUSES.map((s) => (
-                            <option key={s} value={s}>
-                                {s.replace(/_/g, " ")}
-                            </option>
-                        ))}
-                    </select>
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                            <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                        </svg>
+                        Add application
+                    </button>
+                    <div ref={statusMenuRef} className="relative">
+                        <button
+                            type="button"
+                            aria-haspopup="listbox"
+                            aria-expanded={statusMenuOpen}
+                            onClick={() => setStatusMenuOpen((v) => !v)}
+                            className="flex cursor-pointer items-center gap-2 rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-[13px] transition-colors focus:border-violet focus:outline-none dark:border-[#333355] dark:bg-[#252540]"
+                        >
+                            {statusFilter === "all" ? (
+                                <span className="text-zinc-400 dark:text-[#9999AA]">All statuses</span>
+                            ) : (
+                                <span className={`rounded px-2 py-0.5 text-xs font-medium capitalize ${statusStyles[statusFilter as JobStatus]}`}>
+                                    {(statusFilter as string).replace(/_/g, " ")}
+                                </span>
+                            )}
+                            <svg
+                                width="12"
+                                height="12"
+                                viewBox="0 0 12 12"
+                                fill="none"
+                                aria-hidden="true"
+                                className={`shrink-0 text-zinc-400 transition-transform dark:text-[#666688] ${statusMenuOpen ? "rotate-180" : ""}`}
+                            >
+                                <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </button>
+                        {statusMenuOpen && (
+                            <div
+                                role="listbox"
+                                className="absolute right-0 top-full z-20 mt-1 max-h-64 w-48 overflow-auto rounded-lg border border-zinc-200 bg-white py-1 shadow-lg dark:border-[#333355] dark:bg-[#252540]"
+                            >
+                                <button
+                                    type="button"
+                                    role="option"
+                                    aria-selected={statusFilter === "all"}
+                                    onClick={() => {
+                                        setStatusFilter("all");
+                                        setStatusMenuOpen(false);
+                                    }}
+                                    className={`flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-xs transition-colors hover:bg-zinc-50 dark:hover:bg-[#2E2E4A] ${statusFilter === "all" ? "bg-zinc-50 dark:bg-[#2E2E4A]" : ""}`}
+                                >
+                                    <span className="rounded bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">All statuses</span>
+                                </button>
+                                {JOB_STATUSES.map((s) => (
+                                    <button
+                                        key={s}
+                                        type="button"
+                                        role="option"
+                                        aria-selected={statusFilter === s}
+                                        onClick={() => {
+                                            setStatusFilter(s);
+                                            setStatusMenuOpen(false);
+                                        }}
+                                        className={`flex w-full cursor-pointer items-center px-3 py-1.5 text-left transition-colors hover:bg-zinc-50 dark:hover:bg-[#2E2E4A] ${statusFilter === s ? "bg-zinc-50 dark:bg-[#2E2E4A]" : ""}`}
+                                    >
+                                        <span className={`rounded px-2 py-0.5 text-xs font-medium capitalize ${statusStyles[s]}`}>
+                                            {s.replace(/_/g, " ")}
+                                        </span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                     <select
                         value={`${sortKey}-${sortDir}`}
                         onChange={(e) => {
@@ -132,7 +213,11 @@ export function JobsList() {
                     </select>
                 </div>
 
-                {filtered.length > 0 ? (
+                {loading ? (
+                    <p className="mt-6 text-sm text-text-secondary dark:text-[#9999AA]">Loading…</p>
+                ) : error ? (
+                    <p className="mt-6 text-sm text-red-600">{error}</p>
+                ) : filtered.length > 0 ? (
                     <div className="mt-6 overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-[#333355] dark:bg-[#1A1A2E]">
                         <table className="w-full">
                             <thead>
@@ -158,12 +243,13 @@ export function JobsList() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-100 dark:divide-[#333355]">
-                                {loading && <h1>LOADING...</h1>}
-                                {error && <h1 className="text-red">something went wrong</h1>}
-                                {filtered.map((job: Job) => (
+                                {filtered.map((job: Job) => {
+                                    const isHighlighted = highlightedId === job.id;
+                                    return (
                                     <tr
                                         key={job.id}
-                                        className="transition-colors hover:bg-zinc-50 dark:hover:bg-[#252540]"
+                                        data-highlighted={isHighlighted ? "true" : undefined}
+                                        className={`transition-colors ${isHighlighted ? "bg-violet/10 dark:bg-violet/20 animate-pulse ring-1 ring-inset ring-violet/40 border border-violet/30" : "hover:bg-zinc-50 dark:hover:bg-[#252540]"}`}
                                     >
                                         <td className="px-6 py-4 text-sm font-medium text-midnight dark:text-[#F5F5F0]">
                                             {job.title}
@@ -208,7 +294,8 @@ export function JobsList() {
                                             </Link>
                                         </td>
                                     </tr>
-                                ))}
+                                    );
+                                    })}
                             </tbody>
                         </table>
                     </div>
@@ -248,6 +335,12 @@ export function JobsList() {
                     </div>
                 )}
             </div>
+            <AddJobModal
+                open={open}
+                onClose={() => setOpen(false)}
+                onSubmit={submit}
+                isSubmitting={isSubmitting}
+            />
         </div>
     );
 }

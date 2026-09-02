@@ -102,7 +102,22 @@ func (r *postgresJobRepository) Delete(ctx context.Context, id int) error {
 }
 
 func toDomainJob(dbJob db.Job) *domain.Job {
-	salary := dbJob.Salary.Int.Int64()
+	var salaryInt int64
+	if dbJob.Salary.Valid && dbJob.Salary.Int != nil {
+		// pgtype.Numeric stores value as Int * 10^Exp.
+		// For DECIMAL(15,2) the DB returns Exp=-2 with Int = salary*100.
+		// Convert back to int salary (whole units) by dividing if Exp < 0.
+		val := new(big.Int).Set(dbJob.Salary.Int)
+		exp := dbJob.Salary.Exp
+		if exp < 0 {
+			divisor := new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(-exp)), nil)
+			val.Div(val, divisor)
+		} else if exp > 0 {
+			multiplier := new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(exp)), nil)
+			val.Mul(val, multiplier)
+		}
+		salaryInt = val.Int64()
+	}
 
 	var statusChangedAt string
 	if dbJob.StatusChangedAt.Valid {
@@ -115,7 +130,7 @@ func toDomainJob(dbJob db.Job) *domain.Job {
 		Title:             dbJob.Title,
 		Company:           dbJob.Company,
 		Location:          dbJob.Location,
-		Salary:            int(salary),
+		Salary:            int(salaryInt),
 		Description:       dbJob.Description.String,
 		Requirements:      dbJob.Requirements,
 		ApplicationStatus: dbJob.ApplicationStatus,

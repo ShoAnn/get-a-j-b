@@ -30,21 +30,22 @@ function makeRequest(body: unknown): Request {
 describe("GET /api/jobs", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        delete process.env.BRANCH;
     });
 
-    it("returns mock jobs when BRANCH=dev", async () => {
-        process.env.BRANCH = "dev";
-        const res = await GET();
-        expect(res.status).toBe(200);
-        const data = await res.json();
-        expect(Array.isArray(data)).toBe(true);
-        expect(mocks.requireAuth).not.toHaveBeenCalled();
-    });
-
-    it("requires auth and forwards with bearer token when not in dev", async () => {
+    it("requires auth and forwards with bearer token", async () => {
         mocks.requireAuth.mockResolvedValue("token-abc");
-        mocks.internalApiGet.mockResolvedValue([{ id: "1" }]);
+        mocks.internalApiGet.mockResolvedValue([
+            {
+                id: 1,
+                user_id: 1,
+                title: "Engineer",
+                company: "Acme",
+                location: "Remote",
+                salary: 100000,
+                current_status: "draft",
+                created_at: "2026-09-02T00:00:00Z",
+            },
+        ]);
 
         const res = await GET();
         expect(res.status).toBe(200);
@@ -98,7 +99,17 @@ describe("POST /api/jobs", () => {
 
     it("forwards body to Go with bearer token and returns 200", async () => {
         mocks.requireAuth.mockResolvedValue("token-abc");
-        mocks.internalApiPost.mockResolvedValue({ id: "new-id" });
+        mocks.internalApiPost.mockResolvedValue({
+            id: 1,
+            user_id: 1,
+            title: "Engineer",
+            company: "Co",
+            location: "Remote",
+            salary: 100000,
+            requirements: "x",
+            current_status: "draft",
+            created_at: "2026-09-02T00:00:00Z",
+        });
 
         const body = {
             title: "Engineer",
@@ -113,7 +124,14 @@ describe("POST /api/jobs", () => {
         expect(mocks.internalApiPost).toHaveBeenCalledWith(
             "/jobs",
             expect.anything(),
-            expect.objectContaining(body),
+            expect.objectContaining({
+                title: "Engineer",
+                company: "Co",
+                location: "Remote",
+                salary: 100000,
+                requirements: "x",
+                current_status: "draft",
+            }),
             { headers: { Authorization: "Bearer token-abc" } }
         );
     });

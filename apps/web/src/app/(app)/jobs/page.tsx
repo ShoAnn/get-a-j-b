@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
     DndContext,
     DragOverlay,
@@ -12,8 +12,10 @@ import {
 import { JobsList } from "@/components/JobsList";
 import { JOB_STATUSES } from "@/components/StatusBadge";
 import { apiClient } from "@/lib/client/api";
+import { useJobsRefresh } from "@/components/JobsRefresh";
 import { HttpError } from "@/types/errors";
 import type { Job, JobStatus } from "@/types/job";
+import { JobSchema } from "@/types/job";
 import z from "zod";
 
 function useGroupedJobs(jobs: Job[]) {
@@ -29,10 +31,11 @@ function useGroupedJobs(jobs: Job[]) {
     return groups;
 }
 
-function KanbanCard({ job, isSaving }: { job: Job; isSaving: boolean }) {
+function KanbanCard({ job, isSaving, isStaged, isHighlighted, disabled }: { job: Job; isSaving: boolean; isStaged: boolean; isHighlighted: boolean; disabled: boolean }) {
     const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
         id: `card-${job.id}`,
         data: { jobId: job.id, sourceStatus: job.status },
+        disabled,
     });
 
     const style = transform
@@ -47,7 +50,8 @@ function KanbanCard({ job, isSaving }: { job: Job; isSaving: boolean }) {
             {...attributes}
             aria-busy={isSaving}
             data-testid={`card-${job.id}`}
-            className={`rounded-xl border-[0.5px] border-zinc-300 bg-surface p-4 cursor-grab active:cursor-grabbing transition-shadow hover:shadow-md dark:border-zinc-600 dark:bg-midnight ${isDragging || isSaving ? "opacity-60" : ""}`}
+            data-highlighted={isHighlighted ? "true" : undefined}
+            className={`rounded-xl border-[0.5px] p-4 cursor-grab active:cursor-grabbing transition-shadow hover:shadow-md ${isHighlighted ? "border-violet bg-violet/10 dark:border-violet dark:bg-violet/20 animate-pulse ring-1 ring-violet/40" : isStaged ? "border-violet bg-violet/5 dark:border-violet dark:bg-violet/10" : "border-zinc-300 bg-surface dark:border-zinc-600 dark:bg-midnight"} ${isDragging || isSaving ? "opacity-60" : ""} ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
         >
             <div className="flex items-start gap-3">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet text-xs font-medium text-white">
@@ -66,6 +70,7 @@ function KanbanCard({ job, isSaving }: { job: Job; isSaving: boolean }) {
                             day: "numeric",
                         })}
                         {isSaving && <span className="ml-2 italic">saving…</span>}
+                        {isStaged && !isSaving && <span className="ml-2 text-violet">• staged</span>}
                     </p>
                 </div>
             </div>
@@ -73,7 +78,7 @@ function KanbanCard({ job, isSaving }: { job: Job; isSaving: boolean }) {
     );
 }
 
-function BoardColumn({ status, jobs, savingIds }: { status: JobStatus; jobs: Job[]; savingIds: Set<string> }) {
+function BoardColumn({ status, jobs, savingIds, stagedIds, anySaving, highlightedId }: { status: JobStatus; jobs: Job[]; savingIds: Set<string>; stagedIds: Set<string>; anySaving: boolean; highlightedId: string | null }) {
     const { setNodeRef, isOver } = useDroppable({
         id: `column-${status}`,
         data: { status },
@@ -83,7 +88,7 @@ function BoardColumn({ status, jobs, savingIds }: { status: JobStatus; jobs: Job
         <div
             ref={setNodeRef}
             data-testid={`column-${status}`}
-            className={`flex h-full w-[260px] shrink-0 flex-col rounded-xl border-[0.5px] border-zinc-200 bg-zinc-200 transition-shadow dark:border-midnight-border dark:bg-midnight ${isOver ? "ring-2 ring-violet mt-1" : ""}`}
+            className={`flex h-full w-[260px] shrink-0 flex-col rounded-xl border-[0.5px] border-zinc-200 bg-zinc-200 transition-shadow dark:border-midnight-border dark:bg-midnight ${isOver && !anySaving ? "ring-2 ring-violet mt-1" : ""}`}
         >
             <div className="flex shrink-0 items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-700">
                 <h3 className="text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-zinc-400">
@@ -95,7 +100,7 @@ function BoardColumn({ status, jobs, savingIds }: { status: JobStatus; jobs: Job
             </div>
             <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-3">
                 {jobs.map((job) => (
-                    <KanbanCard key={job.id} job={job} isSaving={savingIds.has(job.id)} />
+                    <KanbanCard key={job.id} job={job} isSaving={savingIds.has(job.id)} isStaged={stagedIds.has(job.id)} isHighlighted={highlightedId === job.id} disabled={anySaving} />
                 ))}
                 {jobs.length === 0 && (
                     <p className="py-4 text-center text-xs italic text-text-secondary dark:text-zinc-400">
@@ -108,13 +113,17 @@ function BoardColumn({ status, jobs, savingIds }: { status: JobStatus; jobs: Job
 }
 
 export default function JobsPage() {
+    const { version, highlightedId, bumpVersion } = useJobsRefresh();
     const [view, setView] = useState<"list" | "board">("list");
     const [jobs, setJobs] = useState<Job[]>([]);
     const [activeJob, setActiveJob] = useState<Job | null>(null);
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
+    const [pendingMoves, setPendingMoves] = useState<Map<string, { from: JobStatus; to: JobStatus }>>(new Map());
     const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
-    const [failedMoves, setFailedMoves] = useState<Map<string, { from: JobStatus; to: JobStatus; message: string }>>(new Map());
+    const [saving, setSaving] = useState(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
+    const baselineRef = useRef<Job[] | null>(null);
 
     useEffect(() => {
         let cancelled = false;
@@ -122,9 +131,13 @@ export default function JobsPage() {
             setLoading(true);
             setLoadError(null);
             try {
-                const data = await apiClient.get("/jobs", z.array(z.any()));
+                const data = await apiClient.get("/jobs", z.array(JobSchema));
                 if (cancelled) return;
-                setJobs(data as Job[]);
+                setJobs(data);
+                // clear staging when fresh data arrives (e.g. after external refresh)
+                setPendingMoves(new Map());
+                setSaveError(null);
+                baselineRef.current = null;
             } catch (err) {
                 if (cancelled) return;
                 if (err instanceof HttpError && err.statusCode === 401) {
@@ -138,19 +151,29 @@ export default function JobsPage() {
         }
         fetchJobs();
         return () => { cancelled = true; };
-    }, []);
+    }, [version]);
 
     const grouped = useGroupedJobs(jobs);
+    const stagedIds = new Set(pendingMoves.keys());
+    const pendingCount = pendingMoves.size;
+
+    useEffect(() => {
+        if (!highlightedId) return;
+        const el = document.querySelector(`[data-highlighted="true"]`);
+        el?.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+    }, [highlightedId, jobs]);
 
     const handleDragStart = useCallback((event: DragStartEvent) => {
+        if (saving) return;
         const jobId = event.active.data.current?.jobId as string | undefined;
         if (!jobId) return;
         const job = jobs.find((j) => j.id === jobId);
         if (job) setActiveJob(job);
-    }, [jobs]);
+    }, [jobs, saving]);
 
     const handleDragEnd = useCallback((event: DragEndEvent) => {
         setActiveJob(null);
+        if (saving) return;
         const { active, over } = event;
         if (!over) return;
 
@@ -161,55 +184,129 @@ export default function JobsPage() {
         const currentJob = jobs.find((j) => j.id === jobId);
         if (!currentJob || currentJob.status === targetStatus) return;
 
-        const previousStatus = currentJob.status;
+        // Determine original status before any staging for this job
+        const existing = pendingMoves.get(jobId);
+        const originalStatus = existing?.from ?? currentJob.status;
 
+        // If dropping back to original, cancel the pending move
+        if (targetStatus === originalStatus) {
+            setPendingMoves((prev) => {
+                const next = new Map(prev);
+                next.delete(jobId);
+                if (next.size === 0) baselineRef.current = null;
+                return next;
+            });
+            setJobs((prev) => prev.map((job) => job.id === jobId ? { ...job, status: targetStatus } : job));
+            setSaveError(null);
+            return;
+        }
+
+        if (baselineRef.current === null) {
+            baselineRef.current = jobs.map((j) => ({ ...j }));
+        }
+
+        setPendingMoves((prev) => {
+            const next = new Map(prev);
+            next.set(jobId, { from: originalStatus, to: targetStatus });
+            return next;
+        });
         setJobs((prev) => prev.map((job) => job.id === jobId ? { ...job, status: targetStatus } : job));
-        setSavingIds((prev) => { const next = new Set(prev); next.add(jobId); return next; });
+        setSaveError(null);
+    }, [jobs, pendingMoves, saving]);
 
-        (async () => {
+    const handleSave = useCallback(async () => {
+        if (pendingMoves.size === 0 || saving) return;
+        setSaving(true);
+        setSaveError(null);
+        const entries = Array.from(pendingMoves.entries());
+        const failed: string[] = [];
+        for (const [jobId, move] of entries) {
+            setSavingIds((prev) => { const next = new Set(prev); next.add(jobId); return next; });
             try {
-                await apiClient.put(`/jobs/${jobId}`, z.any(), {
-                    title: currentJob.title,
-                    company: currentJob.company,
-                    location: currentJob.location,
-                    salary: currentJob.salary,
-                    requirements: currentJob.requirements,
-                    status: targetStatus,
-                });
-                setSavingIds((prev) => { const next = new Set(prev); next.delete(jobId); return next; });
-            } catch (err) {
-                setJobs((prev) => prev.map((job) => job.id === jobId ? { ...job, status: previousStatus } : job));
-                setSavingIds((prev) => { const next = new Set(prev); next.delete(jobId); return next; });
-                setFailedMoves((prev) => {
+                await apiClient.patch(`/jobs/${jobId}`, JobSchema, { status: move.to });
+                setPendingMoves((prev) => {
                     const next = new Map(prev);
-                    next.set(jobId, {
-                        from: previousStatus,
-                        to: targetStatus,
-                        message:
-                            err instanceof HttpError && err.statusCode >= 500
-                                ? "Couldn't save. Please try again."
-                                : err instanceof Error
-                                    ? err.message
-                                    : "Couldn't save. Please try again.",
-                    });
+                    next.delete(jobId);
                     return next;
                 });
+            } catch (err) {
+                failed.push(jobId);
+                setSaveError(
+                    err instanceof HttpError && err.statusCode >= 500
+                        ? "Couldn't save. Please try again."
+                        : err instanceof Error
+                            ? err.message
+                            : "Couldn't save. Please try again.",
+                );
+                // keep this move staged; update savingIds and continue to next? keep first error style: stop batch on first failure
+                setSavingIds((prev) => { const next = new Set(prev); next.delete(jobId); return next; });
+                break;
             }
-        })();
-    }, [jobs]);
+            setSavingIds((prev) => { const next = new Set(prev); next.delete(jobId); return next; });
+        }
+        setSaving(false);
+        if (failed.length === 0) {
+            baselineRef.current = null;
+            bumpVersion();
+        }
+    }, [pendingMoves, saving, bumpVersion]);
+
+    const handleDiscard = useCallback(() => {
+        if (baselineRef.current) {
+            setJobs(baselineRef.current);
+        } else if (pendingMoves.size > 0) {
+            // fallback: revert pending moves individually
+            setJobs((prev) => prev.map((job) => {
+                const m = pendingMoves.get(job.id);
+                return m ? { ...job, status: m.from } : job;
+            }));
+        }
+        setPendingMoves(new Map());
+        setSaveError(null);
+        setSavingIds(new Set());
+        baselineRef.current = null;
+    }, [pendingMoves]);
 
     return (
-        <div className="flex flex-1 min-h-0 flex-col bg-zinc-50 dark:bg-midnight">
+        <div className="flex flex-1 flex-col bg-zinc-50 min-h-full dark:bg-[#1A1A2E]">
             <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col px-4 py-4 sm:px-6 lg:px-8">
-                <div className="flex items-baseline justify-between">
-                    <h1 className="text-2xl font-semibold tracking-tight text-midnight dark:text-[#F5F5F0]">
+                <div className="flex items-center justify-between gap-4">
+                    <h1 className="shrink-0 text-2xl font-semibold tracking-tight text-midnight dark:text-[#F5F5F0]">
                         Jobs
                     </h1>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-1 justify-center">
+                        {view === "board" && pendingCount > 0 && (
+                            <div className="flex items-center gap-2" data-testid="board-save-bar">
+                                <span className="hidden text-xs text-midnight dark:text-[#F5F5F0] sm:inline">
+                                    {pendingCount === 1 ? "1 unsaved change" : `${pendingCount} unsaved changes`}
+                                </span>
+                                <span className="text-xs text-midnight dark:text-[#F5F5F0] sm:hidden">
+                                    {pendingCount}
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={handleDiscard}
+                                    disabled={saving}
+                                    className="cursor-pointer rounded-full border border-zinc-300 px-3 py-1 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                                >
+                                    Discard
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleSave}
+                                    disabled={saving}
+                                    className="cursor-pointer rounded-full bg-violet px-4 py-1 text-xs font-medium text-white transition-colors hover:bg-[#6B63C9] disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    {saving ? "Saving…" : "Save"}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
                         <button
                             type="button"
                             onClick={() => setView("board")}
-                            className={`rounded-lg px-3 py-[6px] text-xs font-medium transition-colors ${
+                            className={`cursor-pointer rounded-lg px-3 py-[6px] text-xs font-medium transition-colors ${
                                 view === "board"
                                     ? "bg-violet text-white"
                                     : "border border-zinc-300 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
@@ -220,7 +317,7 @@ export default function JobsPage() {
                         <button
                             type="button"
                             onClick={() => setView("list")}
-                            className={`rounded-lg px-3 py-[6px] text-xs font-medium transition-colors ${
+                            className={`cursor-pointer rounded-lg px-3 py-[6px] text-xs font-medium transition-colors ${
                                 view === "list"
                                     ? "bg-violet text-white"
                                     : "border border-zinc-300 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
@@ -240,32 +337,15 @@ export default function JobsPage() {
                         </div>
                     ) : (
                         <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-                            {failedMoves.size > 0 && (
-                                <div role="alert" aria-live="polite" className="mt-3 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
-                                    {Array.from(failedMoves.values()).map((move, idx) => (
-                                        <p key={idx}>
-                                            Couldn't move a job from {move.from.replace(/_/g, " ")} to {move.to.replace(/_/g, " ")}: {move.message}
-                                            <button
-                                                type="button"
-                                                className="ml-2 underline"
-                                                onClick={() => {
-                                                    setFailedMoves((prev) => {
-                                                        const next = new Map(prev);
-                                                        next.delete(String(idx));
-                                                        return next;
-                                                    });
-                                                }}
-                                            >
-                                                dismiss
-                                            </button>
-                                        </p>
-                                    ))}
+                            {saveError && (
+                                <div role="alert" aria-live="polite" className="mt-3 rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
+                                    {saveError}
                                 </div>
                             )}
-                            <div className="mt-6 h-[calc(100vh-56px-2.5rem-1.5rem)] pb-4">
+                            <div className="mt-6 h-[calc(100vh-56px-2.5rem-3rem)] pb-4">
                                 <div className="flex h-full items-stretch gap-4 overflow-x-auto">
                                     {JOB_STATUSES.map((status) => (
-                                        <BoardColumn key={status} status={status} jobs={grouped[status]} savingIds={savingIds} />
+                                        <BoardColumn key={status} status={status} jobs={grouped[status]} savingIds={savingIds} stagedIds={stagedIds} anySaving={saving} highlightedId={highlightedId} />
                                     ))}
                                 </div>
                             </div>

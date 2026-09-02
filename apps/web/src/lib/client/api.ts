@@ -50,5 +50,10 @@ export const apiClient = {
 		schema,
 		{ method: "PUT", body: JSON.stringify(body) }
 	),
+	patch: <T>(path: string, schema: z.ZodType<T>, body: unknown) => request<T>(
+		path,
+		schema,
+		{ method: "PATCH", body: JSON.stringify(body) }
+	),
 	delete: <T>(path: string, schema: z.ZodType<T>) => request<T>(path, schema, { method: "DELETE" }),
 }

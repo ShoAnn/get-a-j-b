@@ -5,6 +5,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const mocks = vi.hoisted(() => ({
     push: vi.fn(),
     refresh: vi.fn(),
+    showToast: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -14,8 +15,9 @@ vi.mock("next/navigation", () => ({
 vi.mock("@/components/ThemeToggle", () => ({
     default: () => <div data-testid="theme-toggle">ThemeToggle</div>,
 }));
-vi.mock("@/components/AddJobModal", () => ({
-    default: () => null,
+
+vi.mock("@/components/Toast", () => ({
+    useToast: () => ({ showToast: mocks.showToast }),
 }));
 
 import Header from "./Header";
@@ -25,33 +27,9 @@ describe("Header", () => {
         vi.clearAllMocks();
     });
 
-    it("renders logo, search, and action buttons", () => {
+    it("renders logo", () => {
         render(<Header />);
         expect(screen.getByText("Get a J*b")).toBeInTheDocument();
-        expect(screen.getByPlaceholderText(/Search jobs/i)).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Add Application/i })).toBeInTheDocument();
-    });
-
-    it("navigates to /jobs when search is submitted empty", () => {
-        render(<Header />);
-
-        const form = screen.getByPlaceholderText(/Search jobs/i).closest("form")!;
-        fireSubmit(form);
-
-        expect(mocks.push).toHaveBeenCalledWith("/jobs");
-    });
-
-    it("navigates to /jobs?q= when search query is provided", async () => {
-        const user = userEvent.setup();
-        render(<Header />);
-
-        const input = screen.getByPlaceholderText(/Search jobs/i);
-        await user.type(input, "engineer");
-
-        const form = input.closest("form")!;
-        fireSubmit(form);
-
-        expect(mocks.push).toHaveBeenCalledWith("/jobs?q=engineer");
     });
 
     it("toggles user menu", async () => {
@@ -112,7 +90,10 @@ describe("Header", () => {
             await user.click(logoutBtns[0]);
 
             await waitFor(() => {
-                expect(screen.getByText(/server is having trouble/i)).toBeInTheDocument();
+                expect(mocks.showToast).toHaveBeenCalledWith(
+                    expect.stringMatching(/server is having trouble/i),
+                    "error",
+                );
             });
 
             expect(mocks.push).not.toHaveBeenCalled();
@@ -133,7 +114,10 @@ describe("Header", () => {
             await user.click(logoutBtns[0]);
 
             await waitFor(() => {
-                expect(screen.getByText(/Unable to reach the server/i)).toBeInTheDocument();
+                expect(mocks.showToast).toHaveBeenCalledWith(
+                    expect.stringMatching(/Unable to reach the server/i),
+                    "error",
+                );
             });
 
             expect(mocks.push).not.toHaveBeenCalled();
@@ -166,8 +150,3 @@ describe("Header", () => {
         });
     });
 });
-
-// Helper since forms don't submit with just type/click
-function fireSubmit(form: HTMLFormElement) {
-    form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
-}

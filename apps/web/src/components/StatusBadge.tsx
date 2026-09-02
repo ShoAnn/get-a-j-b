@@ -1,6 +1,6 @@
 import type { JobStatus } from "@/types/job";
 
-const statusStyles: Record<JobStatus, string> = {
+export const statusStyles: Record<JobStatus, string> = {
   draft: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300",
   submitted: "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
   under_review: "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",

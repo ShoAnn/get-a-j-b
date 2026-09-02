@@ -64,6 +64,14 @@ describe("apiClient", () => {
             expect(init.method).toBe("PUT");
         });
 
+        it("uses PATCH method", async () => {
+            fetchMock.mockResolvedValue(mockResponse(200, {}));
+            await apiClient.patch("/jobs/1", z.any(), { status: "submitted" });
+            const init = fetchMock.mock.calls[0][1];
+            expect(init.method).toBe("PATCH");
+            expect(init.body).toBe(JSON.stringify({ status: "submitted" }));
+        });
+
         it("uses DELETE method", async () => {
             fetchMock.mockResolvedValue(mockResponse(200, {}));
             await apiClient.delete("/jobs/1", z.any());

@@ -38,7 +38,16 @@ describe("GET /api/jobs/[id]", () => {
 
     it("returns 200 and forwards to Go with id", async () => {
         mocks.requireAuth.mockResolvedValue("t");
-        mocks.internalApiGet.mockResolvedValue({ id: "1", title: "Engineer" });
+        mocks.internalApiGet.mockResolvedValue({
+            id: 1,
+            user_id: 1,
+            title: "Engineer",
+            company: "Acme",
+            location: "Remote",
+            salary: 100000,
+            current_status: "draft",
+            created_at: "2026-08-01T00:00:00Z",
+        });
 
         const res = await GET({} as never, context);
         expect(res.status).toBe(200);
@@ -80,7 +89,16 @@ describe("PUT /api/jobs/[id]", () => {
 
     it("forwards full update with bearer token", async () => {
         mocks.requireAuth.mockResolvedValue("t");
-        mocks.internalApiPut.mockResolvedValue({ id: "1", title: "new" });
+        mocks.internalApiPut.mockResolvedValue({
+            id: 1,
+            user_id: 1,
+            title: "new",
+            company: "Co",
+            location: "Remote",
+            salary: 100000,
+            current_status: "draft",
+            created_at: "2026-08-01T00:00:00Z",
+        });
 
         const body = {
             title: "new",
