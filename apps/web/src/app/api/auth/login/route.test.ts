@@ -59,27 +59,38 @@ describe("POST /api/auth/login", () => {
         expect(mocks.setAuthCookies).toHaveBeenCalledWith("a", "r", "900");
     });
 
-    it("returns 422 on ZodError validation failure", async () => {
+    it("returns 422 with friendly error on ZodError validation failure", async () => {
         const res = await POST(makeRequest({ email: "not-an-email", password: "x" }) as never);
         expect(res.status).toBe(422);
         const body = await res.json();
-        expect(body.error).toBe("Validation failed");
+        expect(body.error).toMatch(/check your email and password/i);
         expect(body.fields).toBeDefined();
     });
 
-    it("returns 401 when internal API returns 401", async () => {
+    it("returns 401 with friendly error when internal API returns 401", async () => {
         mocks.internalApiPost.mockRejectedValue(new HttpError("Invalid credentials", 401));
 
         const res = await POST(makeRequest({ email: "user@test.com", password: "wrong" }) as never);
         expect(res.status).toBe(401);
+        const body = await res.json();
+        expect(body.error).toMatch(/incorrect email or password/i);
     });
 
-    it("returns 500 on unexpected error", async () => {
+    it("returns 502 with friendly error on upstream 5xx", async () => {
+        mocks.internalApiPost.mockRejectedValue(new HttpError("Server error", 503));
+
+        const res = await POST(makeRequest({ email: "user@test.com", password: "password123" }) as never);
+        expect(res.status).toBe(502);
+        const body = await res.json();
+        expect(body.error).toMatch(/server is having trouble/i);
+    });
+
+    it("returns 500 with friendly error on unexpected error", async () => {
         mocks.internalApiPost.mockRejectedValue(new Error("boom"));
 
         const res = await POST(makeRequest({ email: "user@test.com", password: "password123" }) as never);
         expect(res.status).toBe(500);
         const body = await res.json();
-        expect(body.error).toBe("Internal server error");
+        expect(body.error).toMatch(/something went wrong/i);
     });
 });

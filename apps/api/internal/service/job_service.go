@@ -34,6 +34,9 @@ func (s *jobService) CreateJob(ctx context.Context, userID int, req *domain.Crea
 	if req.ApplicationStatus != nil {
 		job.ApplicationStatus = *req.ApplicationStatus
 	}
+	if req.Notes != nil {
+		job.Notes = *req.Notes
+	}
 	if req.SourceURL != nil {
 		job.SourceURL = *req.SourceURL
 	}

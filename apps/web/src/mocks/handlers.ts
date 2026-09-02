@@ -1,11 +1,10 @@
 import { http, HttpResponse } from "msw";
 import { CreateJobSchema, Job, UpdateJobSchema } from "@/types/job";
-import { createMockJobs } from "./data";
 
-let jobs: Job[] = createMockJobs();
+let jobs: Job[] = [];
 
 export function resetMockJobs() {
-    jobs = createMockJobs();
+    jobs = [];
 }
 
 export const handlers = [

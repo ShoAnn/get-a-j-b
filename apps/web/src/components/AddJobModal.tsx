@@ -18,12 +18,14 @@ interface AddJobModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: JobFormData) => void;
+  isSubmitting?: boolean;
 }
 
 export default function AddJobModal({
   open,
   onClose,
   onSubmit,
+  isSubmitting = false,
 }: AddJobModalProps) {
   const [role, setRole] = useState("");
   const [company, setCompany] = useState("");
@@ -143,10 +145,12 @@ export default function AddJobModal({
         </div>
 
         <div className="flex items-center justify-end gap-3 pt-2">
-          <Button type="button" variant="ghost" onClick={handleClose}>
+          <Button type="button" variant="ghost" onClick={handleClose} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button type="submit">Save</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : "Save"}
+          </Button>
         </div>
       </form>
     </Modal>

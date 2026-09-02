@@ -64,6 +64,14 @@ describe("apiClient", () => {
             expect(init.method).toBe("PUT");
         });
 
+        it("uses PATCH method", async () => {
+            fetchMock.mockResolvedValue(mockResponse(200, {}));
+            await apiClient.patch("/jobs/1", z.any(), { status: "submitted" });
+            const init = fetchMock.mock.calls[0][1];
+            expect(init.method).toBe("PATCH");
+            expect(init.body).toBe(JSON.stringify({ status: "submitted" }));
+        });
+
         it("uses DELETE method", async () => {
             fetchMock.mockResolvedValue(mockResponse(200, {}));
             await apiClient.delete("/jobs/1", z.any());
@@ -99,9 +107,19 @@ describe("apiClient", () => {
             await expect(apiClient.get("/jobs", z.any())).rejects.toBeInstanceOf(HttpError);
         });
 
-        it("includes server message in HttpError", async () => {
+        it("uses server message field when present", async () => {
             fetchMock.mockResolvedValue(mockResponse(500, { message: "boom" }));
-            await expect(apiClient.get("/jobs", z.any())).rejects.toThrow(/boom/);
+            await expect(apiClient.get("/jobs", z.any())).rejects.toThrow(/^boom$/);
+        });
+
+        it("falls back to error field when message is absent", async () => {
+            fetchMock.mockResolvedValue(mockResponse(400, { error: "bad input" }));
+            await expect(apiClient.get("/jobs", z.any())).rejects.toThrow(/^bad input$/);
+        });
+
+        it("falls back to status text when no message body", async () => {
+            fetchMock.mockResolvedValue(mockResponse(502, {}));
+            await expect(apiClient.get("/jobs", z.any())).rejects.toThrow(/status 502/);
         });
 
         it("returns parsed data on success", async () => {

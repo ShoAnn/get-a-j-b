@@ -19,7 +19,6 @@ vi.mock("next/headers", () => ({
 }));
 
 import { POST } from "./route";
-import { HttpError } from "@/types/errors";
 
 describe("POST /api/auth/logout", () => {
     beforeEach(() => {
@@ -43,19 +42,32 @@ describe("POST /api/auth/logout", () => {
         expect(mocks.cookieStore.delete).toHaveBeenCalledWith("refresh_token");
     });
 
-    it("returns 401 on HttpError 401 from Go", async () => {
+    it("returns 204 without calling upstream when no refresh_token cookie", async () => {
+        mocks.cookieStore.get.mockReturnValue(undefined);
+
+        const res = await POST();
+        expect(res.status).toBe(204);
+        expect(mocks.internalApiPost).not.toHaveBeenCalled();
+        expect(mocks.cookieStore.delete).toHaveBeenCalledWith("access_token");
+        expect(mocks.cookieStore.delete).toHaveBeenCalledWith("refresh_token");
+    });
+
+    it("still returns 204 (and clears cookies) when upstream returns 401", async () => {
         mocks.cookieStore.get.mockReturnValue({ value: "r" });
+        const { HttpError } = await import("@/types/errors");
         mocks.internalApiPost.mockRejectedValue(new HttpError("expired", 401));
 
         const res = await POST();
-        expect(res.status).toBe(401);
+        expect(res.status).toBe(204);
+        expect(mocks.cookieStore.delete).toHaveBeenCalledWith("access_token");
     });
 
-    it("returns 500 on unexpected error", async () => {
+    it("still returns 204 when upstream throws an unexpected error", async () => {
         mocks.cookieStore.get.mockReturnValue({ value: "r" });
         mocks.internalApiPost.mockRejectedValue(new Error("boom"));
 
         const res = await POST();
-        expect(res.status).toBe(500);
+        expect(res.status).toBe(204);
+        expect(mocks.cookieStore.delete).toHaveBeenCalledWith("refresh_token");
     });
 });
