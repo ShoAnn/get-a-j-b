@@ -78,6 +78,18 @@ function KanbanCard({ job, isSaving, isStaged, isHighlighted, disabled }: { job:
     );
 }
 
+const statusColumnColors: Record<JobStatus, string> = {
+    draft: "#D4D4D8",
+    submitted: "#3B82F6",
+    under_review: "#F59E0B",
+    interview_scheduled: "#8B5CF6",
+    offer_extended: "#06B6D4",
+    accepted: "#22C55E",
+    rejected: "#EF4444",
+    withdrawn: "#EC4899",
+    archived: "#52525B",
+};
+
 function BoardColumn({ status, jobs, savingIds, stagedIds, anySaving, highlightedId }: { status: JobStatus; jobs: Job[]; savingIds: Set<string>; stagedIds: Set<string>; anySaving: boolean; highlightedId: string | null }) {
     const { setNodeRef, isOver } = useDroppable({
         id: `column-${status}`,
@@ -88,10 +100,12 @@ function BoardColumn({ status, jobs, savingIds, stagedIds, anySaving, highlighte
         <div
             ref={setNodeRef}
             data-testid={`column-${status}`}
+            style={{ borderTop: `3px solid ${statusColumnColors[status]}` }}
             className={`flex h-full w-[260px] shrink-0 flex-col rounded-xl border-[0.5px] border-zinc-200 bg-zinc-200 transition-shadow dark:border-midnight-border dark:bg-midnight ${isOver && !anySaving ? "ring-2 ring-violet mt-1" : ""}`}
         >
             <div className="flex shrink-0 items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-700">
-                <h3 className="text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-zinc-400">
+                <h3 className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-zinc-400">
+                    <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: statusColumnColors[status] }} aria-hidden="true" />
                     {status.replace(/_/g, " ")}
                 </h3>
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-zinc-200 text-xs font-medium text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">

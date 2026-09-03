@@ -11,15 +11,15 @@ import { HttpError } from "@/types/errors";
 import z from "zod";
 
 const statusColors: Record<string, string> = {
-    draft: "#D4D4D8",
-    submitted: "#60A5FA",
-    under_review: "#FBBF24",
-    interview_scheduled: "#7F77DD",
-    offer_extended: "#1D9E75",
-    accepted: "#1D9E75",
-    rejected: "#E24B4A",
-    withdrawn: "#A1A1AA",
-    archived: "#D4D4D8",
+    draft: "#D4D4D8", // zinc-300 - light neutral
+    submitted: "#3B82F6", // blue-500 - clear blue
+    under_review: "#F59E0B", // amber-500 - warm yellow
+    interview_scheduled: "#8B5CF6", // violet-500 - purple
+    offer_extended: "#06B6D4", // cyan-500 - bright teal/cyan (distinct from green)
+    accepted: "#22C55E", // green-500 - vivid emerald
+    rejected: "#EF4444", // red-500 - strong red
+    withdrawn: "#EC4899", // pink-500 - magenta/fuchsia (distinct from red & violet)
+    archived: "#52525B", // zinc-600 - dark neutral (noticeably darker than draft)
 };
 
 export default function Dashboard() {

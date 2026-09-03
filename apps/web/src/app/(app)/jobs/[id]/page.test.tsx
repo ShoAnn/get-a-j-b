@@ -8,6 +8,7 @@ vi.mock("@/lib/client/api", () => ({
   apiClient: {
     get: vi.fn(),
     put: vi.fn(),
+    delete: vi.fn(),
   },
 }));
 
@@ -16,6 +17,11 @@ const mockedApi = vi.mocked(apiClient);
 
 vi.mock("next/navigation", () => ({
   useParams: () => ({ id: "job-1" }),
+  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+}));
+
+vi.mock("@/components/JobsRefresh", () => ({
+  useJobsRefresh: () => ({ bumpVersion: vi.fn(), version: 0, highlightedId: null }),
 }));
 
 const MOCK_JOB: Job = {

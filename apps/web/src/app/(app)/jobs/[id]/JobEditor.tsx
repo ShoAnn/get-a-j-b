@@ -3,7 +3,9 @@
 import { Job, JobSchema, UpdateJob, UpdateJobSchema } from "@/types/job";
 import { JOB_STATUSES, StatusBadge } from "@/components/StatusBadge";
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/client/api";
+import { useJobsRefresh } from "@/components/JobsRefresh";
 import { HttpError } from "@/types/errors";
 import z from "zod";
 
@@ -63,6 +65,8 @@ export default function JobEditor({
     initialJob: Job;
     onSaved: (job: Job) => void;
 }) {
+    const router = useRouter();
+    const { bumpVersion } = useJobsRefresh();
     const [job, setJobLocal] = useState<Job>(initialJob);
     const [formData, setFormData] = useState<UpdateJob>({
         title: initialJob.title,
@@ -80,6 +84,7 @@ export default function JobEditor({
     const [saving, setSaving] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
     const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof UpdateJob, string>>>({});
+    const [deleting, setDeleting] = useState(false);
 
     const isDirty = useMemo(
         () => Object.entries(formData).some(([key, value]) => value !== job[key as keyof Job]),
@@ -151,6 +156,26 @@ export default function JobEditor({
             }
         } finally {
             setSaving(false);
+        }
+    }
+
+    async function handleDelete() {
+        if (deleting || saving) return;
+        if (!window.confirm("Delete this job? This cannot be undone.")) return;
+        setDeleting(true);
+        setSaveError(null);
+        try {
+            await apiClient.delete(`/jobs/${jobId}`, z.void());
+            bumpVersion();
+            router.push("/jobs");
+            router.refresh();
+        } catch (err) {
+            if (err instanceof HttpError) {
+                setSaveError(`Delete failed (${err.statusCode}): ${err.message}`);
+            } else {
+                setSaveError("Something went wrong while deleting");
+            }
+            setDeleting(false);
         }
     }
 
@@ -309,6 +334,20 @@ export default function JobEditor({
                                     className="rounded-lg border border-violet px-5 py-[10px] text-sm font-medium text-violet transition-colors hover:bg-[#F5F3FF] disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     Discard
+                                </button>
+                            </div>
+                        )}
+
+                        {!isEditing && (
+                            <div className="flex items-center gap-3">
+                                <button
+                                    type="button"
+                                    onClick={handleDelete}
+                                    disabled={deleting || saving}
+                                    aria-label="Delete job"
+                                    className="rounded-lg border border-red-300 px-5 py-[10px] text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/30"
+                                >
+                                    {deleting ? "Deleting..." : "Delete job"}
                                 </button>
                             </div>
                         )}
