@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -13,6 +15,9 @@ import (
 	"github.com/ShoAnn/get-a-j-b/api/internal/middleware"
 	repository "github.com/ShoAnn/get-a-j-b/api/internal/repository/postgres"
 	"github.com/ShoAnn/get-a-j-b/api/internal/service"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 )
@@ -44,6 +49,47 @@ func main() {
 		log.Fatalf("Database unreachable: %v", err)
 	}
 	log.Println("Successfully connected to the database")
+
+	// Run migrations (best-effort: required for fresh volumes / e2e)
+	migrationsPath := os.Getenv("MIGRATIONS_PATH")
+	if migrationsPath == "" {
+		_, filename, _, _ := runtime.Caller(0)
+		dir := filepath.Dir(filename)
+		for {
+			candidate := filepath.Join(dir, "internal", "db", "migrations")
+			if _, err := os.Stat(candidate); err == nil {
+				migrationsPath = "file://" + candidate
+				break
+			}
+			parent := filepath.Dir(dir)
+			if parent == dir {
+				break
+			}
+			dir = parent
+		}
+	}
+	if migrationsPath != "" {
+		if !strings.HasPrefix(migrationsPath, "file://") {
+			migrationsPath = "file://" + migrationsPath
+		}
+		if m, err := migrate.New(migrationsPath, dbURL); err == nil {
+			if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+				log.Printf("Migration failed: %v", err)
+			} else {
+				log.Println("Migrations applied (or already up-to-date)")
+			}
+			if srcErr, dbErr := m.Close(); srcErr != nil || dbErr != nil {
+				if srcErr != nil {
+					log.Printf("Migration source close error: %v", srcErr)
+				}
+				if dbErr != nil {
+					log.Printf("Migration db close error: %v", dbErr)
+				}
+			}
+		} else {
+			log.Printf("Failed to init migrator (%s): %v", migrationsPath, err)
+		}
+	}
 
 	// JWT Secret
 	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")

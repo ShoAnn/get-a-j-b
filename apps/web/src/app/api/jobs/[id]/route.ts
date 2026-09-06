@@ -29,6 +29,8 @@ function errorResponse(err: unknown) {
             return NextResponse.json({ error: 'Not found' }, { status: 404 });
         }
     }
+    // eslint-disable-next-line no-console
+    console.error("[BFF jobs/[id]] errorResponse:", err);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });
 }
 
@@ -58,7 +60,13 @@ export async function PUT(request: NextRequest, context: RouteContext) {
                 { status: 422 }
             );
         }
-        const data = await internalApiClient.put(`/jobs/${id}`, ApiJobSchema, validatedInput.data,
+        // Translate frontend `status` to Go wire `current_status`
+        const wireBody: Record<string, unknown> = { ...validatedInput.data } as Record<string, unknown>;
+        if (wireBody.status !== undefined) {
+            wireBody.current_status = wireBody.status;
+            delete wireBody.status;
+        }
+        const data = await internalApiClient.put(`/jobs/${id}`, ApiJobSchema, wireBody,
             { headers: { Authorization: `Bearer ${token}` }, }
         );
         return NextResponse.json(toJob(data));

@@ -13,5 +13,6 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./src/setupTests.ts", "./src/mocks/testSetup.ts"],
+    exclude: ["e2e/**", "node_modules/**", ".next/**", "playwright.config.ts"],
   },
 });

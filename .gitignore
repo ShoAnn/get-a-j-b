@@ -25,6 +25,11 @@ docker-compose.override.yml
 .env
 .env.local
 
+# Playwright
+playwright-report/
+test-results/
+blob-report/
+
 # notes
 gemini.md
 todo.md
