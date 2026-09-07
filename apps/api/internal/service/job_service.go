@@ -71,7 +71,7 @@ func (s *jobService) UpdateJob(ctx context.Context, jobID int, userID int, req *
 
 	// Check ownership
 	if job.UserID != userID {
-		return nil, domain.ErrUnauthorized
+		return nil, domain.ErrForbidden
 	}
 
 	if req.Title != nil {
@@ -115,7 +115,7 @@ func (s *jobService) DeleteJob(ctx context.Context, jobID int, userID int) error
 	}
 
 	if job.UserID != userID {
-		return domain.ErrUnauthorized
+		return domain.ErrForbidden
 	}
 
 	return s.repo.Delete(ctx, jobID)

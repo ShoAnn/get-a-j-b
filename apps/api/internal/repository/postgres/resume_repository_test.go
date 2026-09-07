@@ -29,7 +29,7 @@ func TestPostgresResumeRepository(t *testing.T) {
 		resume := &domain.Resume{
 			UserID:  user.ID,
 			Label:   "Software Engineer Resume",
-			FileUrl: "https://example.com/resume.pdf",
+			Content: "# Resume\nMarkdown content here",
 		}
 
 		createdResume, err := resumeRepo.Create(ctx, resume)
@@ -45,8 +45,8 @@ func TestPostgresResumeRepository(t *testing.T) {
 		if err != nil {
 			t.Fatalf("failed to get resume by ID: %v", err)
 		}
-		if foundResume.FileUrl != resume.FileUrl {
-			t.Errorf("expected file url %s, got %s", resume.FileUrl, foundResume.FileUrl)
+		if foundResume.Content != resume.Content {
+			t.Errorf("expected content %s, got %s", resume.Content, foundResume.Content)
 		}
 	})
 
@@ -69,12 +69,12 @@ func TestPostgresResumeRepository(t *testing.T) {
 		_, _ = resumeRepo.Create(ctx, &domain.Resume{
 			UserID:  user.ID,
 			Label:   "Resume 1",
-			FileUrl: "url1",
+			Content: "# Resume 1\nContent 1",
 		})
 		_, _ = resumeRepo.Create(ctx, &domain.Resume{
 			UserID:  user.ID,
 			Label:   "Resume 2",
-			FileUrl: "url2",
+			Content: "# Resume 2\nContent 2",
 		})
 
 		resumes, err := resumeRepo.GetAll(ctx, user.ID)
@@ -106,11 +106,11 @@ func TestPostgresResumeRepository(t *testing.T) {
 		resume, _ := resumeRepo.Create(ctx, &domain.Resume{
 			UserID:  user.ID,
 			Label:   "Old Label",
-			FileUrl: "old_url",
+			Content: "old markdown",
 		})
 
 		resume.Label = "New Label"
-		resume.FileUrl = "new_url"
+		resume.Content = "new markdown"
 
 		updatedResume, err := resumeRepo.Update(ctx, resume)
 		if err != nil {
@@ -120,8 +120,8 @@ func TestPostgresResumeRepository(t *testing.T) {
 		if updatedResume.Label != "New Label" {
 			t.Errorf("expected new label, got %s", updatedResume.Label)
 		}
-		if updatedResume.FileUrl != "new_url" {
-			t.Errorf("expected new file url, got %s", updatedResume.FileUrl)
+		if updatedResume.Content != "new markdown" {
+			t.Errorf("expected new content, got %s", updatedResume.Content)
 		}
 	})
 
@@ -144,7 +144,7 @@ func TestPostgresResumeRepository(t *testing.T) {
 		resume, _ := resumeRepo.Create(ctx, &domain.Resume{
 			UserID:  user.ID,
 			Label:   "Delete Me",
-			FileUrl: "gone_url",
+			Content: "# Delete Me\nGone content",
 		})
 
 		err = resumeRepo.Delete(ctx, resume.ID)

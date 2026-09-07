@@ -645,7 +645,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: Access token (JWT, 15-minute expiry)
+      description: Access token (JWT, 24-hour expiry)
 
   schemas:
     ErrorResponse:
@@ -674,7 +674,7 @@ components:
       properties:
         token:
           type: string
-          description: JWT access token (15-minute expiry)
+          description: JWT access token (24-hour expiry)
         refresh_token:
           type: string
           description: Refresh token (7-day expiry, for obtaining new access tokens)
@@ -685,7 +685,7 @@ components:
       properties:
         token:
           type: string
-          description: JWT access token (15-minute expiry)
+          description: JWT access token (24-hour expiry)
       required: [token]
 
     User:
@@ -823,10 +823,10 @@ components:
           type: string
         user_id:
           type: integer
-        file_url:
+        content:
           type: string
-          format: uri
-      required: [id, label, user_id, file_url]
+          description: Markdown resume text
+      required: [id, label, user_id, content]
 
     CreateResumeRequest:
       type: object
@@ -837,17 +837,16 @@ components:
           description: Display label for the resume
         content:
           type: string
-          format: uri
-          description: URL to the resume file (sent as field "content")
+          description: Markdown resume text
 
     UpdateResumeRequest:
       type: object
       properties:
         label:
           type: string
-        file_url:
+        content:
           type: string
-          format: uri
+          description: Markdown resume text
 
   responses:
     ValidationError:

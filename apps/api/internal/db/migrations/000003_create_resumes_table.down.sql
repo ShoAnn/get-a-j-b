@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS resumes;
+DROP TABLE IF EXISTS ats_resumes;

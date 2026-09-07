@@ -19,7 +19,7 @@ describe("setAuthCookies", () => {
     });
 
     it("sets access_token cookie with parsed maxAge", async () => {
-        await setAuthCookies("access-abc", "refresh-xyz", "900");
+        await setAuthCookies("access-abc", "refresh-xyz", "86400");
         expect(mockSet).toHaveBeenCalledWith(
             "access_token",
             "access-abc",
@@ -27,13 +27,13 @@ describe("setAuthCookies", () => {
                 httpOnly: true,
                 sameSite: "lax",
                 path: "/",
-                maxAge: 900,
+                maxAge: 86400,
             })
         );
     });
 
     it("sets refresh_token cookie without maxAge", async () => {
-        await setAuthCookies("access-abc", "refresh-xyz", "900");
+        await setAuthCookies("access-abc", "refresh-xyz", "86400");
         expect(mockSet).toHaveBeenCalledWith(
             "refresh_token",
             "refresh-xyz",

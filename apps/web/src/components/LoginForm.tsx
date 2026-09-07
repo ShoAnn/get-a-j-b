@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "./Button";
 import z from "zod";
 import { apiClient } from "@/lib/client/api";
@@ -31,6 +31,15 @@ export default function LoginForm() {
     const isFormValid = email.length > 0 && password.length > 0;
 
     const router = useRouter();
+
+    useEffect(() => {
+        try {
+            if (typeof window !== "undefined" && sessionStorage.getItem("auth_bounce_reason") === "expired") {
+                sessionStorage.removeItem("auth_bounce_reason");
+                setError("Your session has expired. Please sign in again.");
+            }
+        } catch {}
+    }, []);
 
     const handleSubmit = async (e: React.SubmitEvent) => {
         e.preventDefault();

@@ -70,7 +70,7 @@ func testResume() *domain.Resume {
 		ID:      1,
 		Label:   "main-resume",
 		UserID:  1,
-		FileUrl: "https://example.com/resume.pdf",
+		Content: "# My Resume\nExperienced engineer",
 	}
 }
 
@@ -88,7 +88,7 @@ func TestResumeHandler_CreateResume(t *testing.T) {
 		h := NewResumeHandler(svc)
 		mux := newResumeMux(h)
 
-		body := `{"label":"main-resume","content":"https://example.com/resume.pdf"}`
+		body := `{"label":"main-resume","content":"# My Resume\nExperienced engineer"}`
 		req := withClaims(httptest.NewRequest(http.MethodPost, "/api/resumes", bytes.NewBufferString(body)), 1, "user")
 
 		w := serve(mux, req)
@@ -106,7 +106,7 @@ func TestResumeHandler_CreateResume(t *testing.T) {
 		h := NewResumeHandler(svc)
 		mux := newResumeMux(h)
 
-		body := `{"label":"main-resume","content":"https://example.com/resume.pdf"}`
+		body := `{"label":"main-resume","content":"# My Resume\nExperienced engineer"}`
 		req := httptest.NewRequest(http.MethodPost, "/api/resumes", bytes.NewBufferString(body))
 
 		w := serve(mux, req)

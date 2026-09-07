@@ -92,7 +92,7 @@ type Resume struct {
 	ID        int32
 	UserID    pgtype.Int4
 	Label     string
-	FileUrl   string
+	Content   string
 	CreatedAt pgtype.Timestamp
 	UpdatedAt pgtype.Timestamp
 }

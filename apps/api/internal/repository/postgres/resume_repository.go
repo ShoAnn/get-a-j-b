@@ -23,7 +23,7 @@ func NewResumeRepository(conn db.DBTX) *ResumeRepository {
 func (r *ResumeRepository) Create(ctx context.Context, resume *domain.Resume) (*domain.Resume, error) {
 	dbResume, err := r.q.CreateResume(ctx, db.CreateResumeParams{
 		Label:   resume.Label,
-		FileUrl: resume.FileUrl,
+		Content: resume.Content,
 		UserID:  pgtype.Int4{Int32: int32(resume.UserID), Valid: true},
 	})
 	if err != nil {
@@ -60,7 +60,7 @@ func (r *ResumeRepository) Update(ctx context.Context, resume *domain.Resume) (*
 	dbResume, err := r.q.UpdateResume(ctx, db.UpdateResumeParams{
 		ID:      int32(resume.ID),
 		Label:   resume.Label,
-		FileUrl: resume.FileUrl,
+		Content: resume.Content,
 	})
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func toDomainResume(dbJob db.Resume) *domain.Resume {
 	return &domain.Resume{
 		ID:      int(dbJob.ID),
 		Label:   dbJob.Label,
-		FileUrl: dbJob.FileUrl,
+		Content: dbJob.Content,
 		UserID:  int(dbJob.UserID.Int32),
 	}
 }

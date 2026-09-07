@@ -1,10 +1,16 @@
 import { http, HttpResponse } from "msw";
 import { CreateJobSchema, Job, UpdateJobSchema } from "@/types/job";
+import { CreateResumeSchema, Resume, UpdateResumeSchema } from "@/types/resume";
 
 let jobs: Job[] = [];
+let resumes: Resume[] = [];
 
 export function resetMockJobs() {
     jobs = [];
+}
+
+export function resetMockResumes() {
+    resumes = [];
 }
 
 export const handlers = [
@@ -83,6 +89,70 @@ export const handlers = [
             return HttpResponse.json({ error: "Not found" }, { status: 404 });
         }
         jobs.splice(index, 1);
+        return new HttpResponse(null, { status: 204 });
+    }),
+
+    http.get("/api/resumes", () => {
+        return HttpResponse.json(resumes);
+    }),
+
+    http.post("/api/resumes", async ({ request }) => {
+        const body = await request.json();
+        const parsed = CreateResumeSchema.safeParse(body);
+        if (!parsed.success) {
+            return HttpResponse.json(
+                { error: "Validation failed", fields: parsed.error.flatten().fieldErrors },
+                { status: 422 },
+            );
+        }
+        const resume: Resume = {
+            id: crypto.randomUUID(),
+            userId: "mock-user",
+            label: parsed.data.label,
+            content: parsed.data.content,
+        };
+        resumes.push(resume);
+        return HttpResponse.json(resume, { status: 201 });
+    }),
+
+    http.get("/api/resumes/:id", ({ params }) => {
+        const { id } = params;
+        const resume = resumes.find((r) => r.id === id);
+        if (!resume) {
+            return HttpResponse.json({ error: "Not found" }, { status: 404 });
+        }
+        return HttpResponse.json(resume);
+    }),
+
+    http.put("/api/resumes/:id", async ({ params, request }) => {
+        const { id } = params;
+        const index = resumes.findIndex((r) => r.id === id);
+        if (index === -1) {
+            return HttpResponse.json({ error: "Not found" }, { status: 404 });
+        }
+        const body = await request.json();
+        const parsed = UpdateResumeSchema.safeParse(body);
+        if (!parsed.success) {
+            return HttpResponse.json(
+                { error: "Validation failed", fields: parsed.error.flatten().fieldErrors },
+                { status: 422 },
+            );
+        }
+        const updated: Resume = {
+            ...resumes[index],
+            ...parsed.data,
+        } as Resume;
+        resumes[index] = updated;
+        return HttpResponse.json(updated);
+    }),
+
+    http.delete("/api/resumes/:id", ({ params }) => {
+        const { id } = params;
+        const index = resumes.findIndex((r) => r.id === id);
+        if (index === -1) {
+            return HttpResponse.json({ error: "Not found" }, { status: 404 });
+        }
+        resumes.splice(index, 1);
         return new HttpResponse(null, { status: 204 });
     }),
 ];

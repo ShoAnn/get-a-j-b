@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/ShoAnn/get-a-j-b/api/internal/domain"
-	"github.com/ShoAnn/get-a-j-b/api/internal/middleware"
 )
 
 type resumeService struct {
@@ -19,21 +18,13 @@ func (s *resumeService) CreateResume(ctx context.Context, userID int, req *domai
 	resume := &domain.Resume{
 		UserID:  userID,
 		Label:   req.Label,
-		FileUrl: req.FileUrl,
+		Content: req.Content,
 	}
 
 	return s.repo.Create(ctx, resume)
 }
 
 func (s *resumeService) GetAllResumes(ctx context.Context, userID int) ([]*domain.Resume, error) {
-	claims, err := middleware.GetClaimsFromContext(ctx)
-	if err != nil {
-		return nil, domain.ErrUnauthorized
-	}
-	if claims.UserID != userID {
-		return nil, domain.ErrForbidden
-	}
-
 	return s.repo.GetAll(ctx, userID)
 }
 
@@ -54,19 +45,15 @@ func (s *resumeService) UpdateResume(ctx context.Context, resumeID int, userID i
 	if err != nil {
 		return nil, domain.ErrResumeNotFound
 	}
-	claims, err := middleware.GetClaimsFromContext(ctx)
-	if err != nil {
-		return nil, domain.ErrUnauthorized
-	}
-	if claims.UserID != resume.UserID {
+	if resume.UserID != userID {
 		return nil, domain.ErrForbidden
 	}
 
 	if req.Label != nil {
 		resume.Label = *req.Label
 	}
-	if req.FileUrl != nil {
-		resume.FileUrl = *req.FileUrl
+	if req.Content != nil {
+		resume.Content = *req.Content
 	}
 
 	return s.repo.Update(ctx, resume)
@@ -77,11 +64,7 @@ func (s *resumeService) DeleteResume(ctx context.Context, resumeID int, userID i
 	if err != nil {
 		return domain.ErrResumeNotFound
 	}
-	claims, err := middleware.GetClaimsFromContext(ctx)
-	if err != nil {
-		return domain.ErrUnauthorized
-	}
-	if claims.UserID != resume.UserID {
+	if resume.UserID != userID {
 		return domain.ErrForbidden
 	}
 

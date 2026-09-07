@@ -16,7 +16,7 @@ func TestResumeService_CreateResume(t *testing.T) {
 	userID := 1
 	req := &domain.CreateResumeRequest{
 		Label:   "My Resume",
-		FileUrl: "http://example.com/resume.pdf",
+		Content: "# My Resume\nContent here",
 	}
 
 	resume, err := svc.CreateResume(ctx, userID, req)
@@ -25,7 +25,7 @@ func TestResumeService_CreateResume(t *testing.T) {
 	assert.NotNil(t, resume)
 	assert.Equal(t, userID, resume.UserID)
 	assert.Equal(t, req.Label, resume.Label)
-	assert.Equal(t, req.FileUrl, resume.FileUrl)
+	assert.Equal(t, req.Content, resume.Content)
 }
 
 func TestResumeService_GetAllResumes(t *testing.T) {
@@ -39,26 +39,17 @@ func TestResumeService_GetAllResumes(t *testing.T) {
 	svc := NewResumeService(repo)
 
 	t.Run("Success", func(t *testing.T) {
-		ctx := context.WithValue(context.Background(), domain.ContextKeyClaims, &domain.Claims{UserID: 1})
+		ctx := context.Background()
 		resumes, err := svc.GetAllResumes(ctx, 1)
 		assert.NoError(t, err)
 		assert.Len(t, resumes, 2)
 	})
 
-	t.Run("Unauthorized", func(t *testing.T) {
+	t.Run("Empty", func(t *testing.T) {
 		ctx := context.Background()
-		resumes, err := svc.GetAllResumes(ctx, 1)
-		assert.Error(t, err)
-		assert.Equal(t, domain.ErrUnauthorized, err)
-		assert.Nil(t, resumes)
-	})
-
-	t.Run("Forbidden", func(t *testing.T) {
-		ctx := context.WithValue(context.Background(), domain.ContextKeyClaims, &domain.Claims{UserID: 2})
-		resumes, err := svc.GetAllResumes(ctx, 1)
-		assert.Error(t, err)
-		assert.Equal(t, domain.ErrForbidden, err)
-		assert.Nil(t, resumes)
+		resumes, err := svc.GetAllResumes(ctx, 99)
+		assert.NoError(t, err)
+		assert.Len(t, resumes, 0)
 	})
 }
 
@@ -94,13 +85,13 @@ func TestResumeService_GetByID(t *testing.T) {
 func TestResumeService_UpdateResume(t *testing.T) {
 	repo := &mockResumeRepository{
 		resumes: map[int]*domain.Resume{
-			1: {ID: 1, UserID: 1, Label: "Old Label", FileUrl: "old.url"},
+			1: {ID: 1, UserID: 1, Label: "Old Label", Content: "old markdown"},
 		},
 	}
 	svc := NewResumeService(repo)
 
 	t.Run("Success", func(t *testing.T) {
-		ctx := context.WithValue(context.Background(), domain.ContextKeyClaims, &domain.Claims{UserID: 1})
+		ctx := context.Background()
 		newLabel := "New Label"
 		req := &domain.UpdateResumeRequest{Label: &newLabel}
 		resume, err := svc.UpdateResume(ctx, 1, 1, req)
@@ -108,19 +99,19 @@ func TestResumeService_UpdateResume(t *testing.T) {
 		assert.Equal(t, newLabel, resume.Label)
 	})
 
-	t.Run("Unauthorized", func(t *testing.T) {
+	t.Run("NotFound", func(t *testing.T) {
 		ctx := context.Background()
 		req := &domain.UpdateResumeRequest{}
-		resume, err := svc.UpdateResume(ctx, 1, 1, req)
+		resume, err := svc.UpdateResume(ctx, 99, 1, req)
 		assert.Error(t, err)
-		assert.Equal(t, domain.ErrUnauthorized, err)
+		assert.Equal(t, domain.ErrResumeNotFound, err)
 		assert.Nil(t, resume)
 	})
 
 	t.Run("Forbidden", func(t *testing.T) {
-		ctx := context.WithValue(context.Background(), domain.ContextKeyClaims, &domain.Claims{UserID: 2})
+		ctx := context.Background()
 		req := &domain.UpdateResumeRequest{}
-		resume, err := svc.UpdateResume(ctx, 1, 1, req)
+		resume, err := svc.UpdateResume(ctx, 1, 2, req)
 		assert.Error(t, err)
 		assert.Equal(t, domain.ErrForbidden, err)
 		assert.Nil(t, resume)
@@ -136,16 +127,25 @@ func TestResumeService_DeleteResume(t *testing.T) {
 	svc := NewResumeService(repo)
 
 	t.Run("Success", func(t *testing.T) {
-		ctx := context.WithValue(context.Background(), domain.ContextKeyClaims, &domain.Claims{UserID: 1})
+		ctx := context.Background()
 		err := svc.DeleteResume(ctx, 1, 1)
 		assert.NoError(t, err)
 		assert.NotContains(t, repo.resumes, 1)
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
-		ctx := context.WithValue(context.Background(), domain.ContextKeyClaims, &domain.Claims{UserID: 1})
+		ctx := context.Background()
 		err := svc.DeleteResume(ctx, 99, 1)
 		assert.Error(t, err)
 		assert.Equal(t, domain.ErrResumeNotFound, err)
+	})
+
+	t.Run("Forbidden", func(t *testing.T) {
+		// re-add resume for forbidden test
+		repo.resumes[1] = &domain.Resume{ID: 1, UserID: 1, Label: "R1"}
+		ctx := context.Background()
+		err := svc.DeleteResume(ctx, 1, 2)
+		assert.Error(t, err)
+		assert.Equal(t, domain.ErrForbidden, err)
 	})
 }
