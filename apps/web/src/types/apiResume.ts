@@ -6,6 +6,7 @@ export const ApiResumeSchema = z.object({
     user_id: z.union([z.number(), z.string()]),
     label: z.string(),
     content: z.string(),
+    updated_at: z.string().optional().default(""),
 });
 
 export type ApiResume = z.infer<typeof ApiResumeSchema>;
@@ -18,6 +19,7 @@ export function toResume(apiResume: ApiResume): Resume {
         userId: String(apiResume.user_id),
         label: apiResume.label.trim(),
         content: apiResume.content,
+        updatedAt: apiResume.updated_at ? apiResume.updated_at : null,
     };
 }
 

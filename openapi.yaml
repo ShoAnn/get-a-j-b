@@ -826,6 +826,9 @@ components:
         content:
           type: string
           description: Markdown resume text
+        updated_at:
+          type: string
+          description: Last edit timestamp ("YYYY-MM-DD HH:MM:SS"), empty string if never edited
       required: [id, label, user_id, content]
 
     CreateResumeRequest:

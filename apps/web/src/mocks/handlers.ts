@@ -110,6 +110,7 @@ export const handlers = [
             userId: "mock-user",
             label: parsed.data.label,
             content: parsed.data.content,
+            updatedAt: null,
         };
         resumes.push(resume);
         return HttpResponse.json(resume, { status: 201 });
@@ -141,6 +142,7 @@ export const handlers = [
         const updated: Resume = {
             ...resumes[index],
             ...parsed.data,
+            updatedAt: new Date().toISOString(),
         } as Resume;
         resumes[index] = updated;
         return HttpResponse.json(updated);

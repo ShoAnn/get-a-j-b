@@ -75,10 +75,15 @@ func (r *ResumeRepository) Delete(ctx context.Context, id int) error {
 }
 
 func toDomainResume(dbJob db.Resume) *domain.Resume {
+	var updatedAt string
+	if dbJob.UpdatedAt.Valid {
+		updatedAt = dbJob.UpdatedAt.Time.Format("2006-01-02 15:04:05")
+	}
 	return &domain.Resume{
-		ID:      int(dbJob.ID),
-		Label:   dbJob.Label,
-		Content: dbJob.Content,
-		UserID:  int(dbJob.UserID.Int32),
+		ID:        int(dbJob.ID),
+		Label:     dbJob.Label,
+		Content:   dbJob.Content,
+		UserID:    int(dbJob.UserID.Int32),
+		UpdatedAt: updatedAt,
 	}
 }

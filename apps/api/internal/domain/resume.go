@@ -3,10 +3,11 @@ package domain
 import "context"
 
 type Resume struct {
-	ID      int    `json:"id"`
-	Label   string `json:"label"`
-	UserID  int    `json:"user_id"`
-	Content string `json:"content"`
+	ID        int    `json:"id"`
+	Label     string `json:"label"`
+	UserID    int    `json:"user_id"`
+	Content   string `json:"content"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 type CreateResumeRequest struct {

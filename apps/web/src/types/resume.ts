@@ -5,6 +5,7 @@ export const ResumeSchema = z.object({
     userId: z.string(),
     label: z.string(),
     content: z.string(),
+    updatedAt: z.string().nullable(),
 });
 
 export type Resume = z.infer<typeof ResumeSchema>;
