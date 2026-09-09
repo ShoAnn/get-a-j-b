@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import ResumeEditor from "./ResumeEditor";
+import ResumeEditor from "@/components/ResumeEditor";
 import { apiClient } from "@/lib/client/api";
 import { ResumeSchema, type Resume } from "@/types/resume";
 import { HttpError } from "@/types/errors";

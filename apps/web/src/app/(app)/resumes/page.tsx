@@ -1,18 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { apiClient } from "@/lib/client/api";
 import { ResumeSchema, type Resume } from "@/types/resume";
 import { HttpError } from "@/types/errors";
 import { ResumeCard } from "@/components/ResumeCard";
-import AddResumeModal from "@/components/AddResumeModal";
-import { useAddResume } from "@/components/useAddResume";
 import { useResumesRefresh } from "@/components/ResumesRefresh";
 import z from "zod";
 
 export default function ResumesPage() {
     const { version, highlightedId } = useResumesRefresh();
-    const { open, setOpen, isSubmitting, submit, error: submitError } = useAddResume();
     const [resumes, setResumes] = useState<Resume[]>([]);
     const [loading, setLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
@@ -55,16 +53,15 @@ export default function ResumesPage() {
             <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col px-4 py-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between gap-4">
                     <h1 className="shrink-0 text-2xl font-semibold tracking-tight text-midnight dark:text-[#F5F5F0]">Resumes</h1>
-                    <button
-                        type="button"
-                        onClick={() => setOpen(true)}
+                    <Link
+                        href="/resumes/new"
                         className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-violet px-3 py-[9px] text-sm font-medium text-white transition-colors hover:bg-[#6B63C9] active:bg-[#5A52B8]"
                     >
                         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                             <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                         </svg>
                         Add resume
-                    </button>
+                    </Link>
                 </div>
 
                 {loading ? (
@@ -95,17 +92,15 @@ export default function ResumesPage() {
                         </svg>
                         <h3 className="text-lg font-medium text-midnight dark:text-[#F5F5F0]">No resumes yet</h3>
                         <p className="text-sm text-text-secondary dark:text-[#9999AA]">Create your first resume to get started.</p>
-                        <button
-                            type="button"
-                            onClick={() => setOpen(true)}
+                        <Link
+                            href="/resumes/new"
                             className="rounded-lg border border-violet px-5 py-[10px] text-sm font-medium text-violet transition-colors hover:bg-[#F5F3FF]"
                         >
                             Add resume
-                        </button>
+                        </Link>
                     </div>
                 )}
             </div>
-            <AddResumeModal open={open} onClose={() => setOpen(false)} onSubmit={submit} isSubmitting={isSubmitting} error={submitError} />
         </div>
     );
 }
