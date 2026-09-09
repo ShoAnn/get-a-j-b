@@ -4,34 +4,163 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  /* ---- Brand palette (static) ---- */
+  --color-midnight: #1a1a2e;
+  --color-midnight-light: #252540;
+  --color-midnight-border: #333355;
+  --color-midnight-hover: #2e2e4a;
+  --color-midnight-active: #3a3a5c;
+
+  --color-cream: #f5f5f0;
+  --color-mist: #9999aa;
+  --color-fog: #666688;
+
+  --color-violet: #7f77dd;
+  --color-violet-hover: #6b63c9;
+  --color-violet-active: #5a52b8;
+  --color-violet-disabled: #b8b4e8;
+  --color-violet-subtle: #f5f3ff;
+  --color-violet-subtle-active: #ebe9fa;
+
+  --color-teal: #1d9e75;
+  --color-error: #e24b4a;
+
+  /* ---- Status / data-viz palette (static) ---- */
+  --color-status-draft: #d4d4d8;
+  --color-status-submitted: #3b82f6;
+  --color-status-under-review: #f59e0b;
+  --color-status-interview: #8b5cf6;
+  --color-status-offer: #06b6d4;
+  --color-status-accepted: #22c55e;
+  --color-status-rejected: #ef4444;
+  --color-status-withdrawn: #ec4899;
+  --color-status-archived: #52525b;
+
+  --color-funnel-applied: #3b82f6;
+  --color-funnel-interview: #8b5cf6;
+  --color-funnel-offer: #06b6d4;
+  --color-funnel-accepted: #22c55e;
+}
+
+/* ---- Semantic theme tokens (mode-aware).
+   Utilities like `bg-background`, `bg-surface`, `text-foreground`
+   resolve to the CSS var below, so they flip with `.dark`
+   without needing `dark:` overrides at the call site. ---- */
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --color-midnight: #1A1A2E;
-  --color-midnight-border: #333355;
-  --color-midnight-light: #252540;
-  --color-violet: #7F77DD;
-  --color-teal: #1D9E75;
-  --color-surface: #F5F5F0;
-  --color-error: #E24B4A;
-  --color-text-secondary: #666;
+
+  --color-background: var(--theme-background);
+  --color-surface: var(--theme-surface);
+  --color-raised: var(--theme-raised);
+  --color-overlay: var(--theme-overlay);
+  --color-border: var(--theme-border);
+  --color-border-strong: var(--theme-border-strong);
+  --color-foreground: var(--theme-foreground);
+  --color-secondary: var(--theme-secondary);
+  --color-muted: var(--theme-muted);
+  --color-hover: var(--theme-hover);
+  --color-chart-grid: var(--theme-chart-grid);
+  --color-chart-tick: var(--theme-chart-tick);
+  --color-chart-tooltip-border: var(--theme-chart-tooltip-border);
+  --color-chart-tooltip-bg: var(--theme-chart-tooltip-bg);
+}
+
+:root {
+  --theme-background: #fafafa;
+  --theme-surface: #f5f5f0;
+  --theme-raised: #ffffff;
+  --theme-overlay: #ffffff;
+  --theme-border: #e4e4e7;
+  --theme-border-strong: #d4d4d8;
+  --theme-foreground: #1a1a2e;
+  --theme-secondary: #666666;
+  --theme-muted: #a1a1aa;
+  --theme-hover: #f4f4f5;
+  --theme-chart-grid: #d4d4d8;
+  --theme-chart-tick: #71717a;
+  --theme-chart-tooltip-border: #d4d4d8;
+  --theme-chart-tooltip-bg: #ffffff;
+  color-scheme: light;
+}
+
+.dark {
+  --theme-background: #1a1a2e;
+  --theme-surface: #252540;
+  --theme-raised: #1a1a2e;
+  --theme-overlay: #252540;
+  --theme-border: #333355;
+  --theme-border-strong: #333355;
+  --theme-foreground: #f5f5f0;
+  --theme-secondary: #9999aa;
+  --theme-muted: #666688;
+  --theme-hover: #2e2e4a;
+  --theme-chart-grid: #52525b;
+  --theme-chart-tick: #a1a1aa;
+  --theme-chart-tooltip-border: #333355;
+  --theme-chart-tooltip-bg: #252540;
+  color-scheme: dark;
 }
 
 body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Countdown ring for the armed "Confirm delete" button. A conic-gradient
+   border overlay that depletes counter-clockwise over 3s (keep in sync with
+   CONFIRM_DELETE_TIMEOUT_MS). Remounts on every arm so it restarts. */
+@property --cd {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+
+.countdown-border {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(
+    from 0deg,
+    rgb(255 255 255 / 0.9) 0 var(--cd, 100%),
+    transparent var(--cd, 100%)
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: confirm-countdown 3s linear forwards;
+}
+
+@keyframes confirm-countdown {
+  from {
+    --cd: 100%;
+  }
+  to {
+    --cd: 0%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .countdown-border {
+    animation: none;
+  }
+}
+
 .overflow-x-auto,
 .overflow-y-auto,
 .overflow-auto {
   scrollbar-width: auto;
-  scrollbar-color: #d4d4d8 transparent;
+  scrollbar-color: var(--theme-border-strong) transparent;
 }
 
 .dark .overflow-x-auto,
 .dark .overflow-y-auto,
 .dark .overflow-auto {
-  scrollbar-color: #52525b transparent;
+  scrollbar-color: var(--theme-chart-grid) transparent;
 }
 
 .overflow-x-auto::-webkit-scrollbar,
@@ -50,28 +179,80 @@ body {
 .overflow-x-auto::-webkit-scrollbar-thumb,
 .overflow-y-auto::-webkit-scrollbar-thumb,
 .overflow-auto::-webkit-scrollbar-thumb {
-  background: #d4d4d8;
+  background: var(--theme-border-strong);
   border-radius: 3px;
 }
 
 .dark .overflow-x-auto::-webkit-scrollbar-thumb,
 .dark .overflow-y-auto::-webkit-scrollbar-thumb,
 .dark .overflow-auto::-webkit-scrollbar-thumb {
-  background: #52525b;
+  background: var(--theme-chart-grid);
 }
 
 .board-columns-scroll {
   background:
-    linear-gradient(#fafafa, #fafafa) left / 3px 100% local no-repeat,
-    linear-gradient(#fafafa, #fafafa) right / 3px 100% local no-repeat,
-    linear-gradient(#d4d4d8, #d4d4d8) left / 3px 100% scroll no-repeat,
-    linear-gradient(#d4d4d8, #d4d4d8) right / 3px 100% scroll no-repeat;
+    linear-gradient(var(--theme-background), var(--theme-background)) left / 3px 100% local no-repeat,
+    linear-gradient(var(--theme-background), var(--theme-background)) right / 3px 100% local no-repeat,
+    linear-gradient(var(--theme-border-strong), var(--theme-border-strong)) left / 3px 100% scroll no-repeat,
+    linear-gradient(var(--theme-border-strong), var(--theme-border-strong)) right / 3px 100% scroll no-repeat;
 }
 
 .dark .board-columns-scroll {
   background:
-    linear-gradient(#1A1A2E, #1A1A2E) left / 3px 100% local no-repeat,
-    linear-gradient(#1A1A2E, #1A1A2E) right / 3px 100% local no-repeat,
-    linear-gradient(#52525b, #52525b) left / 3px 100% scroll no-repeat,
-    linear-gradient(#52525b, #52525b) right / 3px 100% scroll no-repeat;
+    linear-gradient(var(--theme-background), var(--theme-background)) left / 3px 100% local no-repeat,
+    linear-gradient(var(--theme-background), var(--theme-background)) right / 3px 100% local no-repeat,
+    linear-gradient(var(--theme-chart-grid), var(--theme-chart-grid)) left / 3px 100% scroll no-repeat,
+    linear-gradient(var(--theme-chart-grid), var(--theme-chart-grid)) right / 3px 100% scroll no-repeat;
+}
+
+/* A4 resume paper preview: print-like type scale on a white sheet.
+   Unlayered so it wins over the layered `prose` typography styles. */
+.resume-paper {
+  color: #1b1b1f;
+  font-size: 11pt;
+  line-height: 1.5;
+}
+
+.resume-paper h1 {
+  font-size: 18pt;
+  line-height: 1.2;
+  font-weight: 700;
+  margin: 0 0 0.4em;
+}
+
+.resume-paper h2 {
+  font-size: 12pt;
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin: 0.9em 0 0.35em;
+}
+
+.resume-paper h3,
+.resume-paper h4 {
+  font-size: 11pt;
+  line-height: 1.4;
+  font-weight: 700;
+  margin: 0.8em 0 0.3em;
+}
+
+.resume-paper p,
+.resume-paper li {
+  font-size: 11pt;
+  margin-top: 0.3em;
+  margin-bottom: 0.3em;
+}
+
+.resume-paper small,
+.resume-paper code {
+  font-size: 10pt;
+}
+
+.resume-paper ul,
+.resume-paper ol {
+  padding-left: 1.25em;
+}
+
+.resume-paper a {
+  color: var(--color-violet);
 }

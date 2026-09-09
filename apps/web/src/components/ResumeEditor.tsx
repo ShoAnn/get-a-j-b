@@ -5,18 +5,19 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/client/api";
 import { useResumesRefresh } from "./ResumesRefresh";
-import MarkdownViewer from "@/components/MarkdownViewer";
+import ResumePreview from "@/components/ResumePreview";
 import ResumeMarkdownEditor from "@/components/ResumeMarkdownEditor";
+import ConfirmDeleteButton, { CONFIRM_DELETE_TIMEOUT_MS } from "@/components/ConfirmDeleteButton";
 import { CreateResumeSchema, ResumeSchema, type Resume } from "@/types/resume";
 import { HttpError } from "@/types/errors";
 import z from "zod";
 
 const LABEL_CLASS =
-    "mb-1 block text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]";
+    "mb-1 block text-xs font-medium uppercase tracking-wider text-secondary";
 const INPUT_CLASS =
-    "w-full rounded-lg border-[0.5px] border-zinc-300 bg-white px-3 py-[9px] text-sm text-midnight transition-colors focus:border-violet focus:outline-none dark:border-[#333355] dark:bg-[#1A1A2E] dark:text-[#F5F5F0]";
+    "w-full rounded-lg border-[0.5px] border-border-strong bg-raised px-3 py-[9px] text-sm text-foreground transition-colors focus:border-violet focus:outline-none";
 const CARD_CLASS =
-    "rounded-xl border-[0.5px] border-zinc-300 bg-surface p-6 dark:border-[#333355] dark:bg-[#252540]";
+    "rounded-xl border-[0.5px] border-border-strong bg-surface p-6";
 
 function formatResumeDate(value: string): string {
     return new Date(value).toLocaleDateString("en-US", {
@@ -76,6 +77,10 @@ export default function ResumeEditor({
     }
 
     function handleCancel() {
+        if (isCreate) {
+            router.push("/resumes");
+            return;
+        }
         setDraftLabel(resume.label);
         setDraftContent(resume.content);
         setFieldErrors({});
@@ -133,7 +138,7 @@ export default function ResumeEditor({
             confirmTimeout.current = setTimeout(() => {
                 setConfirmingDelete(false);
                 confirmTimeout.current = null;
-            }, 5000);
+            }, CONFIRM_DELETE_TIMEOUT_MS);
             return;
         }
         if (confirmTimeout.current) {
@@ -159,7 +164,7 @@ export default function ResumeEditor({
     }
 
     return (
-        <div className="flex flex-1 flex-col bg-zinc-50 min-h-full dark:bg-[#1A1A2E]">
+        <div className="flex flex-1 flex-col bg-background min-h-full">
             <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-6 sm:px-6 lg:px-8">
                 <Link href="/resumes" className="inline-flex items-center gap-1 self-start text-sm text-violet hover:underline">
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
@@ -187,11 +192,11 @@ export default function ResumeEditor({
                                 {fieldErrors.label && <p className="mt-1 text-xs text-red-600">{fieldErrors.label}</p>}
                             </div>
                         ) : (
-                            <h1 className="text-3xl font-semibold text-midnight dark:text-[#F5F5F0]">{resume.label}</h1>
+                            <h1 className="text-3xl font-semibold text-foreground">{resume.label}</h1>
                         )}
                         <div className="flex shrink-0 items-center gap-3">
                             {!isCreate && (
-                                <span className="text-xs text-text-secondary dark:text-[#9999AA]">
+                                <span className="text-xs text-secondary">
                                     {resume.updatedAt ? `Last edited ${formatResumeDate(resume.updatedAt)}` : "Not edited yet"}
                                 </span>
                             )}
@@ -201,7 +206,7 @@ export default function ResumeEditor({
                                         type="button"
                                         onClick={handleSave}
                                         disabled={saving || !canSave}
-                                        className="rounded-lg bg-violet px-5 py-[9px] text-sm font-medium text-white transition-colors hover:bg-[#6B63C9] disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="cursor-pointer rounded-lg bg-violet px-5 py-[9px] text-sm font-medium text-white transition-colors hover:bg-violet-hover disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         {saving ? "Saving..." : "Save"}
                                     </button>
@@ -209,7 +214,7 @@ export default function ResumeEditor({
                                         type="button"
                                         onClick={handleCancel}
                                         disabled={saving}
-                                        className="rounded-lg border border-violet px-5 py-[9px] text-sm font-medium text-violet transition-colors hover:bg-[#F5F3FF] disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="cursor-pointer rounded-lg border border-violet px-5 py-[9px] text-sm font-medium text-violet transition-colors hover:bg-violet-subtle disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         Cancel
                                     </button>
@@ -219,23 +224,18 @@ export default function ResumeEditor({
                                     <button
                                         type="button"
                                         onClick={startEditing}
-                                        className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-violet px-3 py-[9px] text-sm font-medium text-white transition-colors hover:bg-[#6B63C9] active:bg-[#5A52B8]"
+                                        className="cursor-pointer flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-violet px-3 py-[9px] text-sm font-medium text-white transition-colors hover:bg-violet-hover active:bg-violet-active"
                                     >
                                         Edit resume
                                     </button>
-                                    <button
-                                        type="button"
-                                        onClick={handleDelete}
+                                    <ConfirmDeleteButton
+                                        idleLabel="Delete resume"
+                                        confirming={confirmingDelete}
+                                        deleting={deleting}
                                         disabled={deleting || saving}
-                                        aria-label={confirmingDelete ? "Confirm delete" : "Delete resume"}
-                                        className={
-                                            confirmingDelete
-                                                ? "rounded-lg bg-red-600 px-5 py-[9px] text-sm font-semibold text-white shadow-md transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-red-500 dark:hover:bg-red-600"
-                                                : "rounded-lg border border-red-300 px-5 py-[9px] text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/30"
-                                        }
-                                    >
-                                        {deleting ? "Deleting..." : confirmingDelete ? "Confirm delete" : "Delete resume"}
-                                    </button>
+                                        onClick={handleDelete}
+                                        className="px-5 py-[9px]"
+                                    />
                                 </div>
                             )}
                     </div>
@@ -253,8 +253,8 @@ export default function ResumeEditor({
                                 placeholder="Resume content"
                             />
                         ) : (
-                            <div className="flex-1 rounded-lg bg-zinc-50 p-4 dark:bg-[#1A1A2E]">
-                                <MarkdownViewer content={resume.content} />
+                            <div className="flex flex-1 justify-center rounded-lg bg-background p-4">
+                                <ResumePreview content={resume.content} />
                             </div>
                         )}
                     </div>

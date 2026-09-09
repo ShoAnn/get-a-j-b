@@ -54,4 +54,13 @@ describe("NewResumePage", () => {
         await waitFor(() => expect(bumpVersion).toHaveBeenCalledWith("r-9"));
         await waitFor(() => expect(push).toHaveBeenCalledWith("/resumes"));
     });
+
+    it("cancel returns to the list without creating", async () => {
+        render(<NewResumePage />);
+        fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+        await waitFor(() => expect(push).toHaveBeenCalledWith("/resumes"));
+        expect(mockedApi.post).not.toHaveBeenCalled();
+        expect(bumpVersion).not.toHaveBeenCalled();
+    });
 });

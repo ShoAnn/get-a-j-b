@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ThemeToggle from "./ThemeToggle";
+import SidebarToggle from "./SidebarToggle";
 import { useToast } from "./Toast";
 
 export default function Header() {
@@ -74,29 +75,34 @@ export default function Header() {
     }
 
     return (
-        <header className="sticky top-0 z-40 border-b border-zinc-200 bg-white/80 backdrop-blur-md dark:border-[#333355] dark:bg-[#1A1A2E]/80">
-            <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 sm:px-4 lg:px-6">
-                {/* Logo */}
-                <Link href="/" className="flex shrink-0 items-center gap-2">
+        <header className="sticky top-0 z-40 border-b border-border bg-raised/80 backdrop-blur-md">
+            <div className="flex h-14 w-full items-center justify-between gap-4 px-4 sm:px-4 lg:px-6">
+                <div className="flex items-center gap-2">
+                    {/* Desktop: sidebar collapse toggle */}
+                    <SidebarToggle />
+
+                    {/* Logo */}
+                    <Link href="/" className="flex shrink-0 items-center gap-2">
                     <svg width="22" height="22" viewBox="0 0 22 22" fill="none" className="text-violet">
                         <rect x="3" y="5" width="16" height="13" rx="3" stroke="currentColor" strokeWidth="1.5" />
                         <path d="M7 12l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                         <path d="M11 5V3a2 2 0 012-2h0a2 2 0 012 2v2" stroke="currentColor" strokeWidth="1.5" />
                     </svg>
-                    <span className="text-base font-semibold tracking-tight text-midnight dark:text-[#F5F5F0]">
+                    <span className="text-base font-semibold tracking-tight text-foreground">
                         Get a J*b
                     </span>
                 </Link>
+                </div>
 
                 {/* Desktop: Right actions */}
-                <div className="ml-auto hidden items-center gap-4 md:flex">
+                <div className="hidden items-center gap-4 md:flex">
                     {/* Notifications */}
-                    <button className="relative flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 dark:text-[#9999AA] dark:hover:bg-[#2E2E4A]">
+                    <button className="relative flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-secondary transition-colors hover:bg-hover">
                         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                             <path d="M9 1.5a5.5 5.5 0 00-5.5 5.5v2.5l-1.5 3h14l-1.5-3V7A5.5 5.5 0 009 1.5z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
                             <path d="M6.5 14a2.5 2.5 0 005 0" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
-                        <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-error ring-1 ring-white dark:ring-[#1A1A2E]" />
+                        <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-error ring-1 ring-white dark:ring-midnight" />
                     </button>
 
                     {/* User avatar / profile menu */}
@@ -109,14 +115,14 @@ export default function Header() {
                         </button>
 
                         {showUserMenu && (
-                            <div className="absolute right-0 top-full mt-2 w-48 rounded-xl border border-zinc-200 bg-surface py-1.5 shadow-lg dark:border-[#333355] dark:bg-[#252540]">
-                                <div className="border-b border-zinc-200 px-4 py-2.5 dark:border-[#333355]">
-                                    <p className="text-sm font-medium text-midnight dark:text-[#F5F5F0]">User</p>
-                                    <p className="text-xs text-text-secondary dark:text-[#9999AA]">user@example.com</p>
+                            <div className="absolute right-0 top-full mt-2 w-48 rounded-xl border border-border bg-surface py-1.5 shadow-lg">
+                                <div className="border-b border-border px-4 py-2.5">
+                                    <p className="text-sm font-medium text-foreground">User</p>
+                                    <p className="text-xs text-secondary">user@example.com</p>
                                 </div>
                                 <Link
                                     href="/"
-                                    className="flex items-center gap-2 px-4 py-2 text-sm text-midnight transition-colors hover:bg-zinc-50 dark:text-[#F5F5F0] dark:hover:bg-[#2E2E4A]"
+                                    className="flex items-center gap-2 px-4 py-2 text-sm text-foreground transition-colors hover:bg-hover"
                                     onClick={() => setShowUserMenu(false)}
                                 >
                                     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="text-zinc-400">
@@ -127,7 +133,7 @@ export default function Header() {
                                 </Link>
                                 <Link
                                     href="/"
-                                    className="flex items-center gap-2 px-4 py-2 text-sm text-midnight transition-colors hover:bg-zinc-50 dark:text-[#F5F5F0] dark:hover:bg-[#2E2E4A]"
+                                    className="flex items-center gap-2 px-4 py-2 text-sm text-foreground transition-colors hover:bg-hover"
                                     onClick={() => setShowUserMenu(false)}
                                 >
                                     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="text-zinc-400">
@@ -136,13 +142,13 @@ export default function Header() {
                                     </svg>
                                     Settings
                                 </Link>
-                                <hr className="my-1 border-zinc-200 dark:border-[#333355]" />
+                                <hr className="my-1 border-border" />
                                 <button
                                     type="button"
                                     onClick={handleLogout}
                                     disabled={isLoggingOut}
                                     aria-label="Log out"
-                                    className="flex w-full cursor-pointer items-center gap-2 px-4 py-2 text-sm text-error transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-[#2E2E4A]"
+                                    className="flex w-full cursor-pointer items-center gap-2 px-4 py-2 text-sm text-error transition-colors hover:bg-hover disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="text-error">
                                         <path d="M5.5 3.5V2a1 1 0 011-1h4a1 1 0 011 1v11a1 1 0 01-1 1h-4a1 1 0 01-1-1v-1.5" stroke="currentColor" strokeWidth="1.2" />
@@ -162,7 +168,7 @@ export default function Header() {
                 <button
                     ref={hamburgerRef}
                     onClick={() => setShowMobileMenu((v) => !v)}
-                    className="ml-auto flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 dark:text-[#9999AA] dark:hover:bg-[#2E2E4A] md:hidden"
+                    className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-secondary transition-colors hover:bg-hover md:hidden"
                     aria-label="Toggle menu"
                 >
                     {showMobileMenu ? (
@@ -181,36 +187,36 @@ export default function Header() {
             {showMobileMenu && (
                 <div
                     ref={mobileMenuRef}
-                    className="border-t border-zinc-200 bg-white px-4 pb-4 pt-3 shadow-lg dark:border-[#333355] dark:bg-[#1A1A2E] md:hidden"
+                    className="border-t border-border bg-raised px-4 pb-4 pt-3 shadow-lg md:hidden"
                 >
                     <div className="flex flex-col gap-3">
                         {/* Mobile actions row */}
                         <div className="flex items-center gap-3">
-                            <button className="relative flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 dark:text-[#9999AA] dark:hover:bg-[#2E2E4A]">
+                            <button className="relative flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-secondary transition-colors hover:bg-hover">
                                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                                     <path d="M9 1.5a5.5 5.5 0 00-5.5 5.5v2.5l-1.5 3h14l-1.5-3V7A5.5 5.5 0 009 1.5z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
                                     <path d="M6.5 14a2.5 2.5 0 005 0" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
-                                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-error ring-1 ring-white dark:ring-[#1A1A2E]" />
+                                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-error ring-1 ring-white dark:ring-midnight" />
                             </button>
 
                             <ThemeToggle />
                         </div>
 
                         {/* Mobile user section */}
-                        <div className="rounded-lg border border-zinc-200 dark:border-[#333355]">
-                            <div className="flex items-center gap-3 border-b border-zinc-200 px-3 py-2.5 dark:border-[#333355]">
+                        <div className="rounded-lg border border-border">
+                            <div className="flex items-center gap-3 border-b border-border px-3 py-2.5">
                                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet text-xs font-medium text-white">
                                     U
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="truncate text-sm font-medium text-midnight dark:text-[#F5F5F0]">User</p>
-                                    <p className="truncate text-xs text-text-secondary dark:text-[#9999AA]">user@example.com</p>
+                                    <p className="truncate text-sm font-medium text-foreground">User</p>
+                                    <p className="truncate text-xs text-secondary">user@example.com</p>
                                 </div>
                             </div>
                             <Link
                                 href="/"
-                                className="flex items-center gap-2 px-3 py-2 text-sm text-midnight transition-colors hover:bg-zinc-50 dark:text-[#F5F5F0] dark:hover:bg-[#2E2E4A]"
+                                className="flex items-center gap-2 px-3 py-2 text-sm text-foreground transition-colors hover:bg-hover"
                                 onClick={() => setShowMobileMenu(false)}
                             >
                                 <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="text-zinc-400">
@@ -221,7 +227,7 @@ export default function Header() {
                             </Link>
                             <Link
                                 href="/"
-                                className="flex items-center gap-2 px-3 py-2 text-sm text-midnight transition-colors hover:bg-zinc-50 dark:text-[#F5F5F0] dark:hover:bg-[#2E2E4A]"
+                                className="flex items-center gap-2 px-3 py-2 text-sm text-foreground transition-colors hover:bg-hover"
                                 onClick={() => setShowMobileMenu(false)}
                             >
                                 <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="text-zinc-400">
@@ -235,7 +241,7 @@ export default function Header() {
                                 onClick={handleLogout}
                                 disabled={isLoggingOut}
                                 aria-label="Log out"
-                                className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-sm text-error transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-[#2E2E4A]"
+                                className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-sm text-error transition-colors hover:bg-hover disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="text-error">
                                     <path d="M5.5 3.5V2a1 1 0 011-1h4a1 1 0 011 1v11a1 1 0 01-1 1h-4a1 1 0 01-1-1v-1.5" stroke="currentColor" strokeWidth="1.2" />

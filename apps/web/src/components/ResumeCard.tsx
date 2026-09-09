@@ -46,7 +46,7 @@ export function ResumeCard({ resume, highlighted }: ResumeCardProps) {
             className={`flex flex-col rounded-xl border-[0.5px] p-4 transition-shadow hover:shadow-md ${
                 highlighted
                     ? "border-violet bg-violet/10 dark:border-violet dark:bg-violet/20 animate-pulse ring-1 ring-violet/40"
-                    : "border-zinc-300 bg-surface dark:border-zinc-600 dark:bg-midnight"
+                    : "border-border-strong bg-surface dark:border-zinc-600 dark:bg-midnight"
             }`}
         >
             <div className="flex items-start gap-3">
@@ -54,11 +54,11 @@ export function ResumeCard({ resume, highlighted }: ResumeCardProps) {
                     {resume.label.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-midnight dark:text-zinc-100">{resume.label}</p>
-                    <p className="mt-0.5 text-xs text-text-secondary dark:text-zinc-400">{charCount} chars</p>
+                    <p className="truncate text-sm font-medium text-foreground">{resume.label}</p>
+                    <p className="mt-0.5 text-xs text-secondary">{charCount} chars</p>
                 </div>
             </div>
-            <p className="mt-3 line-clamp-3 min-h-[3.75rem] text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
+            <p className="mt-3 line-clamp-3 min-h-[3.75rem] text-xs leading-relaxed text-secondary">
                 {snapshot || <span className="italic text-zinc-400">No content</span>}
             </p>
         </Link>

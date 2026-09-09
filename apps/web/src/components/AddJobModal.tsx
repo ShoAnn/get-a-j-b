@@ -68,7 +68,7 @@ export default function AddJobModal({
     <Modal open={open} onClose={handleClose} title="Add Job">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="role" className="text-xs font-medium text-text-secondary dark:text-[#9999AA]">
+          <label htmlFor="role" className="text-xs font-medium text-secondary">
             Role
           </label>
           <input
@@ -76,7 +76,7 @@ export default function AddJobModal({
             value={role}
             onChange={(e) => setRole(e.target.value)}
             placeholder="e.g. Frontend Engineer"
-            className="rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-sm transition-colors focus:border-violet focus:outline-none dark:border-[#333355] dark:bg-[#1A1A2E] dark:text-[#F5F5F0] dark:placeholder:text-[#666688]"
+            className="rounded-lg border-[0.5px] border-border-strong bg-raised px-3 py-[9px] text-sm text-foreground transition-colors focus:border-violet focus:outline-none placeholder:text-muted"
           />
           {errors.role && (
             <span className="text-xs text-error">{errors.role}</span>
@@ -84,7 +84,7 @@ export default function AddJobModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="company" className="text-xs font-medium text-text-secondary dark:text-[#9999AA]">
+          <label htmlFor="company" className="text-xs font-medium text-secondary">
             Company
           </label>
           <input
@@ -92,7 +92,7 @@ export default function AddJobModal({
             value={company}
             onChange={(e) => setCompany(e.target.value)}
             placeholder="e.g. Acme Corp"
-            className="rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-sm transition-colors focus:border-violet focus:outline-none dark:border-[#333355] dark:bg-[#1A1A2E] dark:text-[#F5F5F0] dark:placeholder:text-[#666688]"
+            className="rounded-lg border-[0.5px] border-border-strong bg-raised px-3 py-[9px] text-sm text-foreground transition-colors focus:border-violet focus:outline-none placeholder:text-muted"
           />
           {errors.company && (
             <span className="text-xs text-error">{errors.company}</span>
@@ -100,14 +100,14 @@ export default function AddJobModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="status" className="text-xs font-medium text-text-secondary dark:text-[#9999AA]">
+          <label htmlFor="status" className="text-xs font-medium text-secondary">
             Status
           </label>
           <select
             id="status"
             value={status}
             onChange={(e) => setStatus(e.target.value as JobStatus)}
-            className="rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-sm transition-colors focus:border-violet focus:outline-none dark:border-[#333355] dark:bg-[#1A1A2E] dark:text-[#F5F5F0]"
+            className="rounded-lg border-[0.5px] border-border-strong bg-raised px-3 py-[9px] text-sm text-foreground transition-colors focus:border-violet focus:outline-none"
           >
             {JOB_STATUSES.map((s) => (
               <option key={s} value={s}>
@@ -118,7 +118,7 @@ export default function AddJobModal({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="jobPortal" className="text-xs font-medium text-text-secondary dark:text-[#9999AA]">
+          <label htmlFor="jobPortal" className="text-xs font-medium text-secondary">
             Job Portal
           </label>
           <input
@@ -126,12 +126,12 @@ export default function AddJobModal({
             value={jobPortal}
             onChange={(e) => setJobPortal(e.target.value)}
             placeholder="e.g. LinkedIn, Indeed, Company Website"
-            className="rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-sm transition-colors focus:border-violet focus:outline-none dark:border-[#333355] dark:bg-[#1A1A2E] dark:text-[#F5F5F0] dark:placeholder:text-[#666688]"
+            className="rounded-lg border-[0.5px] border-border-strong bg-raised px-3 py-[9px] text-sm text-foreground transition-colors focus:border-violet focus:outline-none placeholder:text-muted"
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="notes" className="text-xs font-medium text-text-secondary dark:text-[#9999AA]">
+          <label htmlFor="notes" className="text-xs font-medium text-secondary">
             Notes
           </label>
           <textarea
@@ -140,7 +140,7 @@ export default function AddJobModal({
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
             placeholder="Optional notes..."
-            className="resize-none rounded-lg border-[0.5px] border-zinc-300 px-3 py-[9px] text-sm transition-colors focus:border-violet focus:outline-none dark:border-[#333355] dark:bg-[#1A1A2E] dark:text-[#F5F5F0] dark:placeholder:text-[#666688]"
+            className="resize-none rounded-lg border-[0.5px] border-border-strong bg-raised px-3 py-[9px] text-sm text-foreground transition-colors focus:border-violet focus:outline-none placeholder:text-muted"
           />
         </div>
 

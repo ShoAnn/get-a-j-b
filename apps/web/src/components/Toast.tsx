@@ -71,10 +71,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }) {
     const styles =
         toast.variant === "success"
-            ? "border-teal bg-teal/10 text-teal dark:border-teal dark:bg-teal/20 dark:text-[#F5F5F0]"
+            ? "border-teal bg-teal/10 text-teal dark:border-teal dark:bg-teal/20 dark:text-cream"
             : toast.variant === "error"
                 ? "border-red-300 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-200"
-                : "border-zinc-300 bg-white text-midnight dark:border-[#333355] dark:bg-[#252540] dark:text-[#F5F5F0]";
+                : "border-border-strong bg-overlay text-foreground";
 
     return (
         <div

@@ -40,4 +40,11 @@ describe("MarkdownViewer", () => {
         render(<MarkdownViewer content={"   \n  "} />);
         expect(screen.getByText("No content")).toBeInTheDocument();
     });
+
+    it("paper variant uses resume-paper styling without dark invert", () => {
+        const { container } = render(<MarkdownViewer content={"# Jane Doe"} variant="paper" />);
+        const doc = container.querySelector(".resume-paper");
+        expect(doc).not.toBeNull();
+        expect(doc?.className).not.toContain("dark:prose-invert");
+    });
 });

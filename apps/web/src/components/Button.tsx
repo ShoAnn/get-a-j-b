@@ -9,11 +9,11 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    "bg-[#7F77DD] text-white hover:bg-[#6B63C9] active:bg-[#5A52B8] disabled:bg-[#B8B4E8]",
+    "bg-violet text-white hover:bg-violet-hover active:bg-violet-active disabled:bg-violet-disabled",
   secondary:
-    "bg-transparent text-[#7F77DD] border border-[#7F77DD] hover:bg-[#F5F3FF] active:bg-[#EBE9FA] disabled:text-[#B8B4E8] disabled:border-[#B8B4E8] dark:hover:bg-[#3A3A5C] dark:active:bg-[#2E2E4A]",
+    "bg-transparent text-violet border border-violet hover:bg-violet-subtle active:bg-violet-subtle-active disabled:text-violet-disabled disabled:border-violet-disabled dark:hover:bg-midnight-active dark:active:bg-midnight-hover",
   ghost:
-    "bg-transparent text-[#1A1A2E] hover:bg-[#F5F3FF] active:bg-[#EBE9FA] disabled:text-[#B8B4E8] dark:text-[#F5F5F0] dark:hover:bg-[#3A3A5C] dark:active:bg-[#2E2E4A]",
+    "bg-transparent text-foreground hover:bg-violet-subtle active:bg-violet-subtle-active disabled:text-violet-disabled dark:hover:bg-midnight-active dark:active:bg-midnight-hover",
 };
 
 export default function Button({

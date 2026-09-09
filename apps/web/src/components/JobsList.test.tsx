@@ -44,6 +44,7 @@ function makeJob(overrides: Partial<Job> & { id: string }): Job {
 describe("JobsList", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        localStorage.clear();
     });
 
     it("does not render duplicate Jobs heading (heading is owned by parent page)", async () => {
@@ -201,5 +202,82 @@ describe("JobsList", () => {
         });
 
         vi.unstubAllGlobals();
+    });
+
+    describe("pagination", () => {
+        function twelveJobs(): Job[] {
+            return Array.from({ length: 12 }, (_, i) =>
+                makeJob({ id: `${i + 1}`, title: `Engineer ${i + 1}`, company: `Company ${i + 1}` }),
+            );
+        }
+
+        it("shows the first page of rows and the total count", async () => {
+            mockedApi.get.mockResolvedValue(twelveJobs());
+            renderWithProviders(<JobsList />);
+
+            await screen.findByText("Engineer 1");
+            expect(screen.getByText("Engineer 10")).toBeInTheDocument();
+            expect(screen.queryByText("Engineer 11")).not.toBeInTheDocument();
+            expect(screen.getByText("Showing 1–10 of 12 applications")).toBeInTheDocument();
+            expect(screen.getByRole("button", { name: "Previous page" })).toBeDisabled();
+        });
+
+        it("navigates between pages with Next/Prev and numbered buttons", async () => {
+            const user = userEvent.setup();
+            mockedApi.get.mockResolvedValue(twelveJobs());
+            renderWithProviders(<JobsList />);
+
+            await screen.findByText("Engineer 1");
+
+            await user.click(screen.getByRole("button", { name: "Next page" }));
+            expect(screen.getByText("Engineer 11")).toBeInTheDocument();
+            expect(screen.queryByText("Engineer 1")).not.toBeInTheDocument();
+            expect(screen.getByText("Showing 11–12 of 12 applications")).toBeInTheDocument();
+            expect(screen.getByRole("button", { name: "Next page" })).toBeDisabled();
+
+            await user.click(screen.getByRole("button", { name: "Go to page 1" }));
+            expect(screen.getByText("Engineer 1")).toBeInTheDocument();
+            expect(screen.queryByText("Engineer 11")).not.toBeInTheDocument();
+        });
+
+        it("changes the number of rows via the per-page input and persists it", async () => {
+            const user = userEvent.setup();
+            mockedApi.get.mockResolvedValue(twelveJobs());
+            renderWithProviders(<JobsList />);
+
+            await screen.findByText("Engineer 1");
+            const perPage = screen.getByLabelText("Per page");
+            await user.clear(perPage);
+            await user.type(perPage, "5");
+
+            expect(screen.queryByText("Engineer 6")).not.toBeInTheDocument();
+            expect(screen.getByText("Showing 1–5 of 12 applications")).toBeInTheDocument();
+            expect(localStorage.getItem("jobs-page-size")).toBe("5");
+        });
+
+        it("restores the per-page setting from localStorage", async () => {
+            localStorage.setItem("jobs-page-size", "5");
+            mockedApi.get.mockResolvedValue(twelveJobs());
+            renderWithProviders(<JobsList />);
+
+            await screen.findByText("Engineer 1");
+            expect(screen.queryByText("Engineer 6")).not.toBeInTheDocument();
+            expect(screen.getByText("Showing 1–5 of 12 applications")).toBeInTheDocument();
+        });
+
+        it("resets to the first page when the search query changes", async () => {
+            const user = userEvent.setup();
+            mockedApi.get.mockResolvedValue(twelveJobs());
+            renderWithProviders(<JobsList />);
+
+            await screen.findByText("Engineer 1");
+            await user.click(screen.getByRole("button", { name: "Next page" }));
+            expect(screen.getByText("Showing 11–12 of 12 applications")).toBeInTheDocument();
+
+            await user.type(screen.getByPlaceholderText(/Search by title/), "Engineer 1");
+            await waitFor(() => {
+                expect(screen.getByText("Showing 1–4 of 4 applications")).toBeInTheDocument();
+            });
+        });
     });
 });

@@ -95,4 +95,28 @@ describe("Dashboard", () => {
 
     expect(await screen.findByText(/Request failed \(500\)/)).toBeInTheDocument();
   });
+
+  it("renders the additional charts when jobs exist", async () => {
+    const now = Date.now();
+    const day = 1000 * 60 * 60 * 24;
+    mockedApi.get.mockResolvedValueOnce([
+      makeJob({ id: "a", company: "Acme", status: "submitted", createdAt: new Date(now - 2 * day).toISOString() }),
+      makeJob({ id: "b", company: "Acme", status: "interview_scheduled", createdAt: new Date(now - 9 * day).toISOString() }),
+    ]);
+    render(<Dashboard />);
+
+    expect(await screen.findByText("Applications Over Time")).toBeInTheDocument();
+    expect(screen.getByText("Hiring Funnel")).toBeInTheDocument();
+    expect(screen.getByText("Top Companies")).toBeInTheDocument();
+  });
+
+  it("renders chart empty states when there are no jobs", async () => {
+    mockedApi.get.mockResolvedValueOnce([]);
+    render(<Dashboard />);
+
+    await screen.findByText("Jobs by Application Status");
+    expect(screen.getByText(/No applications in the last/i)).toBeInTheDocument();
+    expect(screen.getByText(/No funnel data yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/No companies yet/i)).toBeInTheDocument();
+  });
 });

@@ -50,17 +50,17 @@ export default function ResumeDetail() {
 
     if (loading) {
         return (
-            <div className="flex flex-1 items-center justify-center bg-zinc-50 min-h-full dark:bg-[#1A1A2E]">
-                <p className="text-sm text-text-secondary dark:text-[#9999AA]">Loading resume...</p>
+            <div className="flex flex-1 items-center justify-center bg-background min-h-full">
+                <p className="text-sm text-secondary">Loading resume...</p>
             </div>
         );
     }
 
     if (notFound) {
         return (
-            <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-zinc-50 min-h-full dark:bg-[#1A1A2E]">
-                <h3 className="text-lg font-medium text-midnight dark:text-[#F5F5F0]">Resume not found</h3>
-                <Link href="/resumes" className="rounded-lg border border-violet px-5 py-[10px] text-sm font-medium text-violet transition-colors hover:bg-[#F5F3FF]">
+            <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-background min-h-full">
+                <h3 className="text-lg font-medium text-foreground">Resume not found</h3>
+                <Link href="/resumes" className="rounded-lg border border-violet px-5 py-[10px] text-sm font-medium text-violet transition-colors hover:bg-violet-subtle">
                     Back to Resumes
                 </Link>
             </div>
@@ -69,9 +69,9 @@ export default function ResumeDetail() {
 
     if (error || !resume) {
         return (
-            <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-zinc-50 min-h-full dark:bg-[#1A1A2E]">
+            <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-background min-h-full">
                 <p className="text-sm text-red-600">{error ?? "Something went wrong"}</p>
-                <Link href="/resumes" className="rounded-lg border border-violet px-5 py-[10px] text-sm font-medium text-violet transition-colors hover:bg-[#F5F3FF]">
+                <Link href="/resumes" className="rounded-lg border border-violet px-5 py-[10px] text-sm font-medium text-violet transition-colors hover:bg-violet-subtle">
                     Back to Resumes
                 </Link>
             </div>

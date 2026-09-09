@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSidebar } from "./SidebarProvider";
 
 const links = [
   {
@@ -41,10 +42,15 @@ const links = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { collapsed } = useSidebar();
 
   return (
-    <aside className="hidden w-56 shrink-0 border-r border-zinc-200 bg-white dark:border-[#333355] dark:bg-[#1A1A2E] lg:block">
-      <nav className="flex flex-col gap-1 px-3 pt-4">
+    <aside
+      className={`hidden shrink-0 flex-col border-r border-border bg-raised transition-[width] duration-200 ease-in-out lg:flex ${
+        collapsed ? "w-16" : "w-56"
+      }`}
+    >
+      <nav className="flex flex-1 flex-col gap-1 px-3 pt-4">
         {links.map((link) => {
           const isActive =
             link.href === "/"
@@ -55,14 +61,18 @@ export default function Sidebar() {
             <Link
               key={link.href}
               href={link.href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+              title={link.label}
+              aria-label={link.label}
+              className={`flex items-center rounded-lg py-2 text-sm font-medium transition-colors ${
+                collapsed ? "justify-center px-2" : "gap-3 px-3"
+              } ${
                 isActive
                   ? "bg-violet/10 text-violet dark:bg-violet/15 dark:text-violet"
-                  : "text-zinc-600 hover:bg-zinc-100 dark:text-[#9999AA] dark:hover:bg-[#252540]"
+                  : "text-secondary hover:bg-hover"
               }`}
             >
               <span className="shrink-0">{link.icon}</span>
-              {link.label}
+              {!collapsed && link.label}
             </Link>
           );
         })}
