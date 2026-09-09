@@ -47,7 +47,7 @@ export async function signInAs(page: Page): Promise<TestCredentials> {
         expires_in: string;
     };
 
-    const expiresInSec = parseInt(data.expires_in, 10) || 900;
+    const expiresInSec = parseInt(data.expires_in, 10) || 86400;
 
     // Next.js reads cookies via `cookies()` (httpOnly). Playwright must set them
     // on the same origin as baseURL (localhost). `domain: localhost` works for

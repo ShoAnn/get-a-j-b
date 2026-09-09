@@ -91,6 +91,12 @@ func (h *JobHandler) GetJobByID(w http.ResponseWriter, r *http.Request) {
 	if errors.Is(err, domain.ErrJobNotFound) {
 		writeJSONError(w, "Job not found", http.StatusNotFound)
 		return
+	} else if errors.Is(err, domain.ErrForbidden) {
+		writeJSONError(w, "Forbidden", http.StatusForbidden)
+		return
+	} else if errors.Is(err, domain.ErrUnauthorized) {
+		writeJSONError(w, "Unauthorized", http.StatusUnauthorized)
+		return
 	} else if err != nil {
 		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
 		return
@@ -126,11 +132,14 @@ func (h *JobHandler) UpdateJob(w http.ResponseWriter, r *http.Request) {
 	}
 
 	job, err := h.svc.UpdateJob(r.Context(), id, claims.UserID, &req)
-	if errors.Is(err, domain.ErrUnauthorized) {
-		writeJSONError(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	} else if errors.Is(err, domain.ErrJobNotFound) {
+	if errors.Is(err, domain.ErrJobNotFound) {
 		writeJSONError(w, "Job not found", http.StatusNotFound)
+		return
+	} else if errors.Is(err, domain.ErrForbidden) {
+		writeJSONError(w, "Forbidden", http.StatusForbidden)
+		return
+	} else if errors.Is(err, domain.ErrUnauthorized) {
+		writeJSONError(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	} else if err != nil {
 		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
@@ -157,11 +166,14 @@ func (h *JobHandler) DeleteJob(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = h.svc.DeleteJob(r.Context(), id, claims.UserID)
-	if errors.Is(err, domain.ErrUnauthorized) {
-		writeJSONError(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	} else if errors.Is(err, domain.ErrJobNotFound) {
+	if errors.Is(err, domain.ErrJobNotFound) {
 		writeJSONError(w, "Job not found", http.StatusNotFound)
+		return
+	} else if errors.Is(err, domain.ErrForbidden) {
+		writeJSONError(w, "Forbidden", http.StatusForbidden)
+		return
+	} else if errors.Is(err, domain.ErrUnauthorized) {
+		writeJSONError(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	} else if err != nil {
 		writeJSONError(w, "Internal server error", http.StatusInternalServerError)

@@ -18,6 +18,20 @@ async function request<T>(
 		}
 	)
 	if (!res.ok) {
+		if (res.status === 401 && typeof window !== "undefined") {
+			const path = window.location.pathname;
+			const isAuthPage = path.startsWith("/login") || path.startsWith("/register");
+			if (!isAuthPage) {
+				try {
+					sessionStorage.setItem("auth_bounce_reason", "expired");
+					document.cookie = "access_token=; Max-Age=0; path=/";
+					document.cookie = "refresh_token=; Max-Age=0; path=/";
+				} catch {}
+				try {
+					window.location.assign("/login");
+				} catch {}
+			}
+		}
 		const body = await res.json().catch(() => ({} as Record<string, unknown>))
 		const message =
 			(typeof body.message === "string" && body.message) ||

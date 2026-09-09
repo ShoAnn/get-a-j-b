@@ -64,10 +64,7 @@ func (h *ResumeHandler) GetAllResumes(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resumes, err := h.svc.GetAllResumes(r.Context(), claims.UserID)
-	if errors.Is(err, domain.ErrUnauthorized) {
-		writeJSONError(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	} else if err != nil {
+	if err != nil {
 		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -94,6 +91,9 @@ func (h *ResumeHandler) GetResumeByID(w http.ResponseWriter, r *http.Request) {
 	resume, err := h.svc.GetByID(r.Context(), id, claims.UserID)
 	if errors.Is(err, domain.ErrResumeNotFound) {
 		writeJSONError(w, "Resume not found", http.StatusNotFound)
+		return
+	} else if errors.Is(err, domain.ErrForbidden) {
+		writeJSONError(w, "Forbidden", http.StatusForbidden)
 		return
 	} else if errors.Is(err, domain.ErrUnauthorized) {
 		writeJSONError(w, "Unauthorized", http.StatusUnauthorized)
@@ -138,6 +138,9 @@ func (h *ResumeHandler) UpdateResume(w http.ResponseWriter, r *http.Request) {
 	if errors.Is(err, domain.ErrResumeNotFound) {
 		writeJSONError(w, "Resume not found", http.StatusNotFound)
 		return
+	} else if errors.Is(err, domain.ErrForbidden) {
+		writeJSONError(w, "Forbidden", http.StatusForbidden)
+		return
 	} else if errors.Is(err, domain.ErrUnauthorized) {
 		writeJSONError(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -169,6 +172,9 @@ func (h *ResumeHandler) DeleteResume(w http.ResponseWriter, r *http.Request) {
 	err = h.svc.DeleteResume(r.Context(), id, claims.UserID)
 	if errors.Is(err, domain.ErrResumeNotFound) {
 		writeJSONError(w, "Resume not found", http.StatusNotFound)
+		return
+	} else if errors.Is(err, domain.ErrForbidden) {
+		writeJSONError(w, "Forbidden", http.StatusForbidden)
 		return
 	} else if errors.Is(err, domain.ErrUnauthorized) {
 		writeJSONError(w, "Unauthorized", http.StatusUnauthorized)

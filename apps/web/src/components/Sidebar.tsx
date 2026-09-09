@@ -27,6 +27,16 @@ const links = [
       </svg>
     ),
   },
+  {
+    href: "/resumes",
+    label: "Resumes",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <rect x="3" y="3" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="1.3" />
+        <path d="M6 7h6M6 10h4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+      </svg>
+    ),
+  },
 ];
 
 export default function Sidebar() {

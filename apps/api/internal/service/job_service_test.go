@@ -93,11 +93,11 @@ func TestJobService_UpdateJob(t *testing.T) {
 		assert.Equal(t, newTitle, job.Title)
 	})
 
-	t.Run("Unauthorized", func(t *testing.T) {
+	t.Run("Forbidden", func(t *testing.T) {
 		req := &domain.UpdateJobRequest{}
 		job, err := svc.UpdateJob(context.Background(), 1, 2, req)
 		assert.Error(t, err)
-		assert.Equal(t, domain.ErrUnauthorized, err)
+		assert.Equal(t, domain.ErrForbidden, err)
 		assert.Nil(t, job)
 	})
 }
@@ -116,10 +116,10 @@ func TestJobService_DeleteJob(t *testing.T) {
 		assert.NotContains(t, repo.jobs, 1)
 	})
 
-	t.Run("Unauthorized", func(t *testing.T) {
+	t.Run("Forbidden", func(t *testing.T) {
 		repo.jobs[1] = &domain.Job{ID: 1, UserID: 1, Title: "Job 1"}
 		err := svc.DeleteJob(context.Background(), 1, 2)
 		assert.Error(t, err)
-		assert.Equal(t, domain.ErrUnauthorized, err)
+		assert.Equal(t, domain.ErrForbidden, err)
 	})
 }

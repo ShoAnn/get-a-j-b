@@ -9,6 +9,11 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+const (
+	AccessTokenTTL              = 24 * time.Hour
+	AccessTokenExpiresInSeconds = "86400"
+)
+
 type AuthService struct {
 	userRepo     domain.UserRepository
 	tokenRepo    domain.RefreshTokenRepository
@@ -60,7 +65,7 @@ func (s *AuthService) Register(ctx context.Context, req *domain.CreateUserReques
 	return &domain.AuthResponse{
 		AccessToken:  token,
 		RefreshToken: refreshToken,
-		ExpiresIn:    "900",
+		ExpiresIn:    AccessTokenExpiresInSeconds,
 	}, nil
 }
 
@@ -93,7 +98,7 @@ func (s *AuthService) Login(ctx context.Context, email, password string) (*domai
 	return &domain.AuthResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
-		ExpiresIn:    "900",
+		ExpiresIn:    AccessTokenExpiresInSeconds,
 	}, nil
 }
 
@@ -146,7 +151,7 @@ func (s *AuthService) RefreshToken(ctx context.Context, refreshTokenStr string) 
 	return &domain.AuthResponse{
 		AccessToken:  accessToken,
 		RefreshToken: newRefreshToken,
-		ExpiresIn:    "900",
+		ExpiresIn:    AccessTokenExpiresInSeconds,
 	}, nil
 }
 
@@ -177,7 +182,7 @@ func (s *AuthService) GenerateJWT(user *domain.User) (string, error) {
 		Email:    user.Email,
 		Role:     user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(AccessTokenTTL)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			Issuer:    domain.AppName,
 		},

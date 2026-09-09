@@ -43,7 +43,7 @@ describe("refresh", () => {
         mocks.mockPost.mockResolvedValue({
             access_token: "new-access",
             refresh_token: "new-refresh",
-            expires_in: "900",
+            expires_in: "86400",
         });
 
         const ok = await refresh();
@@ -53,7 +53,7 @@ describe("refresh", () => {
             expect.anything(),
             { token: "old-refresh" }
         );
-        expect(mocks.mockSetAuthCookies).toHaveBeenCalledWith("new-access", "new-refresh", "900");
+        expect(mocks.mockSetAuthCookies).toHaveBeenCalledWith("new-access", "new-refresh", "86400");
     });
 
     it("returns false when API throws HttpError", async () => {
