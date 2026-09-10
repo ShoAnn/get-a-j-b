@@ -104,12 +104,21 @@ describe("ResumeEditor", () => {
         expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     });
 
+    it("create mode Cancel returns to the list without POST", () => {
+        render(<ResumeEditor mode="create" initialResume={MOCK} onSaved={vi.fn()} />);
+        fireEvent.change(screen.getByLabelText("Label"), { target: { value: "Changed" } });
+        fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+        expect(mockedApi.post).not.toHaveBeenCalled();
+        expect(mockPush).toHaveBeenCalledWith("/resumes");
+    });
+
     it("deletes the resume after inline two-step confirm", async () => {
         mockedApi.delete.mockResolvedValueOnce(undefined);
         render(<ResumeEditor resumeId="r-1" initialResume={MOCK} onSaved={vi.fn()} />);
 
         fireEvent.click(screen.getByRole("button", { name: "Delete resume" }));
         expect(screen.getByRole("button", { name: "Confirm delete" })).toBeInTheDocument();
+        expect(screen.getByTestId("confirm-countdown")).toBeInTheDocument();
         expect(mockedApi.delete).not.toHaveBeenCalled();
 
         fireEvent.click(screen.getByRole("button", { name: "Confirm delete" }));
@@ -127,7 +136,7 @@ describe("ResumeEditor", () => {
             expect(screen.getByRole("button", { name: "Confirm delete" })).toBeInTheDocument();
 
             act(() => {
-                vi.advanceTimersByTime(5000);
+                vi.advanceTimersByTime(3000);
             });
             expect(screen.getByRole("button", { name: "Delete resume" })).toBeInTheDocument();
             expect(mockedApi.delete).not.toHaveBeenCalled();

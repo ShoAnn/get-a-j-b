@@ -4,6 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { JOB_STATUSES } from "@/components/StatusBadge";
+import ApplicationsOverTimeChart from "@/components/ApplicationsOverTimeChart";
+import HiringFunnelChart from "@/components/HiringFunnelChart";
+import TopCompaniesChart from "@/components/TopCompaniesChart";
 import type { Job } from "@/types/job";
 import { JobSchema } from "@/types/job";
 import { apiClient } from "@/lib/client/api";
@@ -93,9 +96,9 @@ export default function Dashboard() {
     );
 
     return (
-        <div className="flex flex-1 flex-col bg-zinc-50 min-h-full dark:bg-[#1A1A2E]">
+        <div className="flex flex-1 flex-col bg-background min-h-full">
             <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-                <h1 className="text-2xl font-semibold tracking-tight text-midnight dark:text-[#F5F5F0]">
+                <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                     Dashboard
                 </h1>
 
@@ -104,7 +107,7 @@ export default function Dashboard() {
                         {[1, 2, 3, 4].map((i) => (
                             <div
                                 key={i}
-                                className="h-28 animate-pulse rounded-xl border-[0.5px] border-zinc-300 bg-surface p-5 dark:border-[#333355] dark:bg-[#252540]"
+                                className="h-28 animate-pulse rounded-xl border-[0.5px] border-border-strong bg-surface p-5"
                             />
                         ))}
                     </div>
@@ -117,7 +120,7 @@ export default function Dashboard() {
                             {stats.map((stat) => (
                                 <div
                                     key={stat.label}
-                                    className="rounded-xl border-[0.5px] border-zinc-300 bg-surface p-5 dark:border-[#333355] dark:bg-[#252540]"
+                                    className="rounded-xl border-[0.5px] border-border-strong bg-surface p-5"
                                 >
                                     <div
                                         className={`mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg ${stat.color} text-sm font-medium text-white`}
@@ -145,10 +148,10 @@ export default function Dashboard() {
                                             </svg>
                                         )}
                                     </div>
-                                    <p className="text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">
+                                    <p className="text-xs font-medium uppercase tracking-wider text-secondary">
                                         {stat.label}
                                     </p>
-                                    <p className="mt-1 text-3xl font-semibold text-midnight dark:text-[#F5F5F0]">
+                                    <p className="mt-1 text-3xl font-semibold text-foreground">
                                         {stat.value}
                                     </p>
                                 </div>
@@ -158,8 +161,8 @@ export default function Dashboard() {
                         {/* Status chart + Recent jobs */}
                         <div className="mt-8 flex flex-col gap-4 lg:h-[300px] lg:flex-row">
                             <div className="flex flex-col lg:w-3/5">
-                                <div className="flex flex-1 flex-col items-center rounded-xl border-[0.5px] border-zinc-300 bg-surface p-5 dark:border-[#333355] dark:bg-[#252540]">
-                                    <h2 className="text-sm font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">
+                                <div className="flex flex-1 flex-col items-center rounded-xl border-[0.5px] border-border-strong bg-surface p-5">
+                                    <h2 className="text-sm font-medium uppercase tracking-wider text-secondary">
                                         Jobs by Application Status
                                     </h2>
                                     {chartData.length > 0 ? (
@@ -184,9 +187,10 @@ export default function Dashboard() {
                                                         <Tooltip
                                                             contentStyle={{
                                                                 borderRadius: 8,
-                                                                border: "0.5px solid #D4D4D8",
+                                                                border: "0.5px solid var(--color-chart-tooltip-border)",
                                                                 fontSize: 13,
-                                                                background: "#fff",
+                                                                background: "var(--color-chart-tooltip-bg)",
+                                                                color: "var(--color-foreground)",
                                                             }}
                                                         />
                                                     </PieChart>
@@ -199,10 +203,10 @@ export default function Dashboard() {
                                                             className="h-3 w-3 shrink-0 rounded-sm"
                                                             style={{ backgroundColor: item.color }}
                                                         />
-                                                        <span className="text-sm capitalize text-midnight dark:text-[#F5F5F0]">
+                                                        <span className="text-sm capitalize text-foreground">
                                                             {item.name}
                                                         </span>
-                                                        <span className="ml-auto text-sm font-medium text-midnight dark:text-[#F5F5F0]">
+                                                        <span className="ml-auto text-sm font-medium text-foreground">
                                                             {item.value}
                                                         </span>
                                                     </div>
@@ -210,7 +214,7 @@ export default function Dashboard() {
                                             </div>
                                         </div>
                                     ) : (
-                                        <p className="mt-5 py-4 text-center text-sm italic text-text-secondary dark:text-[#9999AA]">
+                                        <p className="mt-5 py-4 text-center text-sm italic text-secondary">
                                             No jobs yet.{" "}
                                             <Link href="/jobs" className="text-violet underline">
                                                 Add your first job
@@ -221,8 +225,8 @@ export default function Dashboard() {
                             </div>
 
                             <div className="flex flex-col lg:w-2/5">
-                                <div className="h-full flex flex-1 flex-col rounded-xl border-[0.5px] border-zinc-300 bg-surface p-6 dark:border-[#333355] dark:bg-[#252540]">
-                                    <h2 className="text-sm font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]">
+                                <div className="h-full flex flex-1 flex-col rounded-xl border-[0.5px] border-border-strong bg-surface p-6">
+                                    <h2 className="text-sm font-medium uppercase tracking-wider text-secondary">
                                         Recent Jobs
                                     </h2>
                                     <div className="mt-4 min-h-0 flex-1 space-y-2 overflow-auto">
@@ -237,14 +241,14 @@ export default function Dashboard() {
                                                 <Link
                                                     key={job.id}
                                                     href={`/jobs/${job.id}`}
-                                                    className="group flex items-center gap-3 border-l-2 px-3 py-2.5 transition-colors hover:bg-zinc-100 dark:hover:bg-[#2E2E4A]"
+                                                    className="group flex items-center gap-3 border-l-2 px-3 py-2.5 transition-colors hover:bg-hover"
                                                     style={{ borderLeftColor: statusColors[job.status] }}
                                                 >
                                                     <div className="min-w-0 flex-1">
-                                                        <p className="text-sm font-medium text-midnight dark:text-[#F5F5F0]">
+                                                        <p className="text-sm font-medium text-foreground">
                                                             {job.title}
                                                         </p>
-                                                        <p className="mt-0.5 text-xs text-text-secondary dark:text-[#9999AA]">
+                                                        <p className="mt-0.5 text-xs text-secondary">
                                                             {job.company}
                                                         </p>
                                                     </div>
@@ -257,13 +261,22 @@ export default function Dashboard() {
                                                 </Link>
                                             ))}
                                         {jobs.length === 0 && (
-                                            <p className="px-3 py-2.5 text-sm italic text-text-secondary dark:text-[#9999AA]">
+                                            <p className="px-3 py-2.5 text-sm italic text-secondary">
                                                 No jobs yet.
                                             </p>
                                         )}
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Activity + funnel + top companies */}
+                        <div className="mt-4">
+                            <ApplicationsOverTimeChart jobs={jobs} />
+                        </div>
+                        <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                            <HiringFunnelChart jobs={jobs} />
+                            <TopCompaniesChart jobs={jobs} />
                         </div>
                     </>
                 )}

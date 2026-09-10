@@ -4,7 +4,13 @@ import { useEffect, useState } from "react";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 
-export default function MarkdownViewer({ content }: { content: string }) {
+export default function MarkdownViewer({
+    content,
+    variant = "auto",
+}: {
+    content: string;
+    variant?: "auto" | "paper";
+}) {
     const [html, setHtml] = useState("");
 
     useEffect(() => {
@@ -27,7 +33,11 @@ export default function MarkdownViewer({ content }: { content: string }) {
 
     return (
         <div
-            className="prose max-w-none break-words text-midnight dark:prose-invert dark:text-[#F5F5F0]"
+            className={
+                variant === "paper"
+                    ? "prose resume-paper max-w-none break-words"
+                    : "prose max-w-none break-words text-foreground dark:prose-invert"
+            }
             dangerouslySetInnerHTML={{ __html: html }}
         />
     );

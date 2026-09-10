@@ -1,6 +1,6 @@
 "use client";
 
-import MarkdownViewer from "./MarkdownViewer";
+import ResumePreview from "./ResumePreview";
 
 interface ResumeMarkdownEditorProps {
     content: string;
@@ -13,9 +13,9 @@ interface ResumeMarkdownEditorProps {
 }
 
 const LABEL_CLASS =
-    "mb-1 block text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]";
+    "mb-1 block text-xs font-medium uppercase tracking-wider text-secondary";
 const TEXTAREA_CLASS =
-    "w-full rounded-lg border-[0.5px] border-zinc-300 bg-white px-3 py-[9px] text-sm text-midnight transition-colors focus:border-violet focus:outline-none dark:border-[#333355] dark:bg-[#1A1A2E] dark:text-[#F5F5F0]";
+    "w-full rounded-lg border-[0.5px] border-border-strong bg-raised px-3 py-[9px] text-sm text-foreground transition-colors focus:border-violet focus:outline-none";
 
 export default function ResumeMarkdownEditor({
     content,
@@ -31,7 +31,7 @@ export default function ResumeMarkdownEditor({
     return (
         <>
             <div className="grid flex-1 gap-4 lg:grid-cols-2">
-                <div className="flex min-h-[40vh] flex-1 flex-col rounded-lg bg-zinc-50 p-4 lg:min-h-[60vh] dark:bg-[#1A1A2E]">
+                <div className="flex min-h-[40vh] flex-1 flex-col rounded-lg bg-background p-4 lg:min-h-[60vh]">
                     <label htmlFor={contentId} className={LABEL_CLASS}>
                         Editor
                     </label>
@@ -46,9 +46,9 @@ export default function ResumeMarkdownEditor({
                         className={`${TEXTAREA_CLASS} min-h-[40vh] flex-1 lg:min-h-[60vh]`}
                     />
                 </div>
-                <div className="flex min-h-[40vh] flex-1 flex-col rounded-lg bg-zinc-50 p-4 lg:min-h-[60vh] dark:bg-[#1A1A2E]">
+                <div className="flex min-h-[40vh] flex-1 flex-col rounded-lg bg-background p-4 lg:min-h-[60vh]">
                     <span className={LABEL_CLASS}>Preview</span>
-                    <MarkdownViewer content={content} />
+                    <ResumePreview content={content} />
                 </div>
             </div>
             {contentError && <p className="mt-1 text-xs text-red-600">{contentError}</p>}

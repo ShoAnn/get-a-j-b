@@ -49,13 +49,13 @@ export default function ResumesPage() {
     }, [highlightedId, resumes]);
 
     return (
-        <div className="flex flex-1 flex-col bg-zinc-50 min-h-full dark:bg-[#1A1A2E]">
+        <div className="flex flex-1 flex-col bg-background min-h-full">
             <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col px-4 py-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between gap-4">
-                    <h1 className="shrink-0 text-2xl font-semibold tracking-tight text-midnight dark:text-[#F5F5F0]">Resumes</h1>
+                    <h1 className="shrink-0 text-2xl font-semibold tracking-tight text-foreground">Resumes</h1>
                     <Link
                         href="/resumes/new"
-                        className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-violet px-3 py-[9px] text-sm font-medium text-white transition-colors hover:bg-[#6B63C9] active:bg-[#5A52B8]"
+                        className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-violet px-3 py-[9px] text-sm font-medium text-white transition-colors hover:bg-violet-hover active:bg-violet-active"
                     >
                         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                             <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -69,7 +69,7 @@ export default function ResumesPage() {
                         {[1, 2, 3, 4].map((i) => (
                             <div
                                 key={i}
-                                className="h-36 animate-pulse rounded-xl border-[0.5px] border-zinc-300 bg-surface p-4 dark:border-zinc-600 dark:bg-midnight"
+                                className="h-36 animate-pulse rounded-xl border-[0.5px] border-border-strong bg-surface p-4 dark:border-zinc-600 dark:bg-midnight"
                             />
                         ))}
                     </div>
@@ -90,11 +90,11 @@ export default function ResumesPage() {
                             <path d="M28 34h24M28 42h16M28 50h8" stroke="#D4D4D8" strokeWidth="2" strokeLinecap="round" />
                             <path d="M36 20V12a4 4 0 014-4h0a4 4 0 014 4v8" stroke="#D4D4D8" strokeWidth="2" />
                         </svg>
-                        <h3 className="text-lg font-medium text-midnight dark:text-[#F5F5F0]">No resumes yet</h3>
-                        <p className="text-sm text-text-secondary dark:text-[#9999AA]">Create your first resume to get started.</p>
+                        <h3 className="text-lg font-medium text-foreground">No resumes yet</h3>
+                        <p className="text-sm text-secondary">Create your first resume to get started.</p>
                         <Link
                             href="/resumes/new"
-                            className="rounded-lg border border-violet px-5 py-[10px] text-sm font-medium text-violet transition-colors hover:bg-[#F5F3FF]"
+                            className="rounded-lg border border-violet px-5 py-[10px] text-sm font-medium text-violet transition-colors hover:bg-violet-subtle"
                         >
                             Add resume
                         </Link>

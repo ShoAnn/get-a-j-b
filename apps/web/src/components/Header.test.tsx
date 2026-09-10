@@ -21,20 +21,35 @@ vi.mock("@/components/Toast", () => ({
 }));
 
 import Header from "./Header";
+import { SidebarProvider } from "./SidebarProvider";
+
+function renderHeader() {
+    return render(
+        <SidebarProvider>
+            <Header />
+        </SidebarProvider>,
+    );
+}
 
 describe("Header", () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        localStorage.clear();
     });
 
     it("renders logo", () => {
-        render(<Header />);
+        renderHeader();
         expect(screen.getByText("Get a J*b")).toBeInTheDocument();
+    });
+
+    it("renders the sidebar toggle", () => {
+        renderHeader();
+        expect(screen.getByRole("button", { name: "Collapse sidebar" })).toBeInTheDocument();
     });
 
     it("toggles user menu", async () => {
         const user = userEvent.setup();
-        render(<Header />);
+        renderHeader();
 
         const avatar = screen.getByText("U");
         await user.click(avatar);
@@ -52,7 +67,7 @@ describe("Header", () => {
             );
             vi.stubGlobal("fetch", fetchSpy);
 
-            render(<Header />);
+            renderHeader();
 
             await user.click(screen.getByText("U"));
 
@@ -82,7 +97,7 @@ describe("Header", () => {
             );
             vi.stubGlobal("fetch", fetchSpy);
 
-            render(<Header />);
+            renderHeader();
 
             await user.click(screen.getByText("U"));
 
@@ -106,7 +121,7 @@ describe("Header", () => {
             const fetchSpy = vi.fn().mockRejectedValue(new Error("network down"));
             vi.stubGlobal("fetch", fetchSpy);
 
-            render(<Header />);
+            renderHeader();
 
             await user.click(screen.getByText("U"));
 
@@ -133,7 +148,7 @@ describe("Header", () => {
             );
             vi.stubGlobal("fetch", fetchSpy);
 
-            render(<Header />);
+            renderHeader();
 
             await user.click(screen.getByText("U"));
 

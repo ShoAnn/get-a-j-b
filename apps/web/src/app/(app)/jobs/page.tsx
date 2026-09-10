@@ -51,20 +51,20 @@ function KanbanCard({ job, isSaving, isStaged, isHighlighted, disabled }: { job:
             aria-busy={isSaving}
             data-testid={`card-${job.id}`}
             data-highlighted={isHighlighted ? "true" : undefined}
-            className={`rounded-xl border-[0.5px] p-4 cursor-grab active:cursor-grabbing transition-shadow hover:shadow-md ${isHighlighted ? "border-violet bg-violet/10 dark:border-violet dark:bg-violet/20 animate-pulse ring-1 ring-violet/40" : isStaged ? "border-violet bg-violet/5 dark:border-violet dark:bg-violet/10" : "border-zinc-300 bg-surface dark:border-zinc-600 dark:bg-midnight"} ${isDragging || isSaving ? "opacity-60" : ""} ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
+            className={`rounded-xl border-[0.5px] p-4 cursor-grab active:cursor-grabbing transition-shadow hover:shadow-md ${isHighlighted ? "border-violet bg-violet/10 dark:border-violet dark:bg-violet/20 animate-pulse ring-1 ring-violet/40" : isStaged ? "border-violet bg-violet/5 dark:border-violet dark:bg-violet/10" : "border-border-strong bg-surface dark:border-zinc-600 dark:bg-midnight"} ${isDragging || isSaving ? "opacity-60" : ""} ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
         >
             <div className="flex items-start gap-3">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet text-xs font-medium text-white">
                     {job.company.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-midnight dark:text-zinc-100">
+                    <p className="truncate text-sm font-medium text-foreground">
                         {job.title}
                     </p>
-                    <p className="mt-0.5 truncate text-xs text-text-secondary dark:text-zinc-400">
+                    <p className="mt-0.5 truncate text-xs text-secondary">
                         {job.company}
                     </p>
-                    <p className="mt-2 text-xs text-text-secondary dark:text-zinc-400">
+                    <p className="mt-2 text-xs text-secondary">
                         {new Date(job.createdAt).toLocaleDateString("en-US", {
                             month: "short",
                             day: "numeric",
@@ -101,10 +101,10 @@ function BoardColumn({ status, jobs, savingIds, stagedIds, anySaving, highlighte
             ref={setNodeRef}
             data-testid={`column-${status}`}
             style={{ borderTop: `3px solid ${statusColumnColors[status]}` }}
-            className={`flex h-full w-[260px] shrink-0 flex-col rounded-xl border-[0.5px] border-zinc-200 bg-zinc-200 transition-shadow dark:border-midnight-border dark:bg-midnight ${isOver && !anySaving ? "ring-2 ring-violet mt-1" : ""}`}
+            className={`flex h-full w-[260px] shrink-0 flex-col rounded-xl border-[0.5px] border-border bg-zinc-200 transition-shadow dark:bg-midnight ${isOver && !anySaving ? "ring-2 ring-violet mt-1" : ""}`}
         >
-            <div className="flex shrink-0 items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-700">
-                <h3 className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-zinc-400">
+            <div className="flex shrink-0 items-center justify-between border-b border-border px-4 py-3 dark:border-zinc-700">
+                <h3 className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-secondary">
                     <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: statusColumnColors[status] }} aria-hidden="true" />
                     {status.replace(/_/g, " ")}
                 </h3>
@@ -117,7 +117,7 @@ function BoardColumn({ status, jobs, savingIds, stagedIds, anySaving, highlighte
                     <KanbanCard key={job.id} job={job} isSaving={savingIds.has(job.id)} isStaged={stagedIds.has(job.id)} isHighlighted={highlightedId === job.id} disabled={anySaving} />
                 ))}
                 {jobs.length === 0 && (
-                    <p className="py-4 text-center text-xs italic text-text-secondary dark:text-zinc-400">
+                    <p className="py-4 text-center text-xs italic text-secondary">
                         No jobs
                     </p>
                 )}
@@ -282,26 +282,26 @@ export default function JobsPage() {
     }, [pendingMoves]);
 
     return (
-        <div className="flex flex-1 flex-col bg-zinc-50 min-h-full dark:bg-[#1A1A2E]">
+        <div className="flex flex-1 flex-col bg-background min-h-full">
             <div className="mx-auto flex min-h-0 w-full max-w-7xl flex-1 flex-col px-4 py-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between gap-4">
-                    <h1 className="shrink-0 text-2xl font-semibold tracking-tight text-midnight dark:text-[#F5F5F0]">
+                    <h1 className="shrink-0 text-2xl font-semibold tracking-tight text-foreground">
                         Jobs
                     </h1>
                     <div className="flex flex-1 justify-center">
                         {view === "board" && pendingCount > 0 && (
                             <div className="flex items-center gap-2" data-testid="board-save-bar">
-                                <span className="hidden text-xs text-midnight dark:text-[#F5F5F0] sm:inline">
+                                <span className="hidden text-xs text-foreground sm:inline">
                                     {pendingCount === 1 ? "1 unsaved change" : `${pendingCount} unsaved changes`}
                                 </span>
-                                <span className="text-xs text-midnight dark:text-[#F5F5F0] sm:hidden">
+                                <span className="text-xs text-foreground sm:hidden">
                                     {pendingCount}
                                 </span>
                                 <button
                                     type="button"
                                     onClick={handleDiscard}
                                     disabled={saving}
-                                    className="cursor-pointer rounded-full border border-zinc-300 px-3 py-1 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                                    className="cursor-pointer rounded-full border border-border-strong px-3 py-1 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
                                 >
                                     Discard
                                 </button>
@@ -309,7 +309,7 @@ export default function JobsPage() {
                                     type="button"
                                     onClick={handleSave}
                                     disabled={saving}
-                                    className="cursor-pointer rounded-full bg-violet px-4 py-1 text-xs font-medium text-white transition-colors hover:bg-[#6B63C9] disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="cursor-pointer rounded-full bg-violet px-4 py-1 text-xs font-medium text-white transition-colors hover:bg-violet-hover disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     {saving ? "Saving…" : "Save"}
                                 </button>
@@ -323,7 +323,7 @@ export default function JobsPage() {
                             className={`cursor-pointer rounded-lg px-3 py-[6px] text-xs font-medium transition-colors ${
                                 view === "board"
                                     ? "bg-violet text-white"
-                                    : "border border-zinc-300 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                                    : "border border-border-strong text-zinc-600 hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
                             }`}
                         >
                             Board view
@@ -334,7 +334,7 @@ export default function JobsPage() {
                             className={`cursor-pointer rounded-lg px-3 py-[6px] text-xs font-medium transition-colors ${
                                 view === "list"
                                     ? "bg-violet text-white"
-                                    : "border border-zinc-300 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                                    : "border border-border-strong text-zinc-600 hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
                             }`}
                         >
                             List view
@@ -344,7 +344,7 @@ export default function JobsPage() {
 
                 {view === "board" ? (
                     loading ? (
-                        <p className="mt-6 text-sm text-text-secondary dark:text-zinc-400">Loading your jobs…</p>
+                        <p className="mt-6 text-sm text-secondary">Loading your jobs…</p>
                     ) : loadError ? (
                         <div role="alert" className="mt-6 rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
                             {loadError}
@@ -365,16 +365,16 @@ export default function JobsPage() {
                             </div>
                             <DragOverlay dropAnimation={null}>
                                 {activeJob ? (
-                                    <div className="w-[260px] rotate-3 rounded-xl border-[0.5px] border-zinc-300 bg-surface p-4 shadow-xl dark:border-zinc-600 dark:bg-zinc-800">
+                                    <div className="w-[260px] rotate-3 rounded-xl border-[0.5px] border-border-strong bg-surface p-4 shadow-xl dark:border-zinc-600 dark:bg-zinc-800">
                                         <div className="flex items-start gap-3">
                                             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet text-xs font-medium text-white">
                                                 {activeJob.company.charAt(0).toUpperCase()}
                                             </div>
                                             <div className="min-w-0 flex-1">
-                                                <p className="truncate text-sm font-medium text-midnight dark:text-zinc-100">
+                                                <p className="truncate text-sm font-medium text-foreground">
                                                     {activeJob.title}
                                                 </p>
-                                                <p className="mt-0.5 truncate text-xs text-text-secondary dark:text-zinc-400">
+                                                <p className="mt-0.5 truncate text-xs text-secondary">
                                                     {activeJob.company}
                                                 </p>
                                             </div>

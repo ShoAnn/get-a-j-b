@@ -2,10 +2,11 @@
 
 import { Job, JobSchema, UpdateJob, UpdateJobSchema } from "@/types/job";
 import { JOB_STATUSES, StatusBadge } from "@/components/StatusBadge";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/client/api";
 import { useJobsRefresh } from "@/components/JobsRefresh";
+import ConfirmDeleteButton, { CONFIRM_DELETE_TIMEOUT_MS } from "@/components/ConfirmDeleteButton";
 import { HttpError } from "@/types/errors";
 import z from "zod";
 
@@ -39,12 +40,17 @@ const NOTES_FIELD: FieldDef = {
 };
 
 const LABEL_CLASS =
-    "mb-1 block text-xs font-medium uppercase tracking-wider text-text-secondary dark:text-[#9999AA]";
+    "mb-1 block text-xs font-medium uppercase tracking-wider text-secondary";
 const BOX_CLASS =
-    "w-full rounded-lg border-[0.5px] border-zinc-300 bg-white px-3 py-[9px] text-[13px] text-midnight transition-colors dark:border-[#333355] dark:bg-[#252540] dark:text-[#F5F5F0]";
+    "w-full rounded-lg border-[0.5px] border-border-strong bg-overlay px-3 py-[9px] text-[13px] text-foreground transition-colors";
 const VIEW_BOX_CLASS = `${BOX_CLASS} block cursor-text text-left focus:border-violet focus:outline-none`;
 const INPUT_CLASS = `${BOX_CLASS} focus:border-violet focus:outline-none`;
-const PLACEHOLDER_CLASS = "text-zinc-400 dark:text-[#666688]";
+const PLACEHOLDER_CLASS = "text-muted";
+
+/** How long inputs stay highlighted after entering edit mode. */
+const EDIT_HIGHLIGHT_MS = 1000;
+/** Extra classes applied to every edit input while the highlight is active. */
+const INPUT_HIGHLIGHT_CLASS = "bg-violet/5 ring-2 ring-violet/40 dark:bg-violet/10";
 
 function formatSalary(salary: number): string {
     return new Intl.NumberFormat("en-US").format(salary);
@@ -85,6 +91,17 @@ export default function JobEditor({
     const [saveError, setSaveError] = useState<string | null>(null);
     const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof UpdateJob, string>>>({});
     const [deleting, setDeleting] = useState(false);
+    const [confirmingDelete, setConfirmingDelete] = useState(false);
+    const confirmTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [highlightInputs, setHighlightInputs] = useState(false);
+    const highlightTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (confirmTimeout.current) clearTimeout(confirmTimeout.current);
+            if (highlightTimeout.current) clearTimeout(highlightTimeout.current);
+        };
+    }, []);
 
     const isDirty = useMemo(
         () => Object.entries(formData).some(([key, value]) => value !== job[key as keyof Job]),
@@ -92,7 +109,14 @@ export default function JobEditor({
     );
 
     function startEditing() {
-        if (!isEditing) setIsEditing(true);
+        if (isEditing) return;
+        setIsEditing(true);
+        setHighlightInputs(true);
+        if (highlightTimeout.current) clearTimeout(highlightTimeout.current);
+        highlightTimeout.current = setTimeout(() => {
+            setHighlightInputs(false);
+            highlightTimeout.current = null;
+        }, EDIT_HIGHLIGHT_MS);
     }
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
@@ -161,7 +185,20 @@ export default function JobEditor({
 
     async function handleDelete() {
         if (deleting || saving) return;
-        if (!window.confirm("Delete this job? This cannot be undone.")) return;
+        if (!confirmingDelete) {
+            setConfirmingDelete(true);
+            if (confirmTimeout.current) clearTimeout(confirmTimeout.current);
+            confirmTimeout.current = setTimeout(() => {
+                setConfirmingDelete(false);
+                confirmTimeout.current = null;
+            }, CONFIRM_DELETE_TIMEOUT_MS);
+            return;
+        }
+        if (confirmTimeout.current) {
+            clearTimeout(confirmTimeout.current);
+            confirmTimeout.current = null;
+        }
+        setConfirmingDelete(false);
         setDeleting(true);
         setSaveError(null);
         try {
@@ -182,6 +219,7 @@ export default function JobEditor({
     function renderField(field: FieldDef) {
         const error = fieldErrors[field.name];
         const value = formData[field.name] as string | number;
+        const inputClass = highlightInputs ? `${INPUT_CLASS} ${INPUT_HIGHLIGHT_CLASS}` : INPUT_CLASS;
 
         if (!isEditing) {
             let display: string;
@@ -226,7 +264,7 @@ export default function JobEditor({
                         value={String(value)}
                         onChange={handleChange}
                         placeholder={field.placeholder}
-                        className={INPUT_CLASS}
+                        className={inputClass}
                     />
                     {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
                 </div>
@@ -245,7 +283,7 @@ export default function JobEditor({
                     value={String(value)}
                     onChange={handleChange}
                     placeholder={field.placeholder}
-                    className={INPUT_CLASS}
+                    className={inputClass}
                 />
                 {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
             </div>
@@ -253,7 +291,7 @@ export default function JobEditor({
     }
 
     return (
-        <form onSubmit={handleSave} className="flex flex-1 flex-col bg-zinc-50 min-h-full dark:bg-[#1A1A2E]">
+        <form onSubmit={handleSave} className="flex flex-1 flex-col bg-background min-h-full">
             <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 gap-10 lg:grid-cols-[3fr_2fr]">
                     {/* Left column — job details */}
@@ -274,7 +312,7 @@ export default function JobEditor({
                                         name="status"
                                         value={formData.status}
                                         onChange={handleChange}
-                                        className={INPUT_CLASS}
+                                        className={highlightInputs ? `${INPUT_CLASS} ${INPUT_HIGHLIGHT_CLASS}` : INPUT_CLASS}
                                     >
                                         {JOB_STATUSES.map((s) => (
                                             <option key={s} value={s}>
@@ -295,10 +333,10 @@ export default function JobEditor({
 
                         {renderField(NOTES_FIELD)}
 
-                        <dl className="rounded-xl border border-zinc-200 bg-white p-4 text-[13px] dark:border-[#333355] dark:bg-[#252540]">
+                        <dl className="rounded-xl border border-border bg-overlay p-4 text-[13px]">
                             <div className="flex justify-between py-1">
-                                <dt className="text-text-secondary dark:text-[#9999AA]">Created</dt>
-                                <dd className="text-midnight dark:text-[#F5F5F0]">
+                                <dt className="text-secondary">Created</dt>
+                                <dd className="text-foreground">
                                     {new Date(job.createdAt).toLocaleDateString("en-US", {
                                         month: "short",
                                         day: "numeric",
@@ -307,8 +345,8 @@ export default function JobEditor({
                                 </dd>
                             </div>
                             <div className="flex justify-between py-1">
-                                <dt className="text-text-secondary dark:text-[#9999AA]">Last status change</dt>
-                                <dd className="text-midnight dark:text-[#F5F5F0]">
+                                <dt className="text-secondary">Last status change</dt>
+                                <dd className="text-foreground">
                                     {new Date(job.statusChangedAt).toLocaleDateString("en-US", {
                                         month: "short",
                                         day: "numeric",
@@ -323,7 +361,7 @@ export default function JobEditor({
                                 <button
                                     type="submit"
                                     disabled={saving || !isDirty}
-                                    className="rounded-lg bg-violet px-5 py-[10px] text-sm font-medium text-white transition-colors hover:bg-[#6C64CC] disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="cursor-pointer rounded-lg bg-violet px-5 py-[10px] text-sm font-medium text-white transition-colors hover:bg-violet-hover disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     {saving ? "Saving..." : "Save"}
                                 </button>
@@ -331,7 +369,7 @@ export default function JobEditor({
                                     type="button"
                                     onClick={handleDiscard}
                                     disabled={saving}
-                                    className="rounded-lg border border-violet px-5 py-[10px] text-sm font-medium text-violet transition-colors hover:bg-[#F5F3FF] disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="cursor-pointer rounded-lg border border-violet px-5 py-[10px] text-sm font-medium text-violet transition-colors hover:bg-violet-subtle disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     Discard
                                 </button>
@@ -340,15 +378,14 @@ export default function JobEditor({
 
                         {!isEditing && (
                             <div className="flex items-center gap-3">
-                                <button
-                                    type="button"
-                                    onClick={handleDelete}
+                                <ConfirmDeleteButton
+                                    idleLabel="Delete job"
+                                    confirming={confirmingDelete}
+                                    deleting={deleting}
                                     disabled={deleting || saving}
-                                    aria-label="Delete job"
-                                    className="rounded-lg border border-red-300 px-5 py-[10px] text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/30"
-                                >
-                                    {deleting ? "Deleting..." : "Delete job"}
-                                </button>
+                                    onClick={handleDelete}
+                                    className="px-5 py-[10px]"
+                                />
                             </div>
                         )}
 
