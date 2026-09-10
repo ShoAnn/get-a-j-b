@@ -126,6 +126,86 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *UserHandler) GetMe(w http.ResponseWriter, r *http.Request) {
+	claims, err := middleware.GetClaimsFromContext(r.Context())
+	if err != nil {
+		writeJSONError(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	user, err := h.svc.GetUserByID(r.Context(), claims.UserID)
+	if errors.Is(err, domain.ErrUserNotFound) {
+		writeJSONError(w, "User not found", http.StatusNotFound)
+		return
+	} else if err != nil {
+		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(user); err != nil {
+		log.Printf("Failed to encode response: %v", err)
+	}
+}
+
+func (h *UserHandler) UpdateMe(w http.ResponseWriter, r *http.Request) {
+	claims, err := middleware.GetClaimsFromContext(r.Context())
+	if err != nil {
+		writeJSONError(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	var input domain.UpdateUserRequest
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		writeJSONError(w, "Invalid input", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.validate.Struct(input); err != nil {
+		writeValidationError(w, err)
+		return
+	}
+
+	user, err := h.svc.UpdateUser(r.Context(), claims.UserID, &input)
+	if errors.Is(err, domain.ErrUserNotFound) {
+		writeJSONError(w, "User not found", http.StatusNotFound)
+		return
+	} else if errors.Is(err, domain.ErrUnauthorized) {
+		writeJSONError(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	} else if errors.Is(err, domain.ErrEmailAlreadyExists) {
+		writeJSONError(w, "Email already exists", http.StatusConflict)
+		return
+	} else if err != nil {
+		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(user); err != nil {
+		log.Printf("Failed to encode response: %v", err)
+	}
+}
+
+func (h *UserHandler) DeleteMe(w http.ResponseWriter, r *http.Request) {
+	claims, err := middleware.GetClaimsFromContext(r.Context())
+	if err != nil {
+		writeJSONError(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	err = h.svc.DeleteUser(r.Context(), claims.UserID)
+	if errors.Is(err, domain.ErrUserNotFound) {
+		writeJSONError(w, "User not found", http.StatusNotFound)
+		return
+	} else if err != nil {
+		writeJSONError(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	claims, err := middleware.GetClaimsFromContext(r.Context())
 	if err != nil {

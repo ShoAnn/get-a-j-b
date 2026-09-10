@@ -38,6 +38,16 @@ const links = [
       </svg>
     ),
   },
+  {
+    href: "/profile",
+    label: "Profile",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <circle cx="9" cy="6" r="3.2" stroke="currentColor" strokeWidth="1.3" />
+        <path d="M2.5 15.5c0-3.4 2.9-5.5 6.5-5.5s6.5 2.1 6.5 5.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+      </svg>
+    ),
+  },
 ];
 
 export default function Sidebar() {

@@ -55,7 +55,7 @@ describe("Header", () => {
         await user.click(avatar);
 
         expect(screen.getByText(/Account/i)).toBeInTheDocument();
-        expect(screen.getByText(/Settings/i)).toBeInTheDocument();
+        expect(screen.queryByText(/Settings/i)).not.toBeInTheDocument();
         expect(screen.getAllByText(/Log out/i).length).toBeGreaterThanOrEqual(1);
     });
 

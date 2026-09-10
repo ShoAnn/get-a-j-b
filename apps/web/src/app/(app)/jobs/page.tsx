@@ -54,9 +54,6 @@ function KanbanCard({ job, isSaving, isStaged, isHighlighted, disabled }: { job:
             className={`rounded-xl border-[0.5px] p-4 cursor-grab active:cursor-grabbing transition-shadow hover:shadow-md ${isHighlighted ? "border-violet bg-violet/10 dark:border-violet dark:bg-violet/20 animate-pulse ring-1 ring-violet/40" : isStaged ? "border-violet bg-violet/5 dark:border-violet dark:bg-violet/10" : "border-border-strong bg-surface dark:border-zinc-600 dark:bg-midnight"} ${isDragging || isSaving ? "opacity-60" : ""} ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
         >
             <div className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet text-xs font-medium text-white">
-                    {job.company.charAt(0).toUpperCase()}
-                </div>
                 <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-foreground">
                         {job.title}
@@ -367,9 +364,6 @@ export default function JobsPage() {
                                 {activeJob ? (
                                     <div className="w-[260px] rotate-3 rounded-xl border-[0.5px] border-border-strong bg-surface p-4 shadow-xl dark:border-zinc-600 dark:bg-zinc-800">
                                         <div className="flex items-start gap-3">
-                                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet text-xs font-medium text-white">
-                                                {activeJob.company.charAt(0).toUpperCase()}
-                                            </div>
                                             <div className="min-w-0 flex-1">
                                                 <p className="truncate text-sm font-medium text-foreground">
                                                     {activeJob.title}

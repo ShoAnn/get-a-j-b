@@ -161,7 +161,11 @@ func main() {
 	mux.Handle("GET /api/users/{id}", authMiddleware.Auth(http.HandlerFunc(userHandler.GetUserByID)))
 	mux.Handle("PUT /api/users/{id}", authMiddleware.Auth(http.HandlerFunc(userHandler.UpdateUser)))
 	mux.Handle("DELETE /api/users/{id}", authMiddleware.Auth(http.HandlerFunc(userHandler.DeleteUser)))
-	// TODO : add/modify "/me" logic
+
+	// Current authenticated user
+	mux.Handle("GET /api/me", authMiddleware.Auth(http.HandlerFunc(userHandler.GetMe)))
+	mux.Handle("PUT /api/me", authMiddleware.Auth(http.HandlerFunc(userHandler.UpdateMe)))
+	mux.Handle("DELETE /api/me", authMiddleware.Auth(http.HandlerFunc(userHandler.DeleteMe)))
 
 	port := os.Getenv("PORT")
 	if port == "" {
