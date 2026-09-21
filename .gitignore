@@ -4,7 +4,8 @@
 node_modules
 .next
 npm-debug.log*
-package-lock.json
+# NOTE: package-lock.json is intentionally NOT ignored — prod Docker builds
+# use `npm ci` for reproducible installs, which requires a committed lockfile.
 
 # Go
 /apps/api/server

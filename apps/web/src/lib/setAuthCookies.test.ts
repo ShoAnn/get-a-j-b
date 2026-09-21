@@ -46,26 +46,24 @@ describe("setAuthCookies", () => {
     });
 
     it("enables secure flag in production", async () => {
-        const originalEnv = process.env.NODE_ENV;
-        process.env.NODE_ENV = "production";
+        vi.stubEnv("NODE_ENV", "production");
         await setAuthCookies("a", "r", "60");
         expect(mockSet).toHaveBeenCalledWith(
             "access_token",
             "a",
             expect.objectContaining({ secure: true })
         );
-        process.env.NODE_ENV = originalEnv;
+        vi.unstubAllEnvs();
     });
 
     it("disables secure flag in non-production", async () => {
-        const originalEnv = process.env.NODE_ENV;
-        process.env.NODE_ENV = "development";
+        vi.stubEnv("NODE_ENV", "development");
         await setAuthCookies("a", "r", "60");
         expect(mockSet).toHaveBeenCalledWith(
             "access_token",
             "a",
             expect.objectContaining({ secure: false })
         );
-        process.env.NODE_ENV = originalEnv;
+        vi.unstubAllEnvs();
     });
 });

@@ -46,14 +46,15 @@ describe("internalApiClient", () => {
         );
     });
 
-    it("documents current behavior when API_URL is undefined", async () => {
+    it("throws a clear error when API_URL is undefined", async () => {
         delete process.env.API_URL;
         const internalApiClient = await loadClient();
         const { z } = await import("zod");
         fetchMock.mockResolvedValue(mockResponse(200, {}));
-        await internalApiClient.get("/jobs", z.any());
-        const calledWith = fetchMock.mock.calls[0][0];
-        expect(calledWith.endsWith("/api/jobs")).toBe(true);
+        await expect(internalApiClient.get("/jobs", z.any())).rejects.toThrow(
+            "API_URL environment variable is required"
+        );
+        expect(fetchMock).not.toHaveBeenCalled();
     });
 
     it("sends Content-Type when body present", async () => {

@@ -7,11 +7,10 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
     const body = await request.json();
     const cookieStore = await cookies();
-    let accessToken = cookieStore.get('access_token')?.value;
+    const accessToken = cookieStore.get('access_token')?.value;
     if (!accessToken) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    let callerRole = "";
     const payload = JSON.parse(Buffer.from(accessToken.split('.')[1], 'base64url').toString());
-    callerRole = payload.role;
+    const callerRole: string = payload.role ?? "";
 
     const parsed = RegisterSchema.safeParse(body);
     const safeInput = {

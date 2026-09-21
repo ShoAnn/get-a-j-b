@@ -15,6 +15,28 @@ docker-compose up --build
 
 afterwards you can just `docker-compose up`
 
+## production
+
+Prerequisites: `cp env.example .env`, then set real secrets in `.env`:
+
+- `DB_PASSWORD` — strong database password
+- `JWT_SECRET_KEY` — min 32 chars of randomness (`openssl rand -base64 48`).
+  The API refuses to boot with the placeholder value.
+- `CORS_ALLOWED_ORIGINS` — your public origin, e.g. `https://app.example.com`
+- `API_URL` stays `http://api:8080` (internal docker DNS)
+
+Build and run the production stack (compiled Go binary + Next.js
+standalone, no bind mounts, no adminer, healthchecks):
+
+```
+docker compose -f docker-compose.yaml -f docker-compose.prod.yaml up --build -d
+docker compose -f docker-compose.yaml -f docker-compose.prod.yaml ps
+```
+
+Health: `GET /api/health` on both web (`:3000`) and api (`:8080`)
+returns `{"status":"ok"}`. Commit `package-lock.json` so prod
+`npm ci` installs are reproducible.
+
 ## done:
 - [x] Set up project scaffolding with Next.js + React + Tailwind (App Router)
 - [x] Create reusable button component with variants (primary, secondary, ghost)

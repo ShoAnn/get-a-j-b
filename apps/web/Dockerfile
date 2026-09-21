@@ -1,4 +1,8 @@
 # syntax=docker/dockerfile:1.7
+
+# Local dev only. Production uses Dockerfile.prod (repo-root context,
+# `npm ci`, standalone output). Build context for this file: ./apps/web.
+
 FROM node:20-alpine AS deps
 
 WORKDIR /app
@@ -10,10 +14,8 @@ FROM node:20-alpine AS dev
 
 WORKDIR /app
 
-ARG NEXT_PUBLIC_API_URL
 ENV NODE_ENV=development \
-    NEXT_TELEMETRY_DISABLED=1 \
-    NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+    NEXT_TELEMETRY_DISABLED=1
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .

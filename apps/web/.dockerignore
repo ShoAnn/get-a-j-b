@@ -1,0 +1,16 @@
+.git
+.idea
+.vscode
+.DS_Store
+*.md
+.env
+.env.*
+node_modules
+.next
+out
+coverage
+test-results
+playwright-report
+blob-report
+*.tsbuildinfo
+next-env.d.ts

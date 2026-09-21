@@ -21,10 +21,14 @@ paths:
         "200":
           description: Server is healthy
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-                example: OK
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    example: ok
 
   /api/auth/register:
     post:

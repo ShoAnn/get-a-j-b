@@ -1,0 +1,70 @@
+# Production overlay. Dev workflow stays on docker-compose.yaml (dev targets,
+# bind mounts, air / next dev, adminer).
+#
+# Usage:
+#   cp .env.example .env   # then set strong secrets (see env.example)
+#   docker compose -f docker-compose.yaml -f docker-compose.prod.yaml up --build -d
+#   docker compose -f docker-compose.yaml -f docker-compose.prod.yaml ps
+#
+# Notes:
+# - No bind mounts: images contain compiled artifacts.
+# - No adminer: don't expose DB tooling in prod.
+# - DB port is NOT published: only api/web talk to postgres over the internal net.
+# - api/web have healthchecks; web waits for a healthy api.
+
+services:
+  # Adminer is dev-only tooling — never boot it in prod even if requested.
+  adminer:
+    profiles: ["dev-only-never-in-prod"]
+    restart: "no"
+
+  db:
+    ports: []
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+      target: prod
+    command: []
+    volumes: []
+    env_file:
+      - .env
+    environment:
+      POSTGRES_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}?sslmode=disable
+    ports:
+      - "${API_EXTERNAL_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/api/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile.prod
+    volumes: []
+    env_file:
+      - .env
+    environment:
+      PORT: 3000
+      API_URL: http://api:8080
+    ports:
+      - "${WEB_EXTERNAL_PORT:-3000}:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped
