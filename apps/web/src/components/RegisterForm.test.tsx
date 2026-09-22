@@ -26,10 +26,10 @@ describe("RegisterForm", () => {
     it("renders email, username, password, confirm password, submit", () => {
         render(<RegisterForm showRoleSelect={false} />);
 
-        expect(screen.getByPlaceholderText("email")).toBeInTheDocument();
-        expect(screen.getByPlaceholderText("username")).toBeInTheDocument();
-        expect(screen.getByPlaceholderText("password")).toBeInTheDocument();
-        expect(screen.getByPlaceholderText("confirmPassword")).toBeInTheDocument();
+        expect(screen.getByPlaceholderText("you@example.com")).toBeInTheDocument();
+        expect(screen.getByPlaceholderText("Choose a username")).toBeInTheDocument();
+        expect(screen.getByPlaceholderText("Create a password")).toBeInTheDocument();
+        expect(screen.getByPlaceholderText("Confirm your password")).toBeInTheDocument();
         expect(screen.getByRole("button", { name: /Register/i })).toBeInTheDocument();
     });
 
@@ -57,10 +57,10 @@ describe("RegisterForm", () => {
         const user = userEvent.setup();
         render(<RegisterForm showRoleSelect={true} />);
 
-        await user.type(screen.getByPlaceholderText("email"), "user@test.com");
-        await user.type(screen.getByPlaceholderText("username"), "user1");
-        await user.type(screen.getByPlaceholderText("password"), "password123");
-        await user.type(screen.getByPlaceholderText("confirmPassword"), "different456");
+        await user.type(screen.getByPlaceholderText("you@example.com"), "user@test.com");
+        await user.type(screen.getByPlaceholderText("Choose a username"), "user1");
+        await user.type(screen.getByPlaceholderText("Create a password"), "password123");
+        await user.type(screen.getByPlaceholderText("Confirm your password"), "different456");
         await user.selectOptions(screen.getByRole("combobox"), "user");
         await user.click(screen.getByRole("button", { name: /Register/i }));
 
@@ -76,10 +76,10 @@ describe("RegisterForm", () => {
 
         render(<RegisterForm showRoleSelect={true} />);
 
-        await user.type(screen.getByPlaceholderText("email"), "user@test.com");
-        await user.type(screen.getByPlaceholderText("username"), "user1");
-        await user.type(screen.getByPlaceholderText("password"), "password123");
-        await user.type(screen.getByPlaceholderText("confirmPassword"), "password123");
+        await user.type(screen.getByPlaceholderText("you@example.com"), "user@test.com");
+        await user.type(screen.getByPlaceholderText("Choose a username"), "user1");
+        await user.type(screen.getByPlaceholderText("Create a password"), "password123");
+        await user.type(screen.getByPlaceholderText("Confirm your password"), "password123");
         await user.selectOptions(screen.getByRole("combobox"), "admin");
         await user.click(screen.getByRole("button", { name: /Register/i }));
 
@@ -107,10 +107,10 @@ describe("RegisterForm", () => {
 
         render(<RegisterForm showRoleSelect={true} />);
 
-        await user.type(screen.getByPlaceholderText("email"), "user@test.com");
-        await user.type(screen.getByPlaceholderText("username"), "user1");
-        await user.type(screen.getByPlaceholderText("password"), "password123");
-        await user.type(screen.getByPlaceholderText("confirmPassword"), "password123");
+        await user.type(screen.getByPlaceholderText("you@example.com"), "user@test.com");
+        await user.type(screen.getByPlaceholderText("Choose a username"), "user1");
+        await user.type(screen.getByPlaceholderText("Create a password"), "password123");
+        await user.type(screen.getByPlaceholderText("Confirm your password"), "password123");
         await user.selectOptions(screen.getByRole("combobox"), "user");
         await user.click(screen.getByRole("button", { name: /Register/i }));
 
@@ -129,10 +129,10 @@ describe("RegisterForm", () => {
 
         render(<RegisterForm showRoleSelect={true} />);
 
-        await user.type(screen.getByPlaceholderText("email"), "user@test.com");
-        await user.type(screen.getByPlaceholderText("username"), "user1");
-        await user.type(screen.getByPlaceholderText("password"), "password123");
-        await user.type(screen.getByPlaceholderText("confirmPassword"), "password123");
+        await user.type(screen.getByPlaceholderText("you@example.com"), "user@test.com");
+        await user.type(screen.getByPlaceholderText("Choose a username"), "user1");
+        await user.type(screen.getByPlaceholderText("Create a password"), "password123");
+        await user.type(screen.getByPlaceholderText("Confirm your password"), "password123");
         await user.selectOptions(screen.getByRole("combobox"), "user");
         await user.click(screen.getByRole("button", { name: /Register/i }));
 

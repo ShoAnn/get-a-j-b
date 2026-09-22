@@ -26,8 +26,8 @@ describe("LoginForm", () => {
     it("renders email, password inputs and submit button", () => {
         render(<LoginForm />);
 
-        expect(screen.getByPlaceholderText("email")).toBeInTheDocument();
-        expect(screen.getByPlaceholderText("password")).toBeInTheDocument();
+        expect(screen.getByPlaceholderText("you@example.com")).toBeInTheDocument();
+        expect(screen.getByPlaceholderText("Enter your password")).toBeInTheDocument();
         expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
     });
 
@@ -45,8 +45,8 @@ describe("LoginForm", () => {
         const user = userEvent.setup();
         const { container } = render(<LoginForm />);
 
-        await user.type(screen.getByPlaceholderText("email"), "not-an-email");
-        await user.type(screen.getByPlaceholderText("password"), "password123");
+        await user.type(screen.getByPlaceholderText("you@example.com"), "not-an-email");
+        await user.type(screen.getByPlaceholderText("Enter your password"), "password123");
 
         fireEvent.submit(container.querySelector("form")!);
 
@@ -62,8 +62,8 @@ describe("LoginForm", () => {
 
         render(<LoginForm />);
 
-        await user.type(screen.getByPlaceholderText("email"), "test@example.com");
-        await user.type(screen.getByPlaceholderText("password"), "password123");
+        await user.type(screen.getByPlaceholderText("you@example.com"), "test@example.com");
+        await user.type(screen.getByPlaceholderText("Enter your password"), "password123");
         await user.click(screen.getByRole("button", { name: "Sign in" }));
 
         await waitFor(() => {
@@ -88,8 +88,8 @@ describe("LoginForm", () => {
 
         render(<LoginForm />);
 
-        await user.type(screen.getByPlaceholderText("email"), "test@example.com");
-        await user.type(screen.getByPlaceholderText("password"), "wrongpassword");
+        await user.type(screen.getByPlaceholderText("you@example.com"), "test@example.com");
+        await user.type(screen.getByPlaceholderText("Enter your password"), "wrongpassword");
         await user.click(screen.getByRole("button", { name: "Sign in" }));
 
         await waitFor(() => {
@@ -106,8 +106,8 @@ describe("LoginForm", () => {
 
         render(<LoginForm />);
 
-        await user.type(screen.getByPlaceholderText("email"), "test@example.com");
-        await user.type(screen.getByPlaceholderText("password"), "password123");
+        await user.type(screen.getByPlaceholderText("you@example.com"), "test@example.com");
+        await user.type(screen.getByPlaceholderText("Enter your password"), "password123");
         await user.click(screen.getByRole("button", { name: "Sign in" }));
 
         await waitFor(() => {
@@ -128,8 +128,8 @@ describe("LoginForm", () => {
 
         render(<LoginForm />);
 
-        await user.type(screen.getByPlaceholderText("email"), "test@example.com");
-        await user.type(screen.getByPlaceholderText("password"), "password123");
+        await user.type(screen.getByPlaceholderText("you@example.com"), "test@example.com");
+        await user.type(screen.getByPlaceholderText("Enter your password"), "password123");
         await user.click(screen.getByRole("button", { name: "Sign in" }));
 
         await waitFor(() => {
@@ -145,8 +145,8 @@ describe("LoginForm", () => {
 
         render(<LoginForm />);
 
-        await user.type(screen.getByPlaceholderText("email"), "test@example.com");
-        await user.type(screen.getByPlaceholderText("password"), "password123");
+        await user.type(screen.getByPlaceholderText("you@example.com"), "test@example.com");
+        await user.type(screen.getByPlaceholderText("Enter your password"), "password123");
         await user.click(screen.getByRole("button", { name: "Sign in" }));
 
         await waitFor(() => {
