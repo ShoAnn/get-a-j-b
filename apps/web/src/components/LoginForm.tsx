@@ -25,6 +25,7 @@ function messageForLoginError(err: unknown): string {
 export default function LoginForm() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(() => {
         try {
@@ -70,40 +71,69 @@ export default function LoginForm() {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="w-3xl flex flex-col border-10 border-midnight" noValidate>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
             {error && (
-                <div role="alert" aria-live="polite" className="mb-3 rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
-                    {error}
+                <div role="alert" aria-live="polite" className="flex items-start gap-2.5 rounded-xl border border-red-300 bg-red-50 px-3.5 py-3 text-sm leading-snug text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-200">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0">
+                        <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.5" />
+                        <path d="M8 5v3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                        <circle cx="8" cy="11" r="0.9" fill="currentColor" />
+                    </svg>
+                    <span>{error}</span>
                 </div>
             )}
             {success && (
-                <div role="status" aria-live="polite" className="mb-3 rounded border border-green-300 bg-green-50 px-3 py-2 text-sm text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-200">
-                    {success}
+                <div role="status" aria-live="polite" className="flex items-start gap-2.5 rounded-xl border border-green-300 bg-green-50 px-3.5 py-3 text-sm leading-snug text-green-700 dark:border-green-800 dark:bg-green-950 dark:text-green-200">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0">
+                        <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.5" />
+                        <path d="M5.5 8l2 2 3.5-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <span>{success}</span>
                 </div>
             )}
-            <label htmlFor="login-email" className="sr-only">Email</label>
-            <input
-                id="login-email"
-                type="email"
-                name="email"
-                placeholder="email"
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                aria-invalid={error && !email ? "true" : "false"}
-            />
-            <label htmlFor="login-password" className="sr-only">Password</label>
-            <input
-                id="login-password"
-                type="password"
-                name="password"
-                placeholder="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                aria-invalid={error && !password ? "true" : "false"}
-            />
-            <Button type="submit" disabled={isSubmitting} variant="primary" >
+            <div>
+                <label htmlFor="login-email" className="mb-1.5 block text-xs font-medium text-secondary">
+                    Email
+                </label>
+                <input
+                    id="login-email"
+                    type="email"
+                    name="email"
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    aria-invalid={error && !email ? "true" : "false"}
+                    className="w-full rounded-lg border border-border bg-raised px-3 py-2.5 text-sm text-foreground placeholder:text-muted shadow-sm outline-none transition-colors focus:border-violet focus:ring-2 focus:ring-violet/25"
+                />
+            </div>
+            <div>
+                <label htmlFor="login-password" className="mb-1.5 block text-xs font-medium text-secondary">
+                    Password
+                </label>
+                <div className="relative">
+                    <input
+                        id="login-password"
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        placeholder="Enter your password"
+                        autoComplete="current-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        aria-invalid={error && !password ? "true" : "false"}
+                        className="w-full rounded-lg border border-border bg-raised px-3 py-2.5 pr-16 text-sm text-foreground placeholder:text-muted shadow-sm outline-none transition-colors focus:border-violet focus:ring-2 focus:ring-violet/25"
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword((v) => !v)}
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        className="absolute inset-y-0 right-0 cursor-pointer px-3 text-xs font-medium text-secondary transition-colors hover:text-violet"
+                    >
+                        {showPassword ? "Hide" : "Show"}
+                    </button>
+                </div>
+            </div>
+            <Button type="submit" disabled={isSubmitting} variant="primary" className="mt-1 w-full py-2.5">
                 {isSubmitting ? "Signing in..." : "Sign in"}
             </Button>
         </form>
