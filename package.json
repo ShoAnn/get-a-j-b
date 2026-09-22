@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm --prefix apps/web run test -- --run",
+    "test:e2e": "npm --prefix apps/web run test:e2e",
+    "build:web": "npm --prefix apps/web run build",
+    "lint:web": "npm --prefix apps/web run lint",
+    "test:api": "go test ./... -C apps/api"
   },
   "repository": {
     "type": "git",

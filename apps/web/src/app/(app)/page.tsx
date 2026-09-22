@@ -159,16 +159,16 @@ export default function Dashboard() {
                         </div>
 
                         {/* Status chart + Recent jobs */}
-                        <div className="mt-8 flex flex-col gap-4 lg:h-[300px] lg:flex-row">
-                            <div className="flex flex-col lg:w-3/5">
-                                <div className="flex flex-1 flex-col items-center rounded-xl border-[0.5px] border-border-strong bg-surface p-5">
+                        <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:items-stretch">
+                            <div className="flex min-w-0 flex-col lg:w-3/5">
+                                <div className="flex max-h-[320px] min-h-0 flex-1 flex-col items-center overflow-hidden rounded-xl border-[0.5px] border-border-strong bg-surface p-5">
                                     <h2 className="text-sm font-medium uppercase tracking-wider text-secondary">
                                         Jobs by Application Status
                                     </h2>
                                     {chartData.length > 0 ? (
-                                        <div className="mt-4 flex flex-1 flex-col items-center justify-center gap-6 sm:flex-row sm:items-start">
-                                            <div className="h-54 w-54 shrink-0">
-                                                <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 320, height: 200 }}>
+                                        <div className="mt-4 flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-6 overflow-hidden sm:flex-row sm:items-center">
+                                            <div className="h-[180px] w-[180px] shrink-0">
+                                                <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 180, height: 180 }}>
                                                     <PieChart>
                                                         <Pie
                                                             data={chartData}
@@ -196,7 +196,7 @@ export default function Dashboard() {
                                                     </PieChart>
                                                 </ResponsiveContainer>
                                             </div>
-                                            <div className="flex flex-col gap-2.5">
+                                            <div className="flex max-h-[180px] min-w-0 flex-col gap-2.5 overflow-y-auto pr-1 sm:max-w-[220px]">
                                                 {chartData.map((item) => (
                                                     <div key={item.name} className="flex items-center gap-2.5">
                                                         <div
@@ -224,8 +224,8 @@ export default function Dashboard() {
                                 </div>
                             </div>
 
-                            <div className="flex flex-col lg:w-2/5">
-                                <div className="h-full flex flex-1 flex-col rounded-xl border-[0.5px] border-border-strong bg-surface p-6">
+                            <div className="flex min-w-0 flex-col lg:w-2/5">
+                                <div className="flex max-h-[320px] min-h-0 flex-1 flex-col rounded-xl border-[0.5px] border-border-strong bg-surface p-6">
                                     <h2 className="text-sm font-medium uppercase tracking-wider text-secondary">
                                         Recent Jobs
                                     </h2>

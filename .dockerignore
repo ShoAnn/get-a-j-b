@@ -3,7 +3,7 @@
 .vscode
 .DS_Store
 *.md
-docker-compose.yaml
+docker-compose*.yaml
 docker-log.txt
 logs
 node_modules
@@ -12,9 +12,9 @@ node_modules
 !.env.example
 openapi.yaml
 sqlc.yaml
-package.json
-package-lock.json
 gemini.md
+# NOTE: root package.json / package-lock.json must stay in context —
+# apps/web/Dockerfile.prod installs workspace deps via `npm ci`.
 
 # API
 apps/api/tmp

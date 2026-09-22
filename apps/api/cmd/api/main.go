@@ -2,13 +2,16 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/ShoAnn/get-a-j-b/api/internal/handler"
@@ -23,7 +26,8 @@ import (
 )
 
 func main() {
-	// Load .env file
+	// Load .env file in dev; in prod (docker) env comes from the orchestrator.
+	// Missing .env must not be fatal so the prod image can boot without one.
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, using environment variables")
 	}
@@ -36,7 +40,17 @@ func main() {
 		log.Fatal("POSTGRES_URL environment variable is required")
 	}
 
-	dbpool, err := pgxpool.New(ctx, dbURL)
+	poolCfg, err := pgxpool.ParseConfig(dbURL)
+	if err != nil {
+		log.Fatalf("Invalid POSTGRES_URL: %v", err)
+	}
+	// Sensible pool defaults for a small production service.
+	poolCfg.MaxConns = 20
+	poolCfg.MinConns = 2
+	poolCfg.MaxConnLifetime = 30 * time.Minute
+	poolCfg.MaxConnIdleTime = 5 * time.Minute
+
+	dbpool, err := pgxpool.NewWithConfig(ctx, poolCfg)
 	if err != nil {
 		log.Fatalf("Unable to create connection pool: %v\n", err)
 	}
@@ -91,10 +105,18 @@ func main() {
 		}
 	}
 
-	// JWT Secret
+	// JWT Secret — fail fast on missing/weak secrets (except explicit dev opt-in).
 	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
-	if jwtSecretKey == "" {
-		log.Fatal("JWT_SECRET_KEY environment variable is required")
+	if jwtSecretKey == "" || jwtSecretKey == "change_me_in_production" {
+		if os.Getenv("ALLOW_INSECURE_JWT") == "true" {
+			log.Println("WARNING: using insecure JWT secret (ALLOW_INSECURE_JWT=true, dev only)")
+			jwtSecretKey = "dev-only-insecure-secret-change-me"
+		} else {
+			log.Fatal("JWT_SECRET_KEY environment variable is required (min 32 chars); refusing to boot with default/insecure value")
+		}
+	}
+	if len(jwtSecretKey) < 32 {
+		log.Fatal("JWT_SECRET_KEY must be at least 32 characters")
 	}
 
 	// Repositories
@@ -120,10 +142,7 @@ func main() {
 
 	// Middleware
 	authMiddleware := middleware.NewAuthMiddleware(authService)
-	allowedOrigins := strings.Split(os.Getenv("CORS_ALLOWED_ORIGINS"), ",")
-	if len(allowedOrigins) == 1 && allowedOrigins[0] == "" {
-		allowedOrigins = []string{"http://localhost:3000"}
-	}
+	allowedOrigins := parseOrigins(os.Getenv("CORS_ALLOWED_ORIGINS"), "http://localhost:3000")
 	corsMiddleware := middleware.NewCORS(allowedOrigins)
 
 	// Router
@@ -131,8 +150,9 @@ func main() {
 
 	// Public routes
 	mux.HandleFunc("GET /api/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	})
 	mux.HandleFunc("POST /api/auth/register", authHandler.Register)
 	mux.HandleFunc("POST /api/auth/login", authHandler.Login)
@@ -161,13 +181,64 @@ func main() {
 	mux.Handle("GET /api/users/{id}", authMiddleware.Auth(http.HandlerFunc(userHandler.GetUserByID)))
 	mux.Handle("PUT /api/users/{id}", authMiddleware.Auth(http.HandlerFunc(userHandler.UpdateUser)))
 	mux.Handle("DELETE /api/users/{id}", authMiddleware.Auth(http.HandlerFunc(userHandler.DeleteUser)))
-	// TODO : add/modify "/me" logic
+
+	// Current authenticated user
+	mux.Handle("GET /api/me", authMiddleware.Auth(http.HandlerFunc(userHandler.GetMe)))
+	mux.Handle("PUT /api/me", authMiddleware.Auth(http.HandlerFunc(userHandler.UpdateMe)))
+	mux.Handle("DELETE /api/me", authMiddleware.Auth(http.HandlerFunc(userHandler.DeleteMe)))
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	fmt.Printf("Go API server starting on port %s\n", port)
-	log.Fatal(http.ListenAndServe(":"+port, middleware.Logger(corsMiddleware.Middleware(mux))))
+	handlerChain := middleware.Logger(
+		middleware.SecurityHeaders(
+			middleware.MaxBodyBytes(1 << 20)(corsMiddleware.Middleware(mux)),
+		),
+	)
+
+	srv := &http.Server{
+		Addr:              ":" + port,
+		Handler:           handlerChain,
+		ReadHeaderTimeout: 10 * time.Second,
+		ReadTimeout:       15 * time.Second,
+		WriteTimeout:      15 * time.Second,
+		IdleTimeout:       60 * time.Second,
+	}
+
+	// Graceful shutdown: drain in-flight requests on SIGINT/SIGTERM.
+	go func() {
+		fmt.Printf("Go API server starting on port %s\n", port)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Server failed: %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutting down server...")
+
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownCancel()
+	dbpool.Close()
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		log.Fatalf("Forced shutdown: %v", err)
+	}
+	log.Println("Server stopped")
+}
+
+func parseOrigins(raw, fallback string) []string {
+	var out []string
+	for _, o := range strings.Split(raw, ",") {
+		o = strings.TrimSpace(strings.TrimSuffix(o, "/"))
+		if o != "" {
+			out = append(out, o)
+		}
+	}
+	if len(out) == 0 {
+		return []string{fallback}
+	}
+	return out
 }

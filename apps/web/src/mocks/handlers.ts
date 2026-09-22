@@ -4,6 +4,25 @@ import { CreateResumeSchema, Resume, UpdateResumeSchema } from "@/types/resume";
 
 let jobs: Job[] = [];
 let resumes: Resume[] = [];
+let mockMe = {
+    id: "1",
+    username: "testuser",
+    email: "test@example.com",
+    role: "user",
+    createdAt: "2025-01-15T10:00:00Z",
+    updatedAt: "2025-01-15T10:00:00Z",
+};
+
+export function resetMockMe() {
+    mockMe = {
+        id: "1",
+        username: "testuser",
+        email: "test@example.com",
+        role: "user",
+        createdAt: "2025-01-15T10:00:00Z",
+        updatedAt: "2025-01-15T10:00:00Z",
+    };
+}
 
 export function resetMockJobs() {
     jobs = [];
@@ -14,6 +33,16 @@ export function resetMockResumes() {
 }
 
 export const handlers = [
+    http.get("/api/me", () => {
+        return HttpResponse.json(mockMe);
+    }),
+
+    http.put("/api/me", async ({ request }) => {
+        const body = (await request.json()) as Partial<typeof mockMe>;
+        mockMe = { ...mockMe, ...body };
+        return HttpResponse.json(mockMe);
+    }),
+
     http.get("/api/jobs", () => {
         return HttpResponse.json(jobs);
     }),

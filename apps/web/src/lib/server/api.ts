@@ -1,7 +1,13 @@
 import { HttpError } from "@/types/errors";
 import z from "zod";
 
-const API_URL = process.env.API_URL
+function baseUrl(): string {
+	const url = process.env.API_URL;
+	if (!url) {
+		throw new Error("API_URL environment variable is required (e.g. http://api:8080)");
+	}
+	return url.replace(/\/$/, "");
+}
 
 async function request<T>(
 	path: string,
@@ -9,7 +15,7 @@ async function request<T>(
 	options: RequestInit = {}
 ): Promise<T> {
 	const res = await fetch(
-		`${API_URL}/api${path}`,
+		`${baseUrl()}/api${path}`,
 		{
 			...options,
 			headers: {

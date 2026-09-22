@@ -46,6 +46,29 @@ export default function Header() {
     }, []);
 
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [me, setMe] = useState<{ username: string; email: string } | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        async function fetchMe() {
+            try {
+                const res = await fetch("/api/me", { credentials: "include" });
+                if (!res.ok) return;
+                const body = await res.json();
+                if (!cancelled && body?.username) {
+                    setMe({ username: body.username, email: body.email ?? "" });
+                }
+            } catch {
+                // stay with fallback display
+            }
+        }
+        fetchMe();
+        return () => { cancelled = true; };
+    }, []);
+
+    const displayName = me?.username ?? "User";
+    const displayEmail = me?.email ?? "user@example.com";
+    const initial = displayName.charAt(0).toUpperCase() || "U";
 
     async function handleLogout() {
         setIsLoggingOut(true);
@@ -96,32 +119,23 @@ export default function Header() {
 
                 {/* Desktop: Right actions */}
                 <div className="hidden items-center gap-4 md:flex">
-                    {/* Notifications */}
-                    <button className="relative flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-secondary transition-colors hover:bg-hover">
-                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                            <path d="M9 1.5a5.5 5.5 0 00-5.5 5.5v2.5l-1.5 3h14l-1.5-3V7A5.5 5.5 0 009 1.5z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
-                            <path d="M6.5 14a2.5 2.5 0 005 0" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-error ring-1 ring-white dark:ring-midnight" />
-                    </button>
-
                     {/* User avatar / profile menu */}
                     <div ref={menuRef} className="relative">
                         <button
                             onClick={() => setShowUserMenu((v) => !v)}
                             className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-violet text-xs font-medium text-white transition-opacity hover:opacity-90"
                         >
-                            U
+                            {initial}
                         </button>
 
                         {showUserMenu && (
                             <div className="absolute right-0 top-full mt-2 w-48 rounded-xl border border-border bg-surface py-1.5 shadow-lg">
                                 <div className="border-b border-border px-4 py-2.5">
-                                    <p className="text-sm font-medium text-foreground">User</p>
-                                    <p className="text-xs text-secondary">user@example.com</p>
+                                    <p className="text-sm font-medium text-foreground">{displayName}</p>
+                                    <p className="text-xs text-secondary">{displayEmail}</p>
                                 </div>
                                 <Link
-                                    href="/"
+                                    href="/profile"
                                     className="flex items-center gap-2 px-4 py-2 text-sm text-foreground transition-colors hover:bg-hover"
                                     onClick={() => setShowUserMenu(false)}
                                 >
@@ -130,17 +144,6 @@ export default function Header() {
                                         <path d="M2 14c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
                                     </svg>
                                     Account
-                                </Link>
-                                <Link
-                                    href="/"
-                                    className="flex items-center gap-2 px-4 py-2 text-sm text-foreground transition-colors hover:bg-hover"
-                                    onClick={() => setShowUserMenu(false)}
-                                >
-                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="text-zinc-400">
-                                        <circle cx="7.5" cy="7.5" r="5.5" stroke="currentColor" strokeWidth="1.2" />
-                                        <path d="M7.5 5v3M7.5 10v.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-                                    </svg>
-                                    Settings
                                 </Link>
                                 <hr className="my-1 border-border" />
                                 <button
@@ -192,14 +195,6 @@ export default function Header() {
                     <div className="flex flex-col gap-3">
                         {/* Mobile actions row */}
                         <div className="flex items-center gap-3">
-                            <button className="relative flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-secondary transition-colors hover:bg-hover">
-                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                                    <path d="M9 1.5a5.5 5.5 0 00-5.5 5.5v2.5l-1.5 3h14l-1.5-3V7A5.5 5.5 0 009 1.5z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
-                                    <path d="M6.5 14a2.5 2.5 0 005 0" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-error ring-1 ring-white dark:ring-midnight" />
-                            </button>
-
                             <ThemeToggle />
                         </div>
 
@@ -207,15 +202,15 @@ export default function Header() {
                         <div className="rounded-lg border border-border">
                             <div className="flex items-center gap-3 border-b border-border px-3 py-2.5">
                                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet text-xs font-medium text-white">
-                                    U
+                                    {initial}
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="truncate text-sm font-medium text-foreground">User</p>
-                                    <p className="truncate text-xs text-secondary">user@example.com</p>
+                                    <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
+                                    <p className="truncate text-xs text-secondary">{displayEmail}</p>
                                 </div>
                             </div>
                             <Link
-                                href="/"
+                                href="/profile"
                                 className="flex items-center gap-2 px-3 py-2 text-sm text-foreground transition-colors hover:bg-hover"
                                 onClick={() => setShowMobileMenu(false)}
                             >
@@ -224,17 +219,6 @@ export default function Header() {
                                     <path d="M2 14c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
                                 </svg>
                                 Account
-                            </Link>
-                            <Link
-                                href="/"
-                                className="flex items-center gap-2 px-3 py-2 text-sm text-foreground transition-colors hover:bg-hover"
-                                onClick={() => setShowMobileMenu(false)}
-                            >
-                                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" className="text-zinc-400">
-                                    <circle cx="7.5" cy="7.5" r="5.5" stroke="currentColor" strokeWidth="1.2" />
-                                    <path d="M7.5 5v3M7.5 10v.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-                                </svg>
-                                Settings
                             </Link>
                             <button
                                 type="button"
