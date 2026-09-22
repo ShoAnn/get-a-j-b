@@ -1,47 +1,29 @@
 # syntax=docker/dockerfile:1.7
 
-# ---------- dev (local, hot reload via air) ----------
-FROM golang:1.25-bookworm AS dev
+# Production API image.
+#
+# DELIBERATELY single-stage. Railway does not support `--target` and builds
+# the first (here: only) stage of a Dockerfile, so any multi-stage layout
+# risks shipping the dev/builder stage. A single stage leaves no ambiguity
+# about what gets deployed. (Slimmer Alpine multi-stage variant rejected:
+# `COPY --from` requires the source stage to be defined first, which
+# conflicts with the first-stage-must-be-prod constraint.)
+# Build context: ./apps/api (see docker-compose.prod.yaml / Railway root dir).
 
-ARG TARGETARCH=amd64
-WORKDIR /app
-
-RUN apt-get update && apt-get install -y --no-install-recommends curl tar ca-certificates && rm -rf /var/lib/apt/lists/*
-ARG AIR_VERSION=1.65.3
-RUN curl -fsSL -o /tmp/air.tar.gz \
-    "https://github.com/air-verse/air/releases/download/v${AIR_VERSION}/air_${AIR_VERSION}_linux_${TARGETARCH}.tar.gz" \
-    && tar -C /usr/local/bin -xzf /tmp/air.tar.gz air \
-    && chmod +x /usr/local/bin/air \
-    && rm /tmp/air.tar.gz
-
-COPY go.mod go.sum ./
-RUN go mod download -x
-
-COPY . .
-
-EXPOSE 8080
-
-CMD ["air"]
-
-# ---------- builder (prod compile) ----------
-FROM golang:1.25-bookworm AS builder
+FROM golang:1.25-bookworm
 
 WORKDIR /app
+
 COPY go.mod go.sum ./
 RUN go mod download
+
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /app/bin/api ./cmd/api
 
-# ---------- prod (minimal, non-root) ----------
-FROM alpine:3.21 AS prod
+RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /app/bin/api ./cmd/api \
+    && rm -rf /root/.cache/go-build
 
-RUN apk add --no-cache ca-certificates tzdata wget \
-    && addgroup -S appgroup && adduser -S appuser -G appgroup
-WORKDIR /app
-
-COPY --from=builder /app/bin/api /app/api
-# Migrations must ship with the image so `m.Up()` works in prod.
-COPY --from=builder /app/internal/db/migrations /app/internal/db/migrations
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser \
+    && chown -R appuser:appgroup /app
 
 ENV PORT=8080 \
     MIGRATIONS_PATH=/app/internal/db/migrations \
@@ -51,6 +33,6 @@ USER appuser
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD wget -qO- http://127.0.0.1:8080/api/health | grep -q ok
+  CMD sh -c 'wget -qO- http://127.0.0.1:${PORT:-8080}/api/health | grep -q ok'
 
-ENTRYPOINT ["/app/api"]
+ENTRYPOINT ["/app/bin/api"]
