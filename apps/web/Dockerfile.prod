@@ -2,52 +2,54 @@
 
 # Production web image. Build context MUST be the repo root, e.g.:
 #   docker build -f apps/web/Dockerfile.prod .
-# (compose prod overlay already sets this). Deps are installed workspace-aware
-# via `npm ci` against the committed root package-lock.json.
+# (compose prod overlay and Railway already set this). Deps are installed
+# workspace-aware via `npm ci` against the committed root package-lock.json.
+#
+# DELIBERATELY single-stage. Railway does not support `--target` and builds
+# the first stage of a Dockerfile, so a multi-stage layout (deps/builder/prod)
+# would ship the wrong stage. The standalone server runs in place from its
+# traced directory; `.next/static` and `public` are arranged next to it,
+# mirroring the documented standalone layout.
+#
+# Browser traffic goes through Next /api route handlers (API_URL, server-side),
+# so no public API URL is required at build time.
 
-FROM node:20-alpine AS deps
+FROM node:20-alpine
 
 WORKDIR /app
+
+# NOTE: NODE_ENV is set to production only AFTER `npm ci` + build below.
+# npm prunes devDependencies when NODE_ENV=production, but the Next.js build
+# needs them (typescript, tailwindcss, eslint, ...).
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    PORT=3000 \
+    HOSTNAME=0.0.0.0
 
 COPY package.json package-lock.json ./
 COPY apps/web/package.json ./apps/web/package.json
 RUN npm ci
 
-FROM node:20-alpine AS builder
-
-WORKDIR /app
-
-ENV NEXT_TELEMETRY_DISABLED=1
-
-COPY --from=deps /app/node_modules ./node_modules
-COPY package.json package-lock.json ./
 COPY apps/web ./apps/web
 
 # Runs with cwd=apps/web; NEXT_PUBLIC_* vars are baked here if needed.
-# Browser traffic goes through Next /api route handlers (API_URL, server-side),
-# so no public API URL is required at build time.
 RUN npm run build --workspace=web
 
-FROM node:20-alpine AS prod
+# Arrange the documented standalone layout in place (server resolves .next
+# and public relative to its own directory).
+RUN cp -r apps/web/.next/static apps/web/.next/standalone/apps/web/.next/static \
+    && cp -r apps/web/public apps/web/.next/standalone/apps/web/public
 
-WORKDIR /app
+RUN addgroup -S nodejs && adduser -S nextjs -G nodejs \
+    && chown -R nextjs:nodejs apps/web/.next/standalone
 
-ENV NODE_ENV=production \
-    NEXT_TELEMETRY_DISABLED=1 \
-    PORT=3000 \
-    HOSTNAME=0.0.0.0
-
-RUN addgroup -S nodejs && adduser -S nextjs -G nodejs
-
-# Monorepo standalone layout: server lives at apps/web/server.js.
-COPY --from=builder /app/apps/web/.next/standalone ./
-COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=builder /app/apps/web/public ./apps/web/public
+ENV NODE_ENV=production
 
 USER nextjs
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
-  CMD wget -qO- http://127.0.0.1:3000/api/health | grep -q ok
+WORKDIR /app/apps/web/.next/standalone/apps/web
 
-CMD ["node", "apps/web/server.js"]
+HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
+  CMD sh -c 'wget -qO- http://127.0.0.1:${PORT:-3000}/api/health | grep -q ok'
+
+CMD ["node", "server.js"]

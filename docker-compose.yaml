@@ -33,7 +33,7 @@ services:
     container_name: go_api_getajob
     build:
       context: ./apps/api
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
       target: dev
     env_file:
       - .env

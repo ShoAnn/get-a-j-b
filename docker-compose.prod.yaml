@@ -26,7 +26,6 @@ services:
     build:
       context: ./apps/api
       dockerfile: Dockerfile
-      target: prod
     command: []
     volumes: []
     env_file:
