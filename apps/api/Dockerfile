@@ -12,6 +12,10 @@
 
 FROM golang:1.25-bookworm
 
+# wget is required by the HEALTHCHECK below; bookworm-slim variants omit it.
+RUN apt-get update && apt-get install -y --no-install-recommends wget ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY go.mod go.sum ./

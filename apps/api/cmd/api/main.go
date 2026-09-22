@@ -34,10 +34,15 @@ func main() {
 
 	ctx := context.Background()
 
-	// Database configuration
+	// Database configuration.
+	// Railway's Postgres plugin injects DATABASE_URL; accept it as a fallback
+	// so the service boots without manual variable remapping.
 	dbURL := os.Getenv("POSTGRES_URL")
 	if dbURL == "" {
-		log.Fatal("POSTGRES_URL environment variable is required")
+		dbURL = os.Getenv("DATABASE_URL")
+	}
+	if dbURL == "" {
+		log.Fatal("POSTGRES_URL environment variable is required (or DATABASE_URL as fallback)")
 	}
 
 	poolCfg, err := pgxpool.ParseConfig(dbURL)
